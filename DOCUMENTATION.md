@@ -291,3 +291,9 @@ Key files:
 - `refimpl_spec.md` — Autonomous implementation spec
 - `data/*.json` — All simulation datasets
 - `src/sim_*.py` — All simulation scripts (re-runnable)
+## Deploy
+
+- **Live URL:** https://find-us-crowd-compass.vercel.app
+- **Platform:** Vercel (# Find Us / Crowd Compass), project `find-us-crowd-compass`
+- **Deployed:** 2026-09-19 via Vercel CLI 59.23.2, node 26.9.0, interactive stream (torus-scan / hot-cold-walk / combined-handoff) — sim numbers on the live page cross-checked against `data/*.json` before deploy (99.86% async coverage, 11,207 ghost gradient → 0, 88.35% terminal, baro within-1-floor 100%).
+- **Envelope MAC anti-spoof:** 0.15% forgery (16-bit), per `data/spoof_resistance.json`.
