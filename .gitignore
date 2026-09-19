@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.venv/
+venv/
+env/
+
+# Swift
+.build/
+Packages/
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+
+# Kotlin/Gradle
+.gradle/
+build/
+*.iml
+.idea/
+local.properties
+*.log
+
+# Android
+*.apk
+*.aar
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+captures/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
