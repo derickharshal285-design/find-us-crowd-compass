@@ -1,0 +1,70 @@
+{
+  "timestamp": "2026-09-19T14:02:14+0530",
+  "test_results": {
+    "canonical_vector_test": {
+      "status": "PASSED",
+      "raw_hex": "17a53ee2998f42",
+      "bitstring": "00010111101001010011111011100010100110011000111101000010",
+      "raw_bytes": 7,
+      "fields_verified": [
+        "PKT_TYPE",
+        "SOS_ID",
+        "HOP_COUNT",
+        "BARO_DIFF",
+        "FLAGS",
+        "EPOCH",
+        "AGE",
+        "RESERVED",
+        "ENVELOPE_MAC"
+      ]
+    },
+    "boundary_values_test": {
+      "status": "PASSED",
+      "combinations_tested": 2240,
+      "baro_range_verified": "[-32, +31] full two's complement boundary",
+      "sos_id_range_verified": "[0, 4095] 12-bit extremes"
+    },
+    "brute_force_roundtrip_test": {
+      "status": "PASSED",
+      "iterations": 100000,
+      "total_time_sec": 0.9559,
+      "throughput_pkts_per_sec": 104616,
+      "lossless_fidelity": 1.0
+    },
+    "anti_spoofing_mac_test": {
+      "status": "PASSED",
+      "mac_bits": 16,
+      "cryptographic_primitive": "HMAC-SHA256 (Truncated to 16 bits)",
+      "invariants_protected": [
+        "SOS_ID",
+        "EPOCH",
+        "PKT_TYPE"
+      ],
+      "zero_decrypt_forwarding_safe": true,
+      "single_packet_guess_probability_theoretical": 1.5e-05,
+      "single_packet_guess_probability_measured": 1.7e-05,
+      "two_consecutive_epoch_rejection_rate": "99.999997%"
+    },
+    "fec_hamming_test": {
+      "status": "PASSED",
+      "trials": 1000,
+      "raw_bytes": 7,
+      "coded_bytes": 13,
+      "expansion_ratio": 1.857,
+      "simultaneous_bit_flips_injected_per_packet": 14,
+      "recovery_success_rate": 1.0
+    },
+    "ble_gap_encapsulation_test": {
+      "status": "PASSED",
+      "mfr_27b_raw_total": 11,
+      "mfr_27b_raw_slack": 20,
+      "mfr_27b_fec_total": 17,
+      "mfr_27b_fec_slack": 14,
+      "ios_23b_raw_total": 15,
+      "ios_23b_raw_slack": 16,
+      "ios_23b_fec_total": 21,
+      "ios_23b_fec_slack": 10
+    }
+  },
+  "all_asserts_passed": true
+}

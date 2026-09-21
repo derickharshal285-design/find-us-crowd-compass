@@ -1,0 +1,47 @@
+{
+  "title": "50k-device crowd envelope benchmark",
+  "date": "2026-09-19",
+  "modality": "software envelope only; field BLE validation remains open",
+  "ops": {
+    "mac_attach_us": 13.8724261400057,
+    "mac_verify_us": 7.747119999985443,
+    "codec_encode_us": 3.4264076800172916,
+    "codec_decode_us": 5.330638460000046,
+    "sos_hear_us": 4.426995380053995,
+    "one_frame_process_us": 30.376592280008484
+  },
+  "memory": {
+    "entries": 50000,
+    "peak_bytes": 19225430,
+    "bytes_per_entry": 384.5086
+  },
+  "dedup_window": 20000,
+  "dedup_bound_measured": 901,
+  "coverage": [
+    {
+      "ring_n_measured": 2000,
+      "ttl": 8,
+      "predicted_small": 0.0085,
+      "measured": 0.0085,
+      "coverage_at_50k": 0.00034,
+      "edge_ok": true
+    },
+    {
+      "ring_n_measured": 2000,
+      "ttl": 12,
+      "predicted_small": 0.0125,
+      "measured": 0.0125,
+      "coverage_at_50k": 0.0005,
+      "edge_ok": true
+    },
+    {
+      "ring_n_measured": 2000,
+      "ttl": 24,
+      "predicted_small": 0.0245,
+      "measured": 0.0245,
+      "coverage_at_50k": 0.00098,
+      "edge_ok": true
+    }
+  ],
+  "note": "single-device graphs are O(neighborhood k), not O(N); ring flood measured at 2000 and extrapolated to 50k"
+}

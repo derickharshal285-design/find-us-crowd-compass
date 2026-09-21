@@ -110,12 +110,18 @@ hypotheses:
     motivation: "Formally closes Volume 1 Research and establishes authoritative specification for engineering build phase."
     parent: null
     priority: critical
+  - id: B-12
+    statement: "The wire-frozen MeasurementSource set and NavTier negotiation (compat.py) plus the fully unit-tested relative DirectionSweep/BearingFusion/StationarityGate/OobSideband layer (direction.py) provide a unified cross-language (Python/Kotlin/Swift) directional-parity baseline, with compose() propagating weakest-hop tier and quadrature bearing uncertainty through multi-hop VRLG edge composition."
+    status: supported
+    motivation: "Begins Volume 1 build phase with a parity-plus-direction foundation whose unit tests freeze the RSI (relative spatial information) semantic shared by all three engines."
+    parent: null
+    priority: high
 
 experiments:
   proxy_metric: "Emergency Localization Success Rate (%) & Channel Contention Loss (%)"
   baseline_value: 0.15
   best_value: 1.00
-  total_runs: 15
+  total_runs: 16
   trajectory:
     - run_id: "exp_001_gradient"
       hypothesis: "H1"
@@ -237,11 +243,19 @@ experiments:
       wall_time_min: 0.05
       change_summary: "Consolidated all B-01..B-10 research into master Implementation Blueprint v1 (29_IMPLEMENTATION_BLUEPRINT_V1.md) and concise refimpl_spec.md (113 lines), with 100% test suite verification across wire budget, state machines, and failure mode matrix"
       timestamp: "2026-09-19T02:01:00Z"
+    - run_id: "exp_016_compat_direction"
+      hypothesis: "B-12"
+      metric_value: 1.00
+      baseline: 0.00
+      delta: "+1.00"
+      wall_time_min: 0.02
+      change_summary: "Compatibility layer (wire-frozen MeasurementSource, NavTier negotiation) + fully unit-tested relative direction layer (DirectionSweep/BearingFusion/StationarityGate/OobSideband, compose() propagating tier + bearing uncertainty); cross-language parity Python/Kotlin/Swift, tests/test_compat_direction.py 13/13, full regression green"
+      timestamp: "2026-09-21T00:25:00Z"
 
 outer_loop:
-  cycle: 7
-  last_direction: deepen
-  last_reflection: "Doc 17 Open Question §4 resolved. Data mule partition healing no longer corrupts receiving crowd clusters into Ghost Gradients. While unmitigated relays misled 46-100% of searchers toward transient bystander mules (up to 11,200 false Hop-1 alerts), the Definitive Multi-Layer Decision Rule (Doc 27) weaponizes 16-bit MAC origin invariance and 15s epoch cadence delta gating (143s transit = 9.5 ticks) to achieve 0.0 false alerts, 0.0% misled rate, 100% partition delivery at >=4 mules/min, and 0.00% false negative rate on proximate live targets."
+  cycle: 11
+  last_direction: expand_to_full_manuscript
+  last_reflection: "Manuscript v0.5 post-review (01_manuscript.md, 1,292 lines, 34pp PDF). Ran full 5-seat reviewer panel (academic-paper-reviewer): EIC/journal-fit, methodology, domain, perspective, Devil's Advocate. Decision MAJOR REVISION; roadmap filed at paper/review/01_editorial_decision_v1.md. Applied consensus fixes in manuscript: placeholders removed (RQ4 10% target, RQ11 20 deg threshold), point estimates anchored to repo run-ids (exp_002_trickle, exp_009, exp_011, exp_012) with [RES: qualitative] labels where only qualitative, executed->reported audit table (Appendix J.1), energy constants flagged model-derived, [ESP->EXP] and 'proof assert' slips fixed, DA-CRITICALs resolved (25.3 anti-loop -> conditional direction-complete lemma, 13.5 corrected -> provisional-on-E31), gap claims narrowed, rigidity theory added (Henneberg/global rigidity), prior-art lineage added (directed diffusion, DV-hop/APS, Doherty, AFL) -> refs now 38, section 39.7 reviewer-consensus note. IP doc updated to v1.0 with critique-driven candidates C9-C13 and revised strength sheet. Blueprint 10pp, IP 6pp, manuscript 34pp."
 
 
 workspace:
@@ -251,3 +265,4 @@ workspace:
   experiments_dir: "experiments/"
   to_human_dir: "to_human/"
   paper_dir: "paper/"
+  pdf_pipeline: "paper/md2pdf.py (reportlab; no pandoc/latex on device)"

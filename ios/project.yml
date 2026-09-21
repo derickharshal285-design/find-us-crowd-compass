@@ -1,0 +1,58 @@
+# XcodeGen project spec — generates FindUsCrowd.xcodeproj.
+# Install xcodegen (brew install xcodegen) then: xcodegen && open FindUsCrowd.xcodeproj
+name: FindUsCrowd
+options:
+  bundleIdPrefix: com.findus.crowd
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    TARGETED_DEVICE_FAMILY: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+targets:
+  FindUsApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources/FindUsApp
+    dependencies:
+      - target: FindUsEngine
+      - target: FindUsBLE
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.findus.crowd.app
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: FindUs connects nearby phones via Bluetooth to route emergency signals. No cloud, no account.
+        INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription: FindUs advertises your pseudonymous emergency presence.
+  FindUsEngine:
+    type: framework
+    platform: iOS
+    sources:
+      - path: Sources/FindUsEngine
+  FindUsBLE:
+    type: framework
+    platform: iOS
+    sources:
+      - path: Sources/FindUsBLE
+    dependencies:
+      - target: FindUsEngine
+  FindUsEngineTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/FindUsEngineTests
+    dependencies:
+      - target: FindUsEngine
+schemes:
+  FindUsApp:
+    build:
+      targets:
+        FindUsApp: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - FindUsEngineTests

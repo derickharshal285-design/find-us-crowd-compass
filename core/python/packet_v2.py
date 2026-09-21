@@ -44,8 +44,8 @@ import json
 import os
 import random
 import time
-from dataclasses import dataclass, asdict
-from typing import Tuple, Dict, Any, List
+from dataclasses import dataclass
+from typing import Tuple, Dict, Any, Optional
 
 # =====================================================================
 # Constants & Enums
@@ -343,6 +343,119 @@ def encapsulate_ios_background_safe(payload: bytes, service_uuid: int = 0xFC00, 
     ad1 = bytes([0x03, 0x03, service_uuid & 0xFF, (service_uuid >> 8) & 0xFF])
     ad2 = bytes([len(payload) + 3, 0xFF, company_id & 0xFF, (company_id >> 8) & 0xFF]) + payload
     return ad1 + ad2
+
+def decode_gap_advertisement(adv_data: bytes) -> Optional[bytes]:
+    """
+    Reverse-decodes a BLE Advertisement Data payload back to the raw payload bytes.
+
+    Handles:
+      - Manufacturer Specific Data AD (0xFF)   [len, 0xFF, co_lo, co_hi, payload]
+      - Dual-AD iOS background-safe structure  (Service UUID 0x03 anchor + 0xFF carrier)
+      - Raw 7-byte / 13-byte passthrough
+
+    Returns the encapsulated payload (bytes) or None if no carrier AD is found.
+    """
+    if len(adv_data) < 3:
+        return None
+    if adv_data[0] == len(adv_data) - 1 and adv_data[1] == 0xFF:
+        return adv_data[4:]
+    i = 0
+    while i < len(adv_data):
+        length = adv_data[i]
+        if length == 0:
+            break
+        if i + 1 + length > len(adv_data):
+            return None
+        ad_type = adv_data[i + 1]
+        if ad_type == 0xFF and length >= 3:  # Manufacturer data carrier
+            return adv_data[i + 4:i + 1 + length]
+        i += length + 1
+    return None
+
+def decode_packet_frame(frame: bytes) -> Optional[bytes]:
+    """
+    Converts any received BLE frame (Dual-AD, Manufacturer-only, raw, FEC-coded)
+    back into the canonical 7-byte raw packet, FEC-decoding when necessary.
+
+    Structure-based (not length-list based): decode_gap_advertisement handles both
+    single 0xFF AD (11/17B) and iOS dual-AD (15/21B) frames.
+
+    Returns None on any structural failure.
+    """
+    if not isinstance(frame, (bytes, bytearray)) or len(frame) < 7:
+        return None
+    if len(frame) == 7:
+        return bytes(frame)
+    if len(frame) == 13:
+        # Raw FEC-coded payload (no AD headers) carried directly on the canonical wire
+        try:
+            payload, _ = decode_fec_hamming(bytes(frame))
+        except Exception:
+            return None
+        return payload if len(payload) == 7 else None
+
+    payload = decode_gap_advertisement(bytes(frame))
+    if payload is None:
+        return None
+    if len(payload) == 13:
+        try:
+            payload, _ = decode_fec_hamming(payload)
+        except Exception:
+            return None
+    return payload if len(payload) == 7 else None
+
+class BLEFraming:
+    """Canonical cross-language BLE framing API (mirrors Kotlin/Swift helpers)."""
+
+    @staticmethod
+    def manufacturerData(payload: bytes, company_id: int = 0xFFFF) -> bytes:
+        return encapsulate_manufacturer_data(payload, company_id)
+
+    @staticmethod
+    def iosBackgroundSafe(payload: bytes, service_uuid: int = 0xFC00, company_id: int = 0xFFFF) -> bytes:
+        return encapsulate_ios_background_safe(payload, service_uuid, company_id)
+
+    @staticmethod
+    def decode(frame: bytes) -> Optional[bytes]:
+        return decode_packet_frame(frame)
+
+    @staticmethod
+    def verifyBudgets(raw: bytes, fec: bytes) -> Any:
+        """Returns a budget struct with slack fields, mirroring the Kotlin API."""
+        mfr_raw = encapsulate_manufacturer_data(raw)
+        mfr_fec = encapsulate_manufacturer_data(fec)
+        ios_raw = encapsulate_ios_background_safe(raw)
+        ios_fec = encapsulate_ios_background_safe(fec)
+
+        @dataclass
+        class Budget:
+            mfrRawSlack: int
+            mfrFECSlack: int
+            iosRawSlack: int
+            iosFECSlack: int
+
+        return Budget(
+            mfrRawSlack=31 - len(mfr_raw),
+            mfrFECSlack=31 - len(mfr_fec),
+            iosRawSlack=31 - len(ios_raw),
+            iosFECSlack=31 - len(ios_fec),
+        )
+
+class CanonicalVectors:
+    """The canonical reference vector shared across Python, Swift and Kotlin (all 3 agree)."""
+    referencePacket = PacketV2(
+        pkt_type=PacketType.CACHED_MULE_BURST,  # 1 (0001)
+        sos_id=0x7A5,
+        hop_count=3,
+        baro_diff=-5,
+        flags=Flags.MULE_STORE_FORWARD | Flags.VISUAL_RUNWAY,  # 0x22
+        epoch=9,
+        age=AgeBucket.UNDER_5MIN,           # 2
+        reserved=ReservedBits.SECONDARY_PHY,    # 1
+        envelope_mac=0x8F42,
+    )
+    EXPECTED_HEX = "17a53ee2998f42"
+    EXPECTED_BITS = "00010111101001010011111011100010100110011000111101000010"
 
 # =====================================================================
 # Verification & Test Suite

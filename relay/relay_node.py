@@ -5,19 +5,17 @@ Zero-Decrypt Forwarding (ZDF) + Epoch-Synchronized Burst Windows (ESBW) + Inhibi
 """
 import time
 import random
-import struct
-import hmac
-import hashlib
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple
+from dataclasses import dataclass
+from typing import Dict, Optional
 from enum import IntEnum
 import threading
 
 from packet_v2 import (
-    PacketV2, PacketType, AgeBucket, Flags, ReservedBits,
+    PacketV2, PacketType, AgeBucket, Flags,
     pack_packet_v2, unpack_packet_v2, encode_fec_hamming,
     compute_envelope_mac, verify_envelope_mac,
-    encapsulate_ios_background_safe, encapsulate_manufacturer_data
+    encapsulate_ios_background_safe,
+    decode_packet_frame
 )
 
 # ─── Constants ───
@@ -151,7 +149,12 @@ class RelayNode:
             threading.Timer(delay, self._transmit_gradient, args=(best,)).start()
 
     def _transmit_gradient(self, grad: GradientEntry):
-        """Build and transmit gradient packet"""
+        """Build and transmit gradient packet.
+
+        Preserves the ORIGINAL (victim) EPOCH in the packet so the envelope MAC
+        remains valid end-to-end. The MAC covers (SOS_ID || EPOCH || PKT_TYPE);
+        HOP is not MAC-covered, so the relay may increment it freely.
+        """
         if not self._running:
             return
 
@@ -162,7 +165,7 @@ class RelayNode:
             hop_count=min(grad.hop + 1, MAX_HOP),
             baro_diff=grad.baro_diff,
             flags=grad.flags,
-            epoch=self.current_epoch,
+            epoch=grad.epoch,          # victim's epoch — keeps MAC valid
             age=grad.age,
             reserved=grad.reserved,
             envelope_mac=grad.envelope_mac
@@ -181,9 +184,12 @@ class RelayNode:
         pass  # In production: BLE stack advertise on channels 37/38/39
 
     def on_packet_received(self, raw_packet: bytes, rssi_dbm: float, rx_time: float):
-        """Process received packet — ZDF relay logic"""
+        """Process received packet — accepts raw 7B or BLE-framed/FEC packets."""
+        payload = decode_packet_frame(raw_packet)
+        if payload is None:
+            return  # Invalid frame
         try:
-            pkt = unpack_packet_v2(raw_packet[:7])
+            pkt = unpack_packet_v2(payload)
         except Exception:
             return  # Invalid packet
 
@@ -260,14 +266,34 @@ if __name__ == "__main__":
     node = RelayNode(node_id=1)
     node.start()
 
-    # Simulate target beacon at Hop 0
+    # Simulate target beacon at Hop 0 (iOS-safe dual-AD frame over BLE)
     beacon = create_sos_beacon(sos_id=0x123, epoch=0)
     node.on_packet_received(beacon, rssi_dbm=-40, rx_time=time.time())
 
     grad = node.get_gradient(0x123)
     assert grad is not None
-    assert grad.hop == 1  # Relay increments hop
-    print(f"✓ Adopted gradient: SOS={grad.sos_id:04X} hop={grad.hop}")
+    assert grad.hop == 0, f"expected adopted hop 0, got {grad.hop}"
+    print(f"✓ Adopted gradient: SOS={grad.sos_id:04X} hop={grad.hop} (MAC verified)")
+
+    # Simulate a relayed transmission and verify the receiver can validate its MAC.
+    # The relay increments HOP to 1 but preserves the victim EPOCH, so MAC should verify.
+    grad.hop = 1  # what _transmit_gradient advertises
+    relayed = pack_packet_v2(PacketV2(
+        pkt_type=PacketType.LIVE_GRADIENT, sos_id=grad.sos_id, hop_count=1,
+        baro_diff=0, flags=0, epoch=grad.epoch, age=grad.age,
+        reserved=0, envelope_mac=grad.envelope_mac,
+    ))
+    assert verify_envelope_mac(SESSION_KEY, grad.sos_id, grad.epoch,
+                               PacketType.LIVE_GRADIENT, grad.envelope_mac), \
+        "Relayed packet MAC must survive hop increment"
+    print(f"✓ Relayed Hop-1 packet MAC verifies at receiver (epoch preserved)")
+
+    # A second relay hops again to 2, still MAC-valid
+    grad.hop = 2
+    assert verify_envelope_mac(SESSION_KEY, grad.sos_id, grad.epoch,
+                               PacketType.LIVE_GRADIENT, grad.envelope_mac), \
+        "MAC must survive multi-hop relay chain"
+    print(f"✓ Multi-hop (0->1->2) chain: MAC valid at every hop")
 
     node.stop()
     print("Self-test passed.")

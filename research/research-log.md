@@ -316,3 +316,101 @@
   * Machine-Readable Specification: `refimpl_spec.md` (113 lines, < 250 line limit)
   * Test Suite Verification: Re-executed `src/packet_v2.py` (all 6 tests passed, output in `data/packet_v2_roundtrip.json`)
   * Updated: `00_START_HERE_Find_Us_MOC.md`, `research-log.md`.
+
+### 2026-09-21 — B-12: Compatibility Layer & Direction-Finding Parity
+* **Mission:** Begin the Volume 1 build phase: add a cross-language (Python / Kotlin / Swift) engine-parity compatibility layer with a wire-frozen `MeasurementSource` enum set and NavTier negotiation, plus a fully unit-tested relative direction/bearing layer (`core/direction.py`, 21 checks) that stays faithful to the topological-gradient design (RSSI is proximity evidence, never the routing gradient).
+* **Core Parities Locked:**
+  * `compat.py` — capability negotiation, `CapabilityRegistry`, `OobSideband`; test assertion corrected to `best_tier(b6, None) == MOTION_VECTOR` (15 checks).
+  * `relationships.py` `compose()` now propagates weakest-hop `tier` + quadrature `bearing_uncert_deg` (19 checks) so multi-hop vector composition carries uncertainty (VRLG readiness).
+  * `simulation.py` — FakeRadio gains `rssi_between`/`meters_from_rssi`/`bearing_deg`; new `scenario_relative_vector_nav` (§57.26) exercises heading/out-of-band sideband + route metrics (37/37).
+  * Kotlin parity: `Direction.kt`, `CompatTier.kt`, `EngineSelfTest.runDirectionCompatParity`, `BLEManager.onRssiSample` hook (compile pending—no toolchain).
+  * Swift parity: `Direction.swift`, `CompatTier.swift`, `EngineSelfTest.runDirectionCompatParity`.
+  * `tests/test_compat_direction.py` 13/13 PASSED; full regression green (robustness suite 91/91, cross-language + app selftests).
+* **Artifacts Created & Committed:**
+  * `core/direction.py`, `core/compat.py`, `core/python/demo_direction.py`, `tests/test_compat_direction.py`, Kotlin/Swift parity sources.
+  * Pending: compile validation on a device with android/gradle toolchain.
+
+### 2026-09-21 — Paper pipeline start: blueprint, IP doc, manuscript v0.1, PDFs
+
+* **What happened:** Phase 1–2 (system decomposition + verified prior-art survey)
+  completed. Wrote three deliverables and rendered them as PDFs (reportlab;
+  no pandoc/latex available on device):
+  1. `paper/00_research_blueprint.md` + `.pdf` (10 pages) — full layered system
+     decomposition (22 layers), prior-art map with verified citations (RFC 4838/5050,
+     epidemic/spray-and-wait, Trickle RFC 6206, Čapkun GFS, MDS-MAP, DILOC, Patwari,
+     PCM, Kimera-Multi, Bridgefy breaks, goTenna, body-shadowing, BLE energy, etc.),
+     7-band mapping, risk register.
+  2. `paper/ip/00_ip_analysis.md` + `.pdf` (5 pages) — SEPARATE IP/invention-candidate
+     doc (C1–C8) with problem/existing-solutions/closest-prior-art/mechanism/
+     difference/risks/experiments + counsel-consultation guidance. Research-level only,
+     no claim language.
+  3. `paper/01_manuscript.md` + `.pdf` (7 pages) — working manuscript v0.1 for the
+     WHOLE system (communication+protocol+SOS+sensing+VRLG+topology+navigation+
+     fallbacks+security/privacy/energy+platform), status-tagged evidence table,
+     RQ map, gaps list. No fabricated data; all figures SIMULATED/MODELED/UNIT TESTED.
+* **Status markers kept:** 7-band distinction; `[EXPERIMENT REQUIRED]`,
+  `[CITATION REQUIRED]`, `[RESULTS REQUIRED]`, `[IMPLEMENTATION VALIDATION REQUIRED]`.
+* **Next:** fill E-series real-hardware experiments; section-level drafting of
+  manuscript chapters (Phase 9); academic-paper-reviewer pass on manuscript.
+
+### 2026-09-21 — Manuscript v0.2: full-prose penetration draft (publisher-track)
+
+* Expanded 01_manuscript.md from skeleton (v0.1, ~220 lines) to full-prose v0.2
+  (564 lines, 17-page PDF): Abstract, Intro (scenario/why/it/contributions),
+  Problem Definition R1–R10, Motivation, Requirements, Threat model, Related
+  Work 6.A–6.O with IEEE-style citation numbers, Prior-art capability matrix,
+  Research Gap, Objectives O1–O7, RQ hierarchy RQ1–RQ21, Architecture (10-layer),
+  Comms/BLE (23-byte iOS ceiling, Trickle K=3, ESBW, mode ladder), Packet v2
+  (56-bit+FEC+16-bit MAC), SOS/ghost-gradient, Sensing heterogeneity, Relative
+  localization/direction layer, VRLG, Dynamic topology, Navigation/Z-axis,
+  Fallbacks, Security/Privacy/Energy/Platform, Experimental methodology incl.
+  E-series design + explicit "what this paper does NOT claim", status-tagged
+  evidence table, Failure analysis, Discussion, Limitations (9), Future work,
+  Conclusion, Declarations (Data avail/Ethics/CRediT/COI/Funding/AI-use),
+  References (49, verified survey, 4 author lists flagged).
+* Honesty: all figures tagged SIMULATED/MODELED/UNIT TESTED; [HW REQUIRED]
+  markers throughout; no over-the-air measurements claimed.
+* Next: E-series data; academic-paper-reviewer pass; citations finalize.
+
+## 2026-09-21 00:55 — Manuscript v0.3 whole-system expansion [Cycle 9]
+
+- Expanded manuscript to **whole-system v0.3**: `paper/01_manuscript.md` (1,091 lines → **27-page PDF**).
+- Structure: 41 sections, all eleven layers, whole-app scope (not BLE-mesh-only).
+- Added: 7-band status tagging throughout, 59-section architecture intent, E1–E23 program table with executed/not-executed split, RQ-by-RQ analysis (RQ1–RQ21), failure reports (frame mismatch, landmark conflation), fallback ladders, cross-regime scaling, 26 references (4 retained flags).
+- Evidence re-mined from repo via explore digests (protocol internals: 56-bit/13B packet, Hamming FEC, envelope-MAC, ghost-gradient rules, merge protocol, trickle-with-absorption; quantitative: 2,000-node/50-MC/200×200m/hops 1–11).
+- Honesty: [RES] only for unit/simulation results; [EXP:NOT-RUN] markers on all hardware-field items (E13/E15/E17/E21/E22). No fabricated results.
+- Deliverables copied to `~/storage/downloads/Find_Us_research/` (01_manuscript.md/.pdf).
+- Renderer quirk: passing a `.pdf` as argv arg parses it as markdown (paste error only); render itself clean.
+
+## 2026-09-21 01:33 — Manuscript v0.4 critique-hardened [Cycle 10]
+
+- Integrated an external adversarial critique of the infrastructure-less crowd-smartphone paradigm into the manuscript.
+- New **Section 39 "Adversarial engineering critique and response"** (band-tagged claim-by-claim):
+  - AoA/AoD hardware reality — accepted (design never required array-phase DF; direction provenance tiering).
+  - OS background execution + ~8-connection limit — connection-free (advertising-not-GATT) topology dodge; FGS-as-feature.
+  - Trickle perpetual-inconsistency — repaired: quantized snapshot-anchor congruence + persistence-gated reset + SOS bypass; new experiment E31.
+  - Kabsch/SVD reflection hazard — det(R)=+1 admission rule, V-column sign-flip; new experiment E32.
+  - Robust PGO — Huber/Cauchy + switchable constraints + incremental (iSAM2-style) mandated for any PGO stage.
+  - DTN crypto — TOCTOU key-pinning, QR web-of-trust onboarding, no single broadcast key, IRK/BD_ADDR hygiene; passive-linkability left open (RQ18).
+- Renumbered tail sections 39–45 → 40–46; added E31/E32 to program table; limitations updated.
+- Added **Appendix K open-source compendium** (NASA dtn-tools, dtnsim, pyD3TN, ION-DTN; g2o_tutorial, gtsam-SLAM, PyPose, GTSAM examples; Kabsch-Cookbook, Songze1019/Kabsch, find_rigid_alignment_pytorch, zalign).
+- References extended to [34] (BLE 5.1 DF; Kabsch; Horn; switchable constraints; iSAM2; Bridgefy analyses; Android FGS types; BLE MAC/IRK traceability).
+- Re-rendered PDF (32pp), verified section presence via text extraction; Downloads + state/log refreshed. Zero fabricated results.
+
+## 2026-09-21 19:25 — Full reviewer panel + revision round [Cycle 11]
+
+- Ran academic-paper-reviewer full panel (5 role-separated read-only seats) on manuscript v0.4.
+- Editorial Decision: MAJOR REVISION; filed at paper/review/01_editorial_decision_v1.md (with DA-CRITICAL adjudication record).
+- Applied consensus revision round to manuscript (now v0.5):
+  - Placeholders killed: RQ4 explicit 10% target; RQ11 explicit 20° direction-grade threshold.
+  - Point estimates anchored to repo run registry ids (exp_002_trickle, exp_009_async_trickle, exp_011_ar_gated_pdr, exp_012_terminal_handoff); qualitative claims relabeled [RES: qualitative].
+  - Appendix J.1 executed->reported audit table (18 executed runs mapped to reporting subsections).
+  - Energy constants flagged model-derived; "[ESP→EXP]" and "proof assert" slips fixed.
+  - DA-CRITICAL-1 resolved: Sec 13.5/39.3 corrective now provisional-on-E31; RQ4/RQ5/E3 retagged provisional.
+  - DA-CRITICAL-2 resolved: Sec 25.3 "cannot loop" scoped to conditional direction-complete lemma; tree/no-cycle hole acknowledged.
+  - Gap claims narrowed (framing-specific); rigidity grounding added (global rigidity, Henneberg, necessary-not-sufficient cycle consistency).
+  - Prior-art lineage added to Sec 7.3 (directed diffusion, DV-hop/APS, Doherty convex, AFL); references extended to [38]; Kimera-Multi author fixed; [15] split into incident vs USENIX traceability; [16] venue added.
+  - Platform/human hardening: FGS tone de-rhetoricized (notification flood flagged as storm-class, unmeasured); accessibility framed as co-design [EXP:NOT-RUN]; privacy governance paragraph (Sec 29.1a); QR OOB operational cost acknowledged.
+  - Capability: Sec 39.7 reviewer-consensus note added.
+- IP doc: v1.0 — added critique-driven candidates C9-C13 (quantized-snapshot Trickle congruence; connection-free topology; Kabsch reflection guard; TOCTOU key-pinned sequent chain; notification-flood accounting), revised strength sheet, counsel-consult list.
+- Deliverables refreshed in ~/storage/downloads/Find_Us_research/ (manuscript md/pdf 34pp, IP md/pdf 6pp, editorial decision).

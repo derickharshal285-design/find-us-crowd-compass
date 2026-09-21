@@ -1,5 +1,35 @@
 # Find Us / Crowd Compass — Complete Documentation
 
+## ⚠ READ FIRST (2026-09 pivot)
+
+The previous "Research Cascade" section documents the *older* design lineage.
+Both have been folded into a single source of truth: **`docs/MASTER_SPEC.md`**
+(92 sections). The sections below `## Research Cascade` remain as archive;
+wherever they conflict with the master spec, the spec wins. Current
+implementation status lives in `docs/PROJECT_STATUS.md`; each design decision
+is an ADR under `docs/DECISIONS/` (ADR-010 security and ADR-011 identity are
+still OPEN).
+
+New pure-Python engine (spec §63 Blocks 1–6, 8; run with `PYTHONPATH=core`):
+
+| Module | Implements | Self-test |
+|--------|------------|----------|
+| `core/domain.py` | block 1 types/enums, lifecycles, statuses | – |
+| `core/graph.py` | dynamic graph, hop BFS, events, aging (§84 A–D, G) | 22 checks |
+| `core/relationships.py` | spatial measurement store + compose (§84 C) | 17 checks |
+| `core/sos.py` | SOS gradient engine, flood, expiry (§40–41, §84 E–L) | 34 checks |
+| `core/protocol.py` | versioned binary codec (§23, §84 B) | 23 checks |
+| `core/simulation.py` | §57 scenarios, §58 fake radio, §59 metrics | 32 checks |
+| `app/devices.py` | one phone = local graph + SOS gradient, wire-only exchange (§48 L2–L3, §56, §64) | app selftests |
+| `app/guidance.py` | honest responder instructions (NO_SOS_KNOWN / NAVIGATING / NO_VALID_ROUTE / AT_TARGET) | app selftests |
+| `app/world.py` + `app/main.py` | transport-agnostic world + `demo`/`shell` CLI | app selftests |
+
+Key structural differences from the archive below: explicit `UNKNOWN` never
+encoded as `0`, no permanent anchor, topology is separate from geometry,
+`null` distance ceiling is explicitly unchecked (spec §65) rather than a
+validated RSSI↔distance table, and the 13-byte Hamming transport is optional
+rather than mandatory (vector chaining is dropped).
+
 ## Executive Summary
 
 **Find Us / Crowd Compass** is an offline, smartphone-only emergency navigation system for dense crowds (concerts, protests, stadiums, disasters) where cellular is jammed and GPS is blocked.
@@ -202,23 +232,37 @@ MFR_CEILING = 27  # bytes
 ## Verification Commands
 
 ```bash
-# Python reference (all 6 tests)
-cd core/python && python3 packet_v2.py
+# Pure core engine (spec §63, PYTHONPATH=core)
+python3 -m core.graph                    # 22 checks
+python3 -m core.relationships            # 17 checks
+python3 -m core.sos                      # 34 checks
+python3 -m core.protocol                 # 23 checks
+python3 -m core.simulation               # 32 scenario checks (§57)
+
+### Application (distributed responder app)
+```bash
+PYTHONPATH=core python3 app/main.py selftest
+PYTHONPATH=core python3 app/main.py demo
+PYTHONPATH=core python3 app/main.py shell
+```
+
+# Python reference layers (packet v2, group layer, relative map)
+PYTHONPATH=core/python python3 core/python/packet_v2.py
+PYTHONPATH=core/python python3 core/python/find_group.py
+PYTHONPATH=core/python python3 core/python/relative_map.py
+
+# Relay + responder
+PYTHONPATH=core/python python3 relay/relay_node.py
+PYTHONPATH=core/python python3 responder/guidance_engine.py
+
+# Cross-language harness
+PYTHONPATH=core/python python3 tests/cross_language_test.py
 
 # Swift
 cd core/swift && swift build && swift test
 
 # Kotlin
 cd core/kotlin && ./gradlew build test
-
-# Cross-language harness
-cd tests && python3 cross_language_test.py
-
-# Relay self-test
-cd relay && PYTHONPATH=../core/python python3 relay_node.py
-
-# Responder self-test
-cd responder && PYTHONPATH=../core/python python3 guidance_engine.py
 ```
 
 ---
@@ -228,30 +272,34 @@ cd responder && PYTHONPATH=../core/python python3 guidance_engine.py
 ```
 find-us-crowd-compass/
 ├── README.md                    # Build overview
-├── DOCUMENTATION.md             # This file
+├── DOCUMENTATION.md             # This file (archive + pivot note)
+├── docs/                        # Source of truth (spec §83)
+│   ├── MASTER_SPEC.md           #   92-section master spec (§1–92)
+│   ├── PROJECT_STATUS.md        #   conceptual / implemented / experimental / unknown
+│   ├── CORE_PROBLEM.md          #   12 core problems (§4–16)
+│   ├── ARCHITECTURE.md          #   L1–L5 layered architecture (§17)
+│   ├── RESEARCH_QUESTIONS.md    #   open research (§60)
+│   ├── PROTOCOL.md              #   wire + data model (§23)
+│   ├── EXPERIMENT_PLAN.md       #   validation hierarchy (§63, §67–72)
+│   └── DECISIONS/               #   ADR-001 … 011
 ├── .gitignore
 ├── core/
-│   ├── python/packet_v2.py      # Reference (verified 6/6 tests)
+│   ├── domain.py                # Block 1 types/enums (pure)
+│   ├── graph.py                 # Block 2/5 dynamic graph + hop BFS (pure)
+│   ├── relationships.py         # Block 3 measurement store (pure)
+│   ├── sos.py                   # Block 4 SOS gradient engine (pure)
+│   ├── protocol.py              # Block 6 versioned binary codec (pure)
+│   ├── simulation.py            # Block 8 §57 scenarios + §59 metrics
+│   ├── python/
+│   │   ├── packet_v2.py         # Reference (verified 6/6 tests)
+│   │   ├── find_group.py        # Group layer (8/8)
+│   │   └── relative_map.py      # Relative map (5/5)
 │   ├── swift/                   # iOS/macOS library
-│   │   ├── Package.swift
-│   │   └── Sources/FindUsPacket/
-│   │       ├── PacketV2.swift
-│   │       ├── FEC.swift
-│   │       └── BLE.swift
 │   └── kotlin/                  # Android library
-│       ├── build.gradle.kts
-│       └── src/main/kotlin/com/findus/packet/
-│           ├── PacketV2.kt
-│           ├── FEC.kt
-│           └── BLE.kt
 ├── relay/relay_node.py          # ZDF + ESBW + Trickle
 ├── responder/guidance_engine.py # AR-PDR + Floor + RF + Terminal
 ├── ios/FindUsApp.swift          # SwiftUI app skeleton
 ├── android/                     # Kotlin app
-│   ├── app/build.gradle.kts
-│   └── app/src/main/kotlin/com/findus/crowdcompass/
-│       ├── ble/BLEManager.kt
-│       └── guidance/GuidanceEngine.kt
 └── tests/cross_language_test.py # Verification harness
 ```
 
@@ -271,8 +319,16 @@ find-us-crowd-compass/
 
 ## Research Vault Reference
 
-All research artifacts are archived in:
+The spec-authored docs and all research source notes are mirrored **inside this
+repo** under `research/` (most-current vault copy). The authoritative live vault
+lives outside this repo — do not treat either as a build dependency:
+
 `/home/derick/Documents/Obsidian Vault/find us reasearch/`
+
+Legacy simulation scripts (`src/sim_*.py`) and datasets (`data/*.json`) belong
+to that vault and are **not vendored** here; the old `data/`/`src/` symlinks
+were removed in 2026-09. The current re-runnable simulation lives in
+`core/simulation.py` and `core/simulation.py --sweep`.
 
 Key files:
 - `00_START_HERE_Find_Us_MOC.md` — Master map of content

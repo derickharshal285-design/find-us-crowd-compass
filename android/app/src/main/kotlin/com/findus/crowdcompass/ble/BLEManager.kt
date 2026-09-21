@@ -62,6 +62,10 @@ class BLEManager(
     var onGradientDiscovered: ((GradientInfo) -> Unit)? = null
     var onStateChange: ((String) -> Unit)? = null
 
+    // Raw-RSSI seam: the rotate-to-find sweeper (engine.DirectionSweep) consumes
+    // these samples; keeps a BLE4/5 phone able to produce direction estimates.
+    var onRssiSample: ((rssiDbm: Int, timestampMs: Long) -> Unit)? = null
+
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun start() {
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
@@ -176,6 +180,8 @@ class BLEManager(
                 val device = result.device
                 val rssi = result.rssi
                 val scanRecord = result.scanRecord
+
+                onRssiSample?.invoke(rssi, System.currentTimeMillis())
 
                 // Parse manufacturer data (0xFF) from scan record
                 scanRecord?.manufacturerSpecificData?.let { mfrData ->
