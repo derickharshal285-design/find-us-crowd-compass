@@ -48,12 +48,17 @@
   function mkContext(canvas) {
     const ctx = canvas.getContext("2d");
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const cssW = canvas.clientWidth || canvas.width;
-    const cssH = canvas.clientHeight || canvas.height;
-    canvas.width = cssW * dpr;
-    canvas.height = cssH * dpr;
-    ctx.scale(dpr, dpr);
-    return { ctx, W: cssW, H: cssH, DPR: dpr };
+    // Authoring space = the canvas width/height attributes (e.g. 840×420).
+    // The whole scene is drawn in that space and uniformly scaled to the CSS
+    // box, so every sim (which uses absolute coords up to 840) fits any screen.
+    const designW = canvas.width || 840;
+    const designH = canvas.height || 420;
+    const cssW = canvas.clientWidth || designW;
+    const cssH = cssW * (designH / designW); // keep the authoring aspect ratio
+    const k = cssW / designW; // uniform scale factor
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    return { ctx, W: designW, H: designH, cssW, cssH, DPR: dpr, SCALE: k };
   }
 
   class Host {
@@ -67,7 +72,13 @@
       this.c = mkContext(canvas);
       // Mix the SIM's methods + data onto the host so sims can call sibling
       // methods via `this` (e.g. advance → this.onStep), like a prototype.
-      Object.assign(this, this.def);
+      // NEVER clobber Host control methods: a SIM that ships its own draw()/
+      // step()/setScene() would otherwise replace Host.draw and crash the
+      // canvas loop (that path is only reachable via this.def.*).
+      const OWN = new Set(["draw", "loop", "play", "pause", "step", "setScene",
+        "bind", "bindPlayerExtras", "constructor", "canvas", "card", "run",
+        "t", "c", "def", "name", "read"]);
+      for (const k of Object.keys(this.def)) if (!OWN.has(k)) this[k] = this.def[k];
       this.def.reset.call(this);
       this.bind();
     }
@@ -110,15 +121,14 @@
     }
     setScene(i) { this.def.setScene && this.def.setScene.call(this, i); this.run = false; this.draw(); }
     draw() {
-      // Re-create the context if the canvas is being shown for the first time
-      // (hidden tabs start 0×0) or the layout actually changed.
+      // Re-create the context if the layout actually changed (hidden tabs start
+      // 0×0; rotations and sidebar resizes change cssW).
       const cw = this.canvas.clientWidth || this.canvas.width;
-      const ch = this.canvas.clientHeight || this.canvas.height;
-      if (cw !== this.c.W || ch !== this.c.H) this.c = mkContext(this.canvas);
+      if (cw !== this.c.cssW) this.c = mkContext(this.canvas);
       const g = this.c;
       g.ctx.save();
-      // Draw in CSS-pixel space over a DPR-scaled bitmap.
-      g.ctx.setTransform(g.DPR, 0, 0, g.DPR, 0, 0);
+      // Draw in authoring space over a DPR × SCALE-scaled bitmap.
+      g.ctx.setTransform(g.DPR * g.SCALE, 0, 0, g.DPR * g.SCALE, 0, 0);
       this.def.draw.call(this, g);
       g.ctx.restore();
       const ro = dom.$("#" + this.name + "-readout");

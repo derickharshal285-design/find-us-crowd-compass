@@ -27,10 +27,13 @@
     ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
     ctx.setLineDash([]);
   }
+  // Authoring fonts are bumped so that after uniform design-space scaling
+  // (≈0.78 on desktop) they read like the sizes the sims were written with.
+  const FONT_K = 1.3;
   function text(g, s, x, y, color, size, align) {
     const ctx = g.ctx;
     ctx.fillStyle = color || C.dim;
-    ctx.font = (size || 12) + "px " + (g.font || "ui-monospace, Menlo, monospace");
+    ctx.font = Math.round((size || 12) * FONT_K) + "px " + (g.font || "ui-monospace, Menlo, monospace");
     ctx.textAlign = align || "left"; ctx.textBaseline = "middle";
     ctx.fillText(s, x, y);
   }
@@ -170,9 +173,8 @@
       const cv = this.canvas;
       const toPos = (e) => {
         const r = cv.getBoundingClientRect();
-        const x = (e.clientX || e.touches[0].clientX) - r.left;
-        const y = (e.clientY || e.touches[0].clientY) - r.top;
-        return { x, y };
+        const k = (this.c && this.c.SCALE) || 1; // CSS px → authoring space
+        return { x: ((e.clientX || e.touches[0].clientX) - r.left) / k, y: ((e.clientY || e.touches[0].clientY) - r.top) / k };
       };
       const down = (e) => { this.pointer.active = true; Object.assign(this.pointer, toPos(e)); };
       const move = (e) => {
@@ -239,7 +241,6 @@
       const W = g.W, H = g.H;
       const ctx = g.ctx;
       ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
-      g.font = "12px ui-monospace, Menlo, monospace";
       // RSSI tiers share draggable anchors — keep them on the canvas whatever
       // the window size (default anchor B sits at x=640, off-screen on phones).
       if (tier === "rssiBand" || tier === "rssiLog") {
