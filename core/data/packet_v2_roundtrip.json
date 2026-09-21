@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-21T21:36:38+0530",
+  "timestamp": "2026-09-22T00:48:33+0530",
   "test_results": {
     "canonical_vector_test": {
       "status": "PASSED",
@@ -27,8 +27,8 @@
     "brute_force_roundtrip_test": {
       "status": "PASSED",
       "iterations": 100000,
-      "total_time_sec": 3.3471,
-      "throughput_pkts_per_sec": 29876,
+      "total_time_sec": 0.9539,
+      "throughput_pkts_per_sec": 104837,
       "lossless_fidelity": 1.0
     },
     "anti_spoofing_mac_test": {
