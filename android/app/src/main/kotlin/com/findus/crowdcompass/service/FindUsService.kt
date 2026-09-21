@@ -15,6 +15,7 @@ import com.findus.crowdcompass.ble.BleTransport
 import com.findus.crowdcompass.data.IncidentStore
 import com.findus.crowdcompass.engine.DeviceApp
 import com.findus.crowdcompass.engine.GuidanceInstruction
+import com.findus.crowdcompass.engine.IncidentSession
 import com.findus.crowdcompass.engine.NodeId
 import com.findus.crowdcompass.ui.MainActivity
 import kotlinx.coroutines.CoroutineScope
@@ -35,10 +36,11 @@ import java.util.Base64
 class FindUsService : Service() {
 
     object State {
-        val instance = SosUiState()
+        @Volatile
+        var instance = SosUiState()
     }
 
-    val backend: Backend = Backend()
+    val backend: Backend get() = Backend.get(this)
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -46,7 +48,7 @@ class FindUsService : Service() {
         super.onCreate()
         createChannel()
         startForeground(NOTIFICATION_ID, buildNotification("starting local mesh…"))
-        backend.start(this)
+        Backend.get(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -98,14 +100,21 @@ class FindUsService : Service() {
 data class SosUiState(
     val joined: Boolean = false,
     val incidentId: String = "",
+    val incidentLink: String = "",
     val wireId: String = "",
     val sosEvent: String = "",
+    val sosActive: Boolean = false,
     val mode: String = "NO_SOS_KNOWN",
+    val summary: String = "",
     val myHop: Int? = null,
     val target: String? = null,
     val neighbors: List<String> = emptyList(),
+    val neighborHops: Map<String, Int> = emptyMap(),
+    val gradientHops: Map<String, Int> = emptyMap(),
     val rejectedMacs: Int = 0,
     val adoption: Int = 0,
+    val tick: Double = 0.0,
+    val ttlHops: Int = 8,
     val hint: String = "",
 )
 
@@ -116,11 +125,31 @@ class Backend {
     private var device: DeviceApp = DeviceApp(NodeId("local"))
     private var scheduler: AdvScheduler? = null
     private var tick = 0.0
+    private var started = false
 
     private val _ui = MutableStateFlow(SosUiState())
     val ui: StateFlow<SosUiState> = _ui.asStateFlow()
 
+    companion object {
+        @Volatile
+        private var shared: Backend? = null
+
+        /**
+         * One engine per process: the foreground service and the UI must share
+         * it, otherwise two engines would fight over the same BLE transport.
+         */
+        fun get(context: Context): Backend =
+            shared ?: synchronized(this) {
+                shared ?: Backend().also {
+                    shared = it
+                    it.start(context)
+                }
+            }
+    }
+
     fun start(context: Context) {
+        if (started) return
+        started = true
         val store = IncidentStore(context)
         scope.launch {
             val joined = store.load()
@@ -137,6 +166,7 @@ class Backend {
             _ui.value = SosUiState(
                 joined = joined != null,
                 incidentId = dev.incident?.incidentId.orEmpty(),
+                incidentLink = dev.incident?.toLink().orEmpty(),
                 wireId = dev.wireId.value,
             )
             scheduler = AdvScheduler(scope, { device.outgoing() }) { publish() }
@@ -155,9 +185,25 @@ class Backend {
                 return@launch
             }
             device.joinIncident(session)
-            IncidentStore(context).saveLink(link, b64(device.installKey))
+            IncidentStore(context).saveLink(link.trim(), b64(device.installKey))
             _ui.value = _ui.value.copy(joined = true, incidentId = session.incidentId,
-                wireId = device.wireId.value)
+                incidentLink = link.trim(), wireId = device.wireId.value)
+            scheduler?.onTick()
+        }
+    }
+
+    /** Origin role: mint a fresh incident, persist it, and publish its link. */
+    fun createIncident(name: String, context: Context) {
+        scope.launch {
+            val id = name.trim().ifBlank {
+                "INC-" + System.currentTimeMillis().toString().takeLast(6)
+            }
+            val session = IncidentSession.makeSession(id)
+            val link = session.toLink()
+            device.joinIncident(session)
+            IncidentStore(context).saveLink(link, b64(device.installKey))
+            _ui.value = _ui.value.copy(joined = true, incidentId = id,
+                incidentLink = link, wireId = device.wireId.value, mode = "NO_SOS_KNOWN")
             scheduler?.onTick()
         }
     }
@@ -166,8 +212,7 @@ class Backend {
         scope.launch {
             IncidentStore(context).clear()
             device = DeviceApp(NodeId("local"), installKey = freshInstallKey())
-            _ui.value = _ui.value.copy(joined = false, incidentId = "",
-                wireId = device.wireId.value, mode = "NO_SOS_KNOWN")
+            _ui.value = SosUiState(wireId = device.wireId.value)
             scheduler?.onTick()
         }
     }
@@ -175,6 +220,13 @@ class Backend {
     fun raiseSos() {
         device.startSos("EVENT-" + System.currentTimeMillis().toString().takeLast(8))
         scheduler?.onTick()
+    }
+
+    /** Origin role: resolve/withdraw the active emergency (ghost-kill at the source). */
+    fun endSos() {
+        for (sid in device.sosEngine.activeSosIds(device.t)) device.endSos(sid)
+        scheduler?.onTick()
+        publish()
     }
 
     private fun startTransport(context: Context) {
@@ -198,25 +250,37 @@ class Backend {
     private fun publish() {
         val sos = device.sosEngine.activeSosIds(device.t).firstOrNull()
         val g: GuidanceInstruction? = sos?.let { device.guidance(it) }
-        _ui.value = SosUiState(
+        val nbs = device.graph.neighbors(device.wireId).map { it.value }
+        val hopMap = sos?.let { device.hopMap(it) } ?: emptyMap()
+        val snapshot = SosUiState(
             joined = device.incident != null,
             incidentId = device.incident?.incidentId.orEmpty(),
+            incidentLink = device.incident?.toLink().orEmpty(),
             wireId = device.wireId.value,
             sosEvent = sos?.value.orEmpty(),
+            sosActive = sos != null,
             mode = g?.mode ?: "NO_SOS_KNOWN",
+            summary = g?.summary.orEmpty(),
             myHop = g?.myHop,
             target = g?.target?.value,
-            neighbors = device.graph.neighbors(device.wireId).map { it.value },
+            neighbors = nbs,
+            neighborHops = nbs.mapNotNull { n -> hopMap[n]?.let { n to it } }.toMap(),
+            gradientHops = hopMap,
             rejectedMacs = device.rejectedMacs,
             adoption = device.sosEngine.adoptions,
+            tick = device.t,
+            ttlHops = device.ttlHops,
             hint = g?.hint.orEmpty(),
         )
+        _ui.value = snapshot
+        FindUsService.State.instance = snapshot
     }
 
     fun stop() {
         BleTransport.stop()
         scheduler?.stop()
         scope.cancel()
+        synchronized(Companion) { if (shared === this) shared = null }
     }
 
     private fun freshInstallKey(): ByteArray {

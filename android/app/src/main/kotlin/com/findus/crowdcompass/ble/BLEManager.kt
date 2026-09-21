@@ -1,5 +1,6 @@
 package com.findus.crowdcompass.ble
 
+import android.app.PendingIntent
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
@@ -90,18 +91,7 @@ class BLEManager(
         val fec = HammingFEC.encode(raw)
         val advPayload = BLEFraming.iosBackgroundSafe(fec, 0xFC00, companyId)
 
-        val advertiseData = AdvertiseData.Builder().apply {
-            // AD1: 16-bit Service UUID (0xFC00) — iOS background filter anchor
-            addServiceUuid(serviceUuid)
-
-            // AD2: Manufacturer Data (0xFF) with FEC-coded Packet v2
-            val builder = AdvertiseData.Builder()
-            builder.addManufacturerData(companyId, advPayload.toByteArray())
-            // Note: Can't easily mix service UUID + mfr data in single AdvertiseData.Builder
-            // Use setManufacturerData directly on AdvertiseData
-        }.build()
-
-        // Manual dual-AD construction for precise control
+        // Dual-AD construction for precise control: service-UUID anchor + carrier.
         val dualAdvData = buildDualAdvData(advPayload)
 
         val settings = AdvertiseSettings.Builder().apply {
@@ -185,8 +175,10 @@ class BLEManager(
 
                 // Parse manufacturer data (0xFF) from scan record
                 scanRecord?.manufacturerSpecificData?.let { mfrData ->
-                    for ((companyId, data) in mfrData) {
-                        if (companyId == this@BLEManager.companyId) {
+                    for (i in 0 until mfrData.size()) {
+                        val cid = mfrData.keyAt(i)
+                        val data = mfrData.valueAt(i)
+                        if (cid == this@BLEManager.companyId) {
                             val gradient = parseGradient(data, rssi, device)
                             if (gradient != null) {
                                 onGradientDiscovered?.invoke(gradient)
