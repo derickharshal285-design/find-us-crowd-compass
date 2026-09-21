@@ -11,7 +11,6 @@ let package = Package(
         .library(name: "FindUsPacket", targets: ["FindUsPacket"])
     ],
     targets: [
-        .target(name: "FindUsPacket", dependencies: []),
-        .testTarget(name: "FindUsPacketTests", dependencies: ["FindUsPacket"])
+        .target(name: "FindUsPacket", dependencies: [])
     ]
 )

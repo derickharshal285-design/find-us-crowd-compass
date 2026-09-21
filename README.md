@@ -1,5 +1,8 @@
 # Find Us / Crowd Compass — Build Repository
 
+[![CI](https://img.shields.io/github/actions/workflow/status/derickharshal285-design/find-us-crowd-compass/ci.yml?branch=main&label=CI&logo=github)](https://github.com/derickharshal285-design/find-us-crowd-compass/actions/workflows/ci.yml)
+[![Watchdog](https://img.shields.io/github/actions/workflow/status/derickharshal285-design/find-us-crowd-compass/watchdog.yml?branch=main&label=nightly%20watchdog&logo=github)](https://github.com/derickharshal285-design/find-us-crowd-compass/actions/workflows/watchdog.yml)
+
 This repository contains the complete reference implementation for the Find Us (Crowd Compass) offline emergency navigation system.
 
 **Hard requirement:** read `docs/MASTER_SPEC.md` (92 sections) before contributing.

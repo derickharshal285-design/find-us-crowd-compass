@@ -2,6 +2,7 @@
 # Install xcodegen (brew install xcodegen) then: xcodegen && open FindUsCrowd.xcodeproj
 name: FindUsCrowd
 options:
+  xcodeVersion: "15.4" # generate an Xcode 15-compatible project (format 60) so macos-14 runners can open it
   bundleIdPrefix: com.findus.crowd
   deploymentTarget:
     iOS: "16.0"

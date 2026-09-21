@@ -88,6 +88,13 @@ def test_swift_implementation():
         print("⚠ Swift directory not found, skipping")
         return True
 
+    # Swift runtime parity requires CryptoKit (macOS only); the Linux CI path
+    # covers Swift via the static canonical-vector check below, and the iOS job
+    # runs the full Swift engine parity battery on a macOS runner.
+    if sys.platform != "darwin":
+        print("⚠ runtime parity is macOS-only (CryptoKit); static vector check runs below")
+        return True
+
     # Build and test
     try:
         result = subprocess.run(

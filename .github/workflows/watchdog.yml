@@ -1,0 +1,39 @@
+name: watchdog
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Reference suites (packet PDU, robustness, cross-language)
+        run: |
+          python3 core/python/packet_v2.py
+          PYTHONPATH=core:app python3 tests/robustness_suite.py
+          PYTHONPATH=core python3 tests/cross_language_test.py
+      - name: Single-file bundle is not stale
+        run: |
+          node website/build-single.js website .tmp-bundle-index.html
+          if ! cmp -s .tmp-bundle-index.html docs/index.html; then
+            echo "::error::docs/index.html is STALE. Regenerate and commit:"
+            echo "::error::  node website/build-single.js website docs/index.html"
+            exit 1
+          fi
+          rm .tmp-bundle-index.html
+      - name: Canonical vector not drifted across implementations
+        run: |
+          for f in core/python/packet_v2.py \
+                    core/swift/Sources/FindUsPacket/PacketV2.swift \
+                    core/kotlin/src/main/kotlin/com/findus/packet/PacketV2.kt; do
+            grep -q "17a53ee2998f42" "$f" || { echo "::error::canonical hex missing from $f"; exit 1; }
+          done
