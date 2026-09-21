@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Find Us — From Research Paper to Working Simulation</title>
+<meta name="description" content="Interactive explainer and hands-on simulations for the Find Us / Crowd Compass research: how a phone joins a crowd mesh, how each navigation system works, and what is measured vs still open.">
+<meta name="theme-color" content="#0d1117">
+<style>
+:root {
+  --bg: #0d1117;
+  --bg2: #11161f;
+  --panel: #161d2a;
+  --panel2: #1c2536;
+  --ink: #e6edf3;
+  --ink-dim: #9aa7b6;
+  --accent: #4cc2ff;
+  --accent2: #7ee787;
+  --warn: #f2cc60;
+  --danger: #ff7b72;
+  --line: #2a3243;
+  --mono: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+a { color: var(--accent); }
+code { font-family: var(--mono); font-size: .92em; background: #0b0f16; border: 1px solid var(--line); border-radius: 4px; padding: .05em .35em; }
+
+/* masthead */
+.masthead { background: linear-gradient(180deg, #0f1726, #0b0f16); border-bottom: 1px solid var(--line); }
+.masthead .wrap { padding-top: 26px; padding-bottom: 22px; }
+h1 { margin: 0 0 4px; font-size: clamp(30px, 5.5vw, 46px); letter-spacing: -.5px; }
+h1 .sub { color: var(--ink-dim); font-weight: 500; }
+.tagline { margin: 8px 0 0; color: var(--ink-dim); max-width: 72ch; }
+
+.status-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.chip {
+  display: inline-block; padding: 2px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; letter-spacing: .4px;
+  border: 1px solid transparent; white-space: nowrap;
+}
+.chip-measured { color: #0b3d17; background: var(--accent2); }
+.chip-model { color: #083244; background: var(--accent); }
+.chip-open { color: #3f2d00; background: var(--warn); }
+.chip-notrun { color: #3b1710; background: var(--danger); }
+
+/* tabs */
+.tabs {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  position: sticky; top: 0; z-index: 20;
+  background: var(--bg); border-bottom: 1px solid var(--line); padding: 10px 20px;
+}
+.tabs a {
+  color: var(--ink-dim); text-decoration: none; font-weight: 600;
+  padding: 9px 14px; border-radius: 8px; border: 1px solid transparent;
+  touch-action: manipulation;
+}
+.tabs a:hover { color: var(--ink); }
+.tabs a.active { color: var(--ink); background: var(--panel2); border-color: var(--line); }
+@media (max-width: 760px) {
+  .tabs {
+    flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain;
+    scrollbar-width: none; padding: 8px 12px;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs a { white-space: nowrap; padding: 10px 12px; }
+}
+
+/* pages */
+main { padding: 26px 0 60px; }
+.page { animation: fade .18s ease; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.page h2 { font-size: 30px; margin: 8px 0 10px; }
+.page h3 { margin: 14px 0 6px; font-size: 19px; }
+.page > p { max-width: 84ch; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 820px) { .grid2 { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 12px; padding: 18px 20px; margin: 16px 0;
+}
+.tight { margin: 4px 0; padding-left: 20px; }
+.tight li { margin: 4px 0; }
+
+/* accordion */
+.accordion details {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; margin: 10px 0; padding: 4px 14px;
+}
+.accordion summary {
+  cursor: pointer; font-weight: 700; padding: 10px 0; color: var(--ink);
+}
+.accordion details[open] summary { color: var(--accent); }
+.acc-body { padding: 2px 2px 14px; color: var(--ink-dim); max-width: 90ch; }
+
+/* sims */
+.sim-card { padding: 16px; }
+.sim-head { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.sim-head h3 { margin: 0; }
+.sim-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; }
+.sim-controls button, button[data-scene] {
+  background: var(--panel2); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 8px; padding: 6px 12px; cursor: pointer; font-weight: 600; font-size: 14px;
+}
+.sim-controls button:hover, button[data-scene]:hover { border-color: var(--accent); color: var(--accent); }
+.sim-controls label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-dim); }
+.sim-controls input[type=range] { width: 130px; }
+.sim-layout { display: grid; grid-template-columns: 1fr 340px; gap: 14px; margin-top: 12px; }
+@media (max-width: 860px) { .sim-layout { grid-template-columns: 1fr; } }
+.sim-canvas {
+  width: 100%; height: auto; background: #0a0e14;
+  border: 1px solid var(--line); border-radius: 10px; display: block;
+}
+.sim-readout {
+  background: #0a0e14; border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px 14px; font-size: 13px;
+}
+.readout-title { margin: 4px 0; font-weight: 700; color: var(--accent); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+.log { margin: 0; padding-left: 18px; color: var(--ink-dim); }
+.log li { margin: 4px 0; }
+.log-wait { color: var(--ink-dim); list-style: none; margin-left: -18px; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin-top: 4px; }
+.kv b { color: var(--ink); font-weight: 600; text-align: left; }
+.kv span { color: var(--ink-dim); }
+.readout-line { font-family: var(--mono); font-size: 14px; margin: 10px 2px 0; color: var(--ink-dim); }
+.caption { font-size: 13px; color: var(--ink-dim); margin: 10px 2px 0; max-width: 92ch; }
+.tier-status { font-size: 13px; margin: 0; color: var(--warn); }
+.tier-status b { color: var(--ink); }
+
+.tier-switch { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+.tier-switch button {
+  background: var(--panel2); color: var(--ink-dim); border: 1px solid var(--line);
+  border-radius: 999px; padding: 7px 14px; cursor: pointer; font-weight: 600;
+}
+.tier-switch button.active { color: #0b3d17; background: var(--accent2); border-color: transparent; }
+
+/* tables */
+.numtable { border-collapse: collapse; width: 100%; margin: 8px 0; }
+.numtable th, .numtable td {
+  text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line);
+  font-size: 14px; vertical-align: top;
+}
+.numtable th { color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: .8px; }
+
+/* glossary */
+.glo dt { font-weight: 700; margin-top: 8px; color: var(--ink); }
+.glo dd { margin: 0 0 2px; color: var(--ink-dim); }
+
+/* concepts curriculum */
+.concepts-jump { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.concepts-jump a {
+  color: var(--ink-dim); text-decoration: none; font-weight: 600; font-size: 12px;
+  background: var(--panel2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px;
+}
+.concepts-jump a:hover { color: var(--ink); border-color: var(--accent); }
+.conch { margin: 22px 0; scroll-margin-top: 64px; }
+.conch h3 { font-size: 18px; color: var(--accent); margin-bottom: 2px; }
+.conlead { color: var(--ink-dim); font-size: 14px; margin: 2px 0 10px; max-width: 90ch; }
+.con {
+  background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--line);
+  border-radius: 8px; padding: 8px 14px 2px; margin: 8px 0;
+}
+.con-h { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ct { font-weight: 700; color: var(--ink); }
+.ca { color: var(--ink-dim); margin: 4px 0 10px; font-size: 14.5px; max-width: 90ch; }
+
+/* walkthrough player */
+.caption-list { font-family: var(--mono); font-size: 14px; color: var(--ink-dim); padding: 12px 14px; background: #0a0e14; border: 1px solid var(--line); border-radius: 10px; margin: 10px 0 0; }
+.caption-list li { margin: 4px 0; }
+.w-scenes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.scene-btn.active { color: #0b3d17; background: var(--accent2); border-color: transparent; }
+
+footer.masthead { margin-top: 10px; border-top: 1px solid var(--line); }
+footer p { color: var(--ink-dim); font-size: 13px; margin: 4px 0; }
+
+/* --- mobile + touch polish --- */
+button { touch-action: manipulation; }
+input[type=range] { width: 100%; max-width: 150px; accent-color: var(--accent); }
+@media (max-width: 620px) {
+  .wrap { padding: 0 14px; }
+  main { padding: 18px 0 48px; }
+  .page h2 { font-size: 24px; }
+  .card { padding: 14px 14px; border-radius: 10px; }
+  .sim-card { padding: 10px; }
+  .sim-controls { margin-left: 0; width: 100%; }
+  .sim-controls button { flex: 1 1 auto; min-height: 38px; font-size: 15px; }
+  .sim-controls label { flex-wrap: wrap; width: 100%; padding: 6px 2px; }
+  .sim-controls input[type=range] { max-width: none; }
+  .sim-layout { gap: 10px; }
+  .readout-line { font-size: 12.5px; }
+  .tier-switch button { padding: 9px 13px; }
+  .concepts-jump a { padding: 6px 12px; }
+  .numtable th, .numtable td { font-size: 12.5px; padding: 6px 6px; }
+  .status-legend .chip { font-size: 11px; padding: 2px 8px; }
+  .masthead .wrap { padding-top: 20px; padding-bottom: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .page { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <div>
+      <h1>Find Us <span class="sub">/ Crowd Compass</span></h1>
+      <p class="tagline">A research paper explainer with hands-on, interactive simulations. Tap, drag, step and scrub — this is the paper turned into things you can operate.</p>
+    </div>
+    <div class="status-legend">
+      <span class="chip chip-measured">MEASURED in sim/reference</span>
+      <span class="chip chip-model">teaching model</span>
+      <span class="chip chip-open">field open</span>
+      <span class="chip chip-notrun">not yet run</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs wrap" id="tabs">
+  <a href="#overview" data-tab="overview">Overview</a>
+  <a href="#paper" data-tab="paper">The paper</a>
+  <a href="#concepts" data-tab="concepts">Concepts</a>
+  <a href="#mesh" data-tab="mesh">Mesh 101</a>
+  <a href="#navigate" data-tab="navigate">Navigate</a>
+  <a href="#radio" data-tab="radio">Radio &amp; BLE</a>
+  <a href="#sim" data-tab="sim">Simulations</a>
+  <a href="#videos" data-tab="videos">Walkthroughs</a>
+  <a href="#facts" data-tab="facts">Glossary &amp; numbers</a>
+</nav>
+
+<main class="wrap">
+
+  <!-- ===================== OVERVIEW ===================== -->
+  <section class="page" id="tab-overview" data-page="overview">
+    <h2>What is this project?</h2>
+    <p><strong>Find Us</strong> is a research + engineering effort for an <em>infrastructure-independent smartphone crowd navigation system</em>. It is <em>not</em> "a BLE app" and <em>not</em> "indoor GPS": it is the whole stack that lets any phone — with no towers, no cloud and no account — join a temporary crowd, help relay an emergency signal, and be walked to it over a graph built from radios it can actually hear.</p>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>The one-line promise</h3>
+        <ol class="tight">
+          <li>Every phone derives a <strong>per-incident team key</strong> from a plain text link — the whole crowd authenticates each other, server-free.</li>
+          <li>Phones form a <strong>live topology graph</strong> (edges = radios actually heard), not a map of GPS.</li>
+          <li>An emergency is a <strong>hop gradient</strong> that ripples outward; every device only holds hops it personally adopted.</li>
+          <li>Every device can then <strong>walk you toward the lower hop</strong> using whatever it can physically measure — the <em>navigation tier</em>.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>The honest map</h3>
+        <p>This site keeps the research community&rsquo;s rule: <strong>theoretical, implemented, and measured are never mixed.</strong> Every simulation on this page is a faithful teaching model of the actual engine (<code>core/python</code> → Kotlin → Swift), and every number is tagged:</p>
+        <ul class="tight">
+          <li><span class="chip chip-measured">MEASURED</span> — produced by the reference implementation on this machine or the audit suite.</li>
+          <li><span class="chip chip-model">MODEL</span> — a simplification for teaching; the real phone uses the engine, this is its inner workings.</li>
+          <li><span class="chip chip-open">FIELD OPEN</span> — the physics we model but have not yet proven with phones on a real emergency floor.</li>
+          <li><span class="chip chip-notrun">NOT-RUN</span> — a planned experiment that has not been executed. Nothing here pretends otherwise.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Why the whole stack matters</h3>
+      <p>A person&rsquo;s question — &ldquo;which direction do I walk?&rdquo; — is <em>last</em> in a chain. Before it can be answered honestly, you need: a way to <strong>authenticate</strong> without servers (the link &amp; envelope MAC), a <strong>connection-free topology</strong> (advertisements, not sessions), a bound <strong>gradient relay</strong> (TTL, dedup, freshness), a rule that <strong>never fabricates a route</strong> (the one-hop back claims rule), a <strong>motion model</strong> (dead reckoning, barometrics), and finally a <strong>navigation tier negotiation</strong> so an old BLE4 phone and a new BLE5 phone still walk the same direction. Skip any one stage and the arrow you finally see is a guess.</p>
+    </div>
+
+    <div class="card">
+      <h3>Status in one breath</h3>
+      <ul class="tight">
+        <li>The <strong>reference engine and audits</strong> are complete and green: packet PDU (56-bit, FEC, anti-spoof MAC), a 91-check adversarial phone-to-phone robustness audit, and the 13-check compat/direction battery all pass.</li>
+        <li>A <strong>50k-device envelope benchmark</strong> exists in simulation: single-frame processing ≈ 30&nbsp;µs, MAC attach ≈ 14&nbsp;µs, MAC verify ≈ 8&nbsp;µs.</li>
+        <li>The <strong>app source</strong> (Android Kotlin + Compose, iOS SwiftUI) carries the engine, a packet layer, and CI that compiles both.</li>
+        <li>The manuscript (46 sections, ~34 printed pages) has been through a 5-seat academic review panel; the consensus fixes are incorporated.</li>
+        <li><strong>What is still open:</strong> field validation of real BLE ranges, RSSI log-distance coefficients, rotate-to-find bearings, baro floor separation, and every [NOT-RUN] experiment this page will flag as you go.</li>
+      </ul>
+    </div>
+
+    <p class="navhint">Start with <a href="#concepts">Concepts</a> for the whole arc from mesh to the BLE radio, then <a href="#mesh">Mesh 101</a> to watch a third device enter the mesh, <a href="#radio">Radio &amp; BLE</a> for the physical floor, <a href="#navigate">Navigate</a> to operate each navigation system, and <a href="#videos">Walkthroughs</a> for narrated timelines.</p>
+  </section>
+
+  <!-- ===================== THE PAPER ===================== -->
+  <section class="page" id="tab-paper" data-page="paper" hidden>
+    <h2>The paper, unpacked</h2>
+    <p>The full manuscript is 46 sections. This page is the explainer version — the ideas and the proof structure, with the honest gaps left visible. The raw artifacts are downloadable at the bottom.</p>
+
+    <div class="accordion">
+      <details open>
+        <summary>1 · The problem — why this is hard</summary>
+        <div class="acc-body">
+          <p>Indoor, mass-casualty, or disaster scenes have no working infrastructure. Prior art splits into two camps that never meet in one phone:<strong>location systems</strong> (need hardware: UWB anchors, AoA arrays, GPS, or a trained fingerprint map) and <strong>mesh messengers</strong> (send bytes, but never say which way to walk). This project asks for the whole thing on ordinary phones: a mesh, a route, and a voice that says &ldquo;move toward that face&rdquo; — using only measurables a commodity phone exposes.</p>
+        </div>
+      </details>
+      <details>
+        <summary>2 · Prior-art lineage — what we built on</summary>
+        <div class="acc-body">
+          <p>The design is a synthesis, not a novelty-sausage machine. Its typed fuses are drawn from: <strong>directed diffusion</strong> (interest gradients), <strong>DV-hop / APS</strong> (hop-count space), <strong>Doherty et al.&rsquo;s location-free topology</strong>, and <strong>AFL</strong> (spring-embedding rigidity). The manuscript credits each lineage in its references. The honest contribution is the <em>integration plus the honesty rules</em>: an offline team-key identity layer, a connection-free topology, and a gradient that is structurally forbidden from fabricating a route.</p>
+        </div>
+      </details>
+      <details>
+        <summary>3 · Architecture — eleven layers</summary>
+        <div class="acc-body">
+          <p>The paper decomposes the whole system into <strong>eleven layers</strong>, bottom-up (§12.1): <strong>1</strong> Radio plausibility — byte-floor facts (BLE ceilings, 3 advert channels, body-shadowing). <strong>2</strong> Link/discovery — advertising cadence, dual-role, half-duplex trades. <strong>3</strong> Packet/coding — 56-bit PDU + Hamming(7,4) ECC, v2/v3 compat. <strong>4</strong> Hop/relay — the four-rule gate (relay / forward / suppress / cache). <strong>5</strong> Routing graph — lazily-built label/route graph with distance/direction/uncertainty edges. <strong>6</strong> Gradient — SOS distance-to-source labels; ghost-safe. <strong>7</strong> Spatial graph (VRLG) — virtual relative landmark graph, the &ldquo;where&rdquo; answer-buffer. <strong>8</strong> Consistency engine — cross-checks, cheat-edge rejection, the anti-rumor authority. <strong>9</strong> Navigation rendering — arrow, edge-icons, path, orbital modes. <strong>10</strong> Terminal UI — glanceability, SOS arm via press/motion/voice, accessibility. <strong>11</strong> Platform compliance — Android/iOS admission control, permissions, background survival.</p>
+          <p>The whole-paper claim is <em>integration across all eleven</em> — no single layer is state-of-the-art alone, the coupling is the contribution.</p>
+        </div>
+      </details>
+      <details>
+        <summary>4 · The one-hop honesty rule (the heart)</summary>
+        <div class="acc-body">
+          <p>Any device at hop <code>H &gt; 0</code> <strong>only advertises hop H while it can still hear a live claim of hop H−1</strong>. If the fresher claim disappears, the device stops advertising — and the gradient collapses one ring at a time from the origin outward. This is what prevents &ldquo;ghost gradients&rdquo;: phantom routes that keep pointing people at a rescue that already ended. You can watch this happen live in the <a href="#sim">Gradient simulation</a> by switching the origin off.</p>
+        </div>
+      </details>
+      <details>
+        <summary>5 · Guidance and the conditional direction lemma</summary>
+        <div class="acc-body">
+          <p>The guidance module proves (under a condition — §25.3 of the manuscript) that if a path of live H−1 claims exists to you, your next hop is on a path to the origin. The caveat is stated, not hidden: the lemma holds given the freshness condition and given neighbor claims are honest. The reviewer panel flagged exactly this class of assumption; the manuscript marks it <em>provisional on the E31/E32 experiments</em> which have not been run.</p>
+        </div>
+      </details>
+      <details>
+        <summary>6 · Security without a server</summary>
+        <div class="acc-body">
+          <p>Identity is <strong>per incident</strong> and pseudonymous. The link is the only secret distribution: anyone who scans it derives the same team key. Frames carry a rolling envelope MAC over (SOS_ID ‖ EPOCH ‖ PKT_TYPE) so a foreign frame is rejected before any graph write — the audit replays, forges and floods all day and the graph never moves. Privacy governance (§: "Identity & governance") explains what a pseudonym is and is not: a phone number of sorts that dies with the incident.</p>
+        </div>
+      </details>
+      <details>
+        <summary>7 · What the reviewer panel did</summary>
+        <div class="acc-body">
+          <p>The manuscript was passed through a 5-seat peer panel (Journal-fit + 3 reviews + Devil&rsquo;s Advocate), verdict <strong>MAJOR REVISION</strong>. The consensus fixes are already in: placeholder numbers killed, every point estimate anchored to a run-id (<code>exp_002_trickle</code>, <code>exp_009_async_trickle</code>, <code>exp_011_ar_gated_pdr</code>, <code>exp_012_terminal_handoff</code>), qualitative findings marked with their method (e.g. <code>[RES: qualitative]</code>), and every executed vs reported step cross-checked in the paper&rsquo;s Appendix J.1 audit.</p>
+        </div>
+      </details>
+      <details>
+        <summary>8 · Ethics and retention</summary>
+        <div class="acc-body">
+          <p>No account, no cloud, no behavioural tracking. An incident key can be retired by the incident creator; responders in the same incident share a capability-negotiated view. The manuscript discusses when retaining hops is a feature (disaster audit) vs a risk (civilian crowds) and does not pretend both can be simultaneously maximised.</p>
+        </div>
+      </details>
+      <details>
+        <summary>9 · Research questions and honest answers</summary>
+        <div class="acc-body">
+          <p>The paper is organised around research questions (RQ1–RQ12). Each has a status: answered in simulation (with run-id), <em>qualitative</em>, or <em>provisional on a field experiment</em>. RQ4&rsquo;s adoption target and RQ11&rsquo;s heading threshold were two places the panel found made-up-looking numbers; both are now explicit measured targets or marked provisional — nothing is silently rounded.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h3>Read the real artifacts</h3>
+      <ul class="tight">
+        <li><a href="https://raw.githubusercontent.com/derickharshal285-design/find-us-crowd-compass/main/research/paper/01_manuscript.md" target="_blank" rel="noopener" download>01_manuscript.md</a> — full 46-section manuscript (markdown)</li>
+        <li><a href="https://raw.githubusercontent.com/derickharshal285-design/find-us-crowd-compass/main/research/paper/01_manuscript.pdf" target="_blank" rel="noopener" download>01_manuscript.pdf</a> — printed manuscript (~34 pages)</li>
+        <li><a href="https://raw.githubusercontent.com/derickharshal285-design/find-us-crowd-compass/main/research/paper/ip/00_ip_analysis.md" target="_blank" rel="noopener" download>IP analysis (markdown)</a> and <a href="https://raw.githubusercontent.com/derickharshal285-design/find-us-crowd-compass/main/research/paper/ip/00_ip_analysis.pdf" target="_blank" rel="noopener" download>PDF</a> — candidate-property review</li>
+        <li><a href="https://raw.githubusercontent.com/derickharshal285-design/find-us-crowd-compass/main/research/paper/review/01_editorial_decision_v1.md" target="_blank" rel="noopener" download>Editorial decision v1</a> — the panel verdict and consensus fixes</li>
+        <li><a href="https://raw.githubusercontent.com/derickharshal285-design/find-us-crowd-compass/main/research/research-log.md" target="_blank" rel="noopener" download>Research log</a> — every cycle, including the CI and app cycles</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== MESH 101 ===================== -->
+  <section class="page" id="tab-mesh" data-page="mesh" hidden>
+    <h2>Mesh 101 — how a device enters the mesh</h2>
+    <p>The exact thing people ask: <strong>&ldquo;how does a third person join a working mesh?&rdquo;</strong> It is six small steps, each honest. This page walks them with the real model: press <em>step</em> to advance the story of a new device walking into range of a live rescue.</p>
+
+    <div class="card">
+      <h3>The six steps</h3>
+      <ol class="tight">
+        <li><strong>Link.</strong> Someone gives you the incident link (a chat, a QR, a printed card). <code>incident://…</code></li>
+        <li><strong>Key.</strong> Your phone derives the same team key everyone else derived from the same link. No server, no sync, no account.</li>
+        <li><strong>Scan.</strong> You begin dual-role: advertise your own identity, listen for others. Advertising itself is a packet you broadcast — even a joining phone is heard instantly.</li>
+        <li><strong>Authenticate.</strong> Every frame you hear must pass the rolling envelope MAC before it can touch your graph. A stranger&rsquo;s frame is counted and dropped.</li>
+        <li><strong>Adopt.</strong> A neighbour&rsquo;s live hop-3 claim is fresher than yours, so you adopt hop 4 (within TTL). You now hold one honest number.</li>
+        <li><strong>Back it.</strong> You may now advertise hop 4 — but only while that hop-3 claim stays live. The moment it dies, you fall silent. No ghosts.</li>
+      </ol>
+    </div>
+
+    <div class="card sim-card">
+      <div class="sim-head">
+        <h3>Interactive: a third device walks in</h3>
+        <div class="sim-controls">
+          <button data-sim-btn="reset">Reset</button>
+          <button data-sim-btn="step">Step ▸</button>
+          <button data-sim-btn="play">Auto ▶</button>
+          <button data-sim-btn="pause">❚❚</button>
+        </div>
+      </div>
+      <div class="sim-layout">
+        <canvas class="sim-canvas" data-sim="mesh-entry" width="840" height="420"></canvas>
+        <aside class="sim-readout" id="mesh-readout">
+          <p class="readout-title">Device log</p>
+          <ol id="mesh-log" class="log"><li class="log-wait">Press <em>Step</em> to begin.</li></ol>
+          <p class="readout-title">State</p>
+          <div id="mesh-state" class="kv"></div>
+        </aside>
+      </div>
+      <p class="caption">Model faithful to <code>DeviceApp</code> / <code>SosEngine</code> in the repo (same adoption, freshness and one-hop rules). This is a teaching canvas, not telemetry from a field run.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>Frequently shorthanded answers</h3>
+        <p><strong>&ldquo;Is it like offline WhatsApp?&rdquo;</strong> Partly: bytes hop phone-to-phone. But it also carries a <em>gradient</em> — numbers that say &ldquo;I am 4 hops from the zero&rdquo; — and a <em>conscience</em> that refuses to repeat a number it can no longer back.</p>
+        <p><strong>&ldquo;Does everyone need the same app?&rdquo;</strong> Everyone in the incident needs a Find Us build. Cross-app participation is future work; the packet and key formats are published so a second implementer could interop.</p>
+        <p><strong>&ldquo;What if nobody&rsquo;s nearby?&rdquo;</strong> A lone phone carries nothing except its own heartbeats. The mesh is connection-free; presence is measured by hearing, and hearing needs a radio neighbour.</p>
+      </div>
+      <div class="card">
+        <h3>What a topology edge really means</h3>
+        <p>An edge between two phones is <em>not</em> &ldquo;we&rsquo;re friends&rdquo;. It is: <strong>you were heard recently on the advertising channel.</strong> The graph expires nodes after 120&nbsp;s and edges after 60&nbsp;s of silence, so the topology tracks physical reach, not a buddy list. A cold corridor suddenly separating two phones poisons exactly one edge.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== NAVIGATE ===================== -->
+  <section class="page" id="tab-navigate" data-page="navigate" hidden>
+    <h2>Navigate — how each navigation system works</h2>
+    <p>A phone never has GPS indoors. It therefore picks the <strong>strongest tier it can honestly measure on this link</strong>. The tiers, weakest to strongest; select one to operate it:</p>
+
+    <div class="tier-switch" id="tier-switch">
+      <button data-tier="gradient" class="active">Hop gradient</button>
+      <button data-tier="rssiBand">RSSI band</button>
+      <button data-tier="rssiLog">RSSI log-distance</button>
+      <button data-tier="heading">Compass heading</button>
+      <button data-tier="motion">IMU motion vector</button>
+      <button data-tier="sweep">Rotate-to-find</button>
+      <button data-tier="baro">Elevation / floor</button>
+    </div>
+
+    <div class="card sim-card">
+      <div class="sim-head">
+        <h3 id="tier-title">Hop gradient</h3>
+        <div class="sim-controls">
+          <button data-sim-btn="reset">Reset</button>
+          <button data-sim-btn="play">Animate ▶</button>
+          <button data-sim-btn="pause">❚❚</button>
+        </div>
+        <p class="tier-status" id="tier-status"></p>
+      </div>
+      <div class="sim-layout">
+        <canvas class="sim-canvas" data-sim="tiers" width="840" height="420"></canvas>
+        <aside class="sim-readout" id="tier-readout">
+          <p class="readout-title">How it works</p>
+          <div id="tier-desc" class="kv"></div>
+        </aside>
+      </div>
+      <p class="caption" id="tier-caption"></p>
+    </div>
+  </section>
+
+  <!-- ===================== CONCEPTS ===================== -->
+  <section class="page" id="tab-concepts" data-page="concepts" hidden>
+    <h2>Every concept, from mesh to the BLE radio</h2>
+    <p>Eleven chapters walking the whole research in order: why it exists, how the mesh is built, how the mesh navigates, and finally what happens at the BLE radio and direction-finding floor. Each entry answers one concept and is tagged with its evidence band (<code>CAN</code> / <code>IMP</code> / <code>RES</code> / <code>PRO</code> / <code>FAIL</code> / <code>NOT-RUN</code>) — nothing is presented as measured if it isn't. Expand any chapter or jump straight to <a href="#radio">Radio &amp; BLE</a> for the physical floor.</p>
+    <div id="concepts-root"></div>
+  </section>
+
+  <!-- ===================== RADIO & BLE ===================== -->
+  <section class="page" id="tab-radio" data-page="radio" hidden>
+    <h2>Radio &amp; BLE — the physical floor of the whole stack</h2>
+    <p>Everything above rides on BLE <strong>advertising</strong>, not connections. This page is the radio truth: the 3 channels, the byte ceilings, the half-duplex reality, and — because it is the most-asked question — <strong>how direction is and is not obtained</strong> on commodity phones.</p>
+
+    <div class="card sim-card">
+      <div class="sim-head">
+        <h3>Advertising channels, half-duplex trades &amp; the byte budget</h3>
+        <div class="sim-controls">
+          <button data-sim-btn="reset">Reset</button>
+          <button data-sim-btn="play">Run ▶</button>
+          <button data-sim-btn="pause">❚❚</button>
+        </div>
+      </div>
+      <canvas class="sim-canvas" data-sim="radio" width="840" height="430"></canvas>
+      <p id="radio-readout" class="readout-line"></p>
+      <p class="caption"><span class="chip chip-measured">CAN</span> BLE facts (Bluetooth Core Spec 5.1): 40 channels, 3 advertising, legacy 31 B / Type-0xFF 27 B / iOS dual-AD ≤ 23 B ceilings. Teaching canvas of the <em>cadence &amp; trade</em>, not a radio trace.</p>
+    </div>
+
+    <div class="card sim-card">
+      <div class="sim-head">
+        <h3>Direction finding — what commodity phones can and cannot do</h3>
+        <div class="sim-controls">
+          <button data-sim-btn="reset">Reset</button>
+          <button data-sim-btn="play">Sweep ▶</button>
+          <button data-sim-btn="pause">❚❚</button>
+        </div>
+      </div>
+      <canvas class="sim-canvas" data-sim="dirfind" width="840" height="430"></canvas>
+      <p id="dirfind-readout" class="readout-line"></p>
+      <p class="caption"><span class="chip chip-measured">CAN</span> AoA/AoD need a switched array + CTE IQ sampling — absent on phones. <span class="chip chip-open">FIELD OPEN</span> swept-RSSI bearings are RSSI-class, provisional on E17 (<code>NOT-RUN</code>). This canvas is the honest spectrum of choices, not a claim of measured precision.</p>
+    </div>
+
+    <div class="accordion">
+      <details open>
+        <summary>The BLE radio reality (advertising vs connections)</summary>
+        <div class="acc-body">
+          <p>BLE has <strong>40 RF channels</strong> (0–39); <strong>3 (37–39) are dedicated to advertising</strong>, the rest are data channels. Advertising packets ride the 3; data rides the 37. Discovery is a coordination problem: schedule, channel, and concurrency must be traded (<code>§13.1</code>).</p>
+          <p>Find Us deliberately builds its topology on advertising/discovery — <strong>not GATT connections</strong>. Nodes exchange state as half-duplex trades (my advert meets your scan); they never open a connection per neighbour. This is structurally decisive: Android/iOS cap concurrent connections (~8 system-wide), but that cache throttles <em>connected</em> topologies, not broadcast activity. A node's effective degree is bounded by radio duty-cycle and energy budget, not by the OS connection cache (<code>§13.3a</code>, critique 39.2).</p>
+        </div>
+      </details>
+      <details>
+        <summary>The byte ceilings that force the packet design</summary>
+        <div class="acc-body">
+          <ul>
+            <li>Legacy advertising PDU payload: <strong>31 B</strong> total.</li>
+            <li>Type 0xFF (manufacturer) block inside it: <strong>27 B</strong> usable.</li>
+            <li>Custom AD record: up to <strong>29 B</strong>.</li>
+            <li>iOS background advertising serializes/coalesces to <strong>≤ 23 B (dual-AD)</strong>; extra records go to an overflow area — delivered, but delayed and not on a guaranteed cadence.</li>
+            <li>Android 12+ requires the nearby/fine-location advisory for BLE scanning/advertising; iOS requires background modes; both throttle in background.</li>
+          </ul>
+          <p>These ceilings are why the core payload is <strong>56 bits + Hamming(7,4) ECC = 13 bytes</strong>: it fits Type-0xFF (27 B) and the iOS dual-AD (23 B) with headroom, and the <code>BLEFraming</code> dual-AD scheme pads it exactly into the iOS-safe shape (<code>§14.6</code>).</p>
+        </div>
+      </details>
+      <details>
+        <summary>Half-duplex, energy asymmetry, and the meeting problem</summary>
+        <div class="acc-body">
+          <p>Two devices meet as a <strong>trade</strong>: A's advertisement and B's scan window must overlap in time (and channel). The system uses a <em>willing-to-advertise</em> discipline — advertise frequently when metadata forks, less when quiescent; scan with a duty cycle that protects energy; treat discovery as stochastic, not scheduled (<code>§13.2</code>).</p>
+          <p>Radio economics reshape the protocol: transmitting an advert slot is cheap (~1.32 µAh/s in the constant model) while <em>listening</em> is ~10× (≈14.23 µAh/s at 10 Hz scan). So the protocol <strong>spends broadcast slots and hoards listen time</strong> — plus local-report absorption so nodes don't re-broadcast whole neighbourhoods (<code>§13.4</code>).</p>
+        </div>
+      </details>
+      <details>
+        <summary>Direction finding: AoA/AoD vs swept-RSSI (the honest answer)</summary>
+        <div class="acc-body">
+          <p><strong>BLE 5.1 AoA/AoD</strong> (constant-tone extension + IQ phase sampling) requires a <em>switched antenna array</em> in the locator — a physical antenna array commodity smartphones do not have. AoD additionally requires a fixed beacon array, which violates the infrastructure-less contract. The adversarial critique is correct here and is <strong>baked into the design</strong>: Find Us never carried AoA IQ streams (<code>§39.1</code>).</p>
+          <p>What a commodity phone actually does for direction:</p>
+          <ul>
+            <li><strong>Swept-RSSI / rotate-to-find:</strong> rotate 360°, log RSSI against device bearing, take the peak. RSSI-class observation, not a phase array. Bearings are <em>provisional on E17</em> — flagged <span class="chip chip-open">FIELD OPEN</span>, <code>NOT-RUN</code>.</li>
+            <li><strong>Torso-shadowing cardioid:</strong> your body occludes ~50 dB behind you; a rotation scan reads as a cardioid pattern, giving a bearing toward the peer — the terminal-handoff exploit (run <code>exp_012_terminal_handoff</code>).</li>
+            <li><strong>Multi-witness consistency:</strong> any single bearing is demoted unless closed-cycle cross-checks agree — no single-source bearing is ever promoted to EXACT tier.</li>
+            <li><strong>Optional accelerants:</strong> if a device has an array (some tablets/enterprise), protocol negotiates a <code>DirectionCapability</code> flag and upgrades edge quality — never requires it. Future UWB / channel-sounding plays the same optional role.</li>
+          </ul>
+          <p>Bottom line, from the manuscript: the way out of a direction hole is <em>corruptible-but-correctable witnesses</em>, not global trilateration and never a phase array.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Why the packet is connection-free and OS-safe</summary>
+        <div class="acc-body">
+          <p>The core frame (13 B) fits all ceilings; extensions chunk via <code>seq</code>-trie reassembly. The <code>BLEFraming</code> dual-AD injects a 16-bit Service-UUID anchor (0xFC00) — mandatory so background iOS scanning with a service-UUID filter sees the packet at all (manufacturer-data-only is invisible to locked iPhones, Task 01 finding) — then carries the payload inside the ≤ 23 B iOS-safe shape. This is deployed in both the Kotlin and Swift <code>BLEFraming</code>.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ===================== SIMULATIONS ===================== -->
+  <section class="page" id="tab-sim" data-page="sim" hidden>
+    <h2>Simulations — the engine, operated</h2>
+    <p>Four teaching simulations built from the actual engine&rsquo;s parameters (TTL 8, node expiry 120&nbsp;s, edge 60&nbsp;s, freshness 120&nbsp;s, dedup window 20k, Trickle window ~1200&nbsp;ms with jitter). These are the same models <code>core/python</code> runs; here you get the controls.</p>
+
+    <div class="card sim-card">
+      <h3>Gradient onboarding &amp; the one-hop ghost rule</h3>
+      <div class="sim-controls">
+        <button data-sim-btn="reset">Reset</button>
+        <button data-sim-btn="play">Run ▶</button>
+        <button data-sim-btn="pause">❚❚</button>
+        <label>Signal range <input type="range" id="g-range" min="80" max="240" value="150"></label>
+        <label><input type="checkbox" id="g-fail"> Origin goes silent at t = 40 s</label>
+      </div>
+      <canvas class="sim-canvas" data-sim="gradient" width="840" height="420"></canvas>
+      <p id="gradient-readout" class="readout-line"></p>
+      <p class="caption">Watch rings of hop numbers radiate from the origin. Then enable <em>origin silent</em> and see the gradient collapse one ring at a time — each device stops advertising the moment its fresher claim dies. That is the ghost-kill in action. <span class="chip chip-model">MODEL (faithful rules)</span></p>
+    </div>
+
+    <div class="card sim-card">
+      <h3>Trickle — bounded broadcast load</h3>
+      <p>Each device advertises a short frame on a <strong>jittered slot</strong>, resting between slots. Even a 50k crowd is O(k) small frames/s per receiver, not O(N).</p>
+      <div class="sim-controls">
+        <button data-sim-btn="reset">Reset</button>
+        <button data-sim-btn="play">Run ▶</button>
+        <button data-sim-btn="pause">❚❚</button>
+        <label>Devices <input type="range" id="t-count" min="3" max="30" value="12"></label>
+      </div>
+      <canvas class="sim-canvas" data-sim="trickle" width="840" height="200"></canvas>
+      <p id="trickle-readout" class="readout-line"></p>
+      <p class="caption">Strips are devices; bars are advert bursts, slots jittered so bursts rarely collide. The duty-cycle readout shows steady-state airtime per device. Reproduces the <code>exp_002_trickle</code> run family in miniature.</p>
+    </div>
+
+    <div class="card sim-card">
+      <h3>SOS flood, dedup, and rejections</h3>
+      <div class="sim-controls">
+        <button data-sim-btn="reset">Reset</button>
+        <button data-sim-btn="play">Run ▶</button>
+        <button data-sim-btn="pause">❚❚</button>
+        <label>Foreign spam/s <input type="range" id="d-spam" min="0" max="200" value="40"></label>
+      </div>
+      <canvas class="sim-canvas" data-sim="dedup" width="840" height="220"></canvas>
+      <p id="dedup-readout" class="readout-line"></p>
+      <p class="caption">Duplicates are absorbed by the dedup window; foreign frames are counted, MAC-rejected, and never touch the graph. Bars: accepted gradient updates vs rejected forge attempts.</p>
+    </div>
+
+    <div class="card sim-card">
+      <h3>Cached mule burst — carrying a gradient across a gap</h3>
+      <div class="sim-controls">
+        <button data-sim-btn="reset">Reset</button>
+        <button data-sim-btn="play">Run ▶</button>
+        <button data-sim-btn="pause">❚❚</button>
+      </div>
+      <canvas class="sim-canvas" data-sim="mule" width="840" height="300"></canvas>
+      <p id="mule-readout" class="readout-line"></p>
+      <p class="caption">A &ldquo;mule&rdquo; (a pedestrian, a runner with a phone, a drone) crosses a radio gap and bursts its cached gradient to the far side, letting a second mesh light up. Store-and-forward with the <code>MULE_STORE_FORWARD</code> flag is a first-class packet type in the PDU.</p>
+    </div>
+
+    <div class="card">
+      <h3>Measured numbers the reference actually produced</h3>
+      <table class="numtable">
+        <thead><tr><th>Quantity</th><th>Value</th><th>Tag</th></tr></thead>
+        <tbody>
+          <tr><td>One-frame processing (packet→MAC→graph)</td><td>≈ 30.4 µs</td><td><span class="chip chip-measured">MEASURED</span></td></tr>
+          <tr><td>Envelope MAC attach / verify</td><td>≈ 13.9 µs / 7.7 µs</td><td><span class="chip chip-measured">MEASURED</span></td></tr>
+          <tr><td>Robustness audit, adversarial checks</td><td>91 / 91 pass</td><td><span class="chip chip-measured">MEASURED</span></td></tr>
+          <tr><td>Compat / direction battery</td><td>13 / 13 pass</td><td><span class="chip chip-measured">MEASURED</span></td></tr>
+          <tr><td>Packet PDU cases</td><td>2,240 boundary + 100,000 random round-trips</td><td><span class="chip chip-measured">MEASURED</span></td></tr>
+          <tr><td>Rotate-to-find bearing accuracy</td><td>provisional on sweep</td><td><span class="chip chip-open">FIELD OPEN</span></td></tr>
+          <tr><td>RSSI log-distance coefficients (walls, crowds)</td><td>—</td><td><span class="chip chip-notrun">NOT-RUN</span></td></tr>
+          <tr><td>Baro floor separation under HVAC drafts</td><td>—</td><td><span class="chip chip-notrun">NOT-RUN</span></td></tr>
+        </tbody>
+      </table>
+      <p class="caption">Source: <code>core/data/crowd_benchmark.json</code>, <code>tests/robustness_suite.py</code>, <code>core/python/packet_v2.py</code> — all run on this machine, all ≥ 13 days old, none from field phones.</p>
+    </div>
+  </section>
+
+  <!-- ===================== WALKTHROUGHS ===================== -->
+  <section class="page" id="tab-videos" data-page="videos" hidden>
+    <h2>Walkthroughs — narrated timelines you can scrub</h2>
+    <p><strong>Honest framing:</strong> there is no camera footage of a field rescue. These are <em>animated timelines</em> — frame-by-frame simulations of the engine&rsquo;s own logs playing at 30 steps/s. They behave like videos: play, pause, scrub, and step through captions. When field experiments are run, equivalent real footage will replace or reinforce them.</p>
+
+    <div class="card">
+      <div class="sim-head">
+        <h3 id="w-title">Walkthrough 1 · The crowd flood</h3>
+        <div class="sim-controls">
+          <button data-sim-btn="reset">Reset</button>
+          <button data-sim-btn="play">Play ▶</button>
+          <button data-sim-btn="pause">Pause ❚❚</button>
+          <label>Scrub <input type="range" id="w-scrub" min="0" max="300" value="0"></label>
+        </div>
+      </div>
+      <canvas class="sim-canvas" data-sim="player" width="840" height="420"></canvas>
+      <ol id="w-caption" class="caption-list"><li>An emergency starts at the origin (red). It is the only device that holds hop 0.</li></ol>
+      <div class="w-scenes">
+        <button data-scene="0" class="scene-btn active">1 · Crowd flood</button>
+        <button data-scene="1" class="scene-btn">2 · Mule across a gap</button>
+        <button data-scene="2" class="scene-btn">3 · Handoff &amp; ghost collapse</button>
+      </div>
+    </div>
+    <p class="caption"><span class="chip chip-model">MODEL</span> These are scripted from engine rules, not a recording. Scrub freely — scenes are deterministic (same seed → same frame).</p>
+  </section>
+
+  <!-- ===================== FACTS ===================== -->
+  <section class="page" id="tab-facts" data-page="facts" hidden>
+    <h2>Glossary &amp; reference numbers</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>Terms</h3>
+        <dl class="glo">
+          <dt>Hop</dt><dd>The number of adopted radio steps from the emergency origin. Origin = hop 0.</dd>
+          <dt>Gradient</dt><dd>Per-device table: which neighbour claims which hop, and how fresh.</dd>
+          <dt>Envelope MAC</dt><dd>16-bit rolling authenticator over (SOS_ID ‖ EPOCH ‖ PKT_TYPE), keyed by the incident team key.</dd>
+          <dt>Trickle</dt><dd>Jittered, duty-cycled broadcast rhythm — small frames, often, predictably but not colliding.</dd>
+          <dt>Dedup window</dt><dd>Bound on packets re-entering the gradient state; 20,000-frame horizon in the engine.</dd>
+          <dt>Freshness / expiry</dt><dd>Nodes die at 120 s, edges at 60 s in the reference; a route claim is &ldquo;live&rdquo; for 120 s.</dd>
+          <dt>Nav tier</dt><dd>The lowest mutually measurable navigation signal two phones agree on.</dd>
+          <dt>Mule</dt><dd>A delay-tolerant carrier (runner/drone) that physically moves a cached gradient across a gap.</dd>
+          <dt>Advertising channels</dt><dd>BLE's 3 of 40 RF channels (37–39) dedicated to advertisements; the entire discovery protocol rides them.</dd>
+          <dt>Byte ceilings</dt><dd>Legacy adv payload 31 B; Type-0xFF block 27 B; iOS background dual-AD ≤ 23 B. The 13-byte frame fits all three.</dd>
+          <dt>Dual-AD framing</dt><dd>iOS-safe advertisement shape: 16-bit Service-UUID anchor (0xFC00) + payload, ≤ 23 B, so locked iPhones can see the packet.</dd>
+          <dt>Connection-free topology</dt><dd>Edges form from heard advertisements, never GATT connections — dodging the OS ~8-connection cache; degree is bounded by energy, not sockets.</dd>
+          <dt>PHY</dt><dd>BLE radio physical layer (LE 1M/2M/Coded). Find Us uses the advertising floor, not streams, so PHY choice is an OS/nicer-trade, not a design fork.</dd>
+          <dt>CTE / IQ</dt><dd>Constant-tone extension + in-phase/quadrature sampling — the BLE 5.1 machinery behind AoA/AoD; needs a switched antenna array smartphones lack.</dd>
+          <dt>AoA / AoD</dt><dd>Angle of arrival/departure. Not used by the design (§39.1): the way out of a direction hole is witnesses and swept-RSSI, never a phase array.</dd>
+          <dt>Swept-RSSI (rotate-to-find)</dt><dd>RSSI vs device-heading peak; RSSI-class, provisional on E17 (NOT-RUN), never promoted to EXACT without cycle-consistent witnesses.</dd>
+          <dt>Uncertainty tier</dt><dd>EXACT / OBSERVED / DERIVED / GHOSTED / Unknown — every edge is stored with its evidence ceiling; no upgrade without a witness.</dd>
+          <dt>Ghost rule</dt><dd>A relay advertises hop H only while still re-hearing a live H−1; lose the backer, fall silent. Structural anti-rumor.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Constants (reference build)</h3>
+        <table class="numtable">
+          <tbody>
+            <tr><td>Packet PDU</td><td>56 bits (7 B)</td></tr>
+            <tr><td>FEC</td><td>nibble Hamming(7,4) → 13 B frame</td></tr>
+            <tr><td>IoT adv budget</td><td>27 B; iOS-safe 23 B</td></tr>
+            <tr><td>Default TTL</td><td>8 hops</td></tr>
+            <tr><td>Incident lifetime</td><td>900 s (configurable)</td></tr>
+            <tr><td>Edge / node expiry</td><td>60 s / 120 s</td></tr>
+            <tr><td>Route freshness</td><td>120 s</td></tr>
+            <tr><td>Dedup window</td><td>20,000 packets</td></tr>
+            <tr><td>Trickle window</td><td>~1200 ms + jitter</td></tr>
+          </tbody>
+        </table>
+        <h3>Field experiments still open</h3>
+        <p class="tight">E13 path loss, E15 log-distance, E17 rotate-to-find, E21/E22 baro floors, E31/E32 the direction lemma&rsquo;s conditions. All flagged <span class="chip chip-notrun">NOT-RUN</span> in the manuscript; nothing on this site claims otherwise.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Provenance of everything on this page</h3>
+      <p class="tight">Text digests: manuscript 01 (46 sections) and review 01. Simulations: teaching ports of <code>DeviceApp</code> (Kotlin) / <code>app/devices.py</code> (Python), same parameters. Numbers: audit outputs on this machine. Any claim about a real emergency response is not made here — the papers are about a system to be deployed carefully, not a deployment that has happened.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="masthead">
+  <div class="wrap">
+    <p>Find Us / Crowd Compass — interactive research explainer. Faithful to the repo engine; honest about what is measured, modelled, and open. Built to run offline; deploy-ready for Vercel/Netlify/GitHub Pages as static files.</p>
+  </div>
+</footer>
+
+<script>
+"use strict";
+/* Concepts curriculum for the explainer. Data-only; rendered by app.js.
+   Coverage contract: every concept the research touches, ordered from mesh
+   foundations down to the BLE radio and direction-finding floor. Each item:
+   term, which-layer, short answer, evidence tag, and the site section that
+   expands it. Text is a faithful digest of research/paper/01_manuscript.md,
+   research/paper/ip/00_ip_analysis.md, and DOCUMENTATION.md. Tag meanings
+   follow the paper's evidence bands (Sec 35.1): CAN=confirmed fact, IMP=
+   implemented in repo, RES=measured in sim/reference, PRO=proposed, FAIL=
+   reported failure (RETURN), NOT-RUN=planned experiment not executed. */
+
+window.CONCEPTS = [
+  {
+    chapter: "1 · Foundations — why this is hard, and the whole-stack answer",
+    lead: "The project is infrastructure-independent crowd navigation for indoor/disaster scenes. Every phone is a node; no tower, GPS, beacons, or cloud. This chapter is the why.",
+    items: [
+      { term: "Infrastructure independence", tag: "CAN", cls: "measured",
+        ans: "The system must work when cellular is jammed and GPS is blocked, so it cannot depend on any pre-existing radio or coordinate service. It uses only the radios a commodity phone already has." },
+      { term: "Why beacons and cloud anchors fail", tag: "CAN", cls: "measured",
+        ans: "Installing fixed beacons (AoD arrays, UWB anchors, fingerprint maps) pre-supposes a maintained, powered fixed installation at the exact scene that is unplanned; that is the situation emergency response is worst at." },
+      { term: "The whole stack, not a component", tag: "IMP", cls: "measured",
+        ans: "A person's question — \u201cwhich way do I walk?\u201d — is last in a chain: identity, radio plumbing, packet, topology, gradient, geometry, then guidance. The paper's contribution is the integration of all eleven layers with honesty rules." },
+      { term: "\u201cWhat, not just who\u201d", tag: "PRO", cls: "open",
+        ans: "Classic DTN answers who can reach whom; Find Us additionally answers where they are relative to you and whether that where is true. The consistency engine is the part that keeps the navigable gradient honest." },
+      { term: "Eleven layers of architecture", tag: "IMP", cls: "measured",
+        ans: "Radio plausibility, link/discovery, packet/coding, hop/relay, routing graph, gradient, spatial graph (VRLG), consistency, navigation rendering, terminal UI, and platform compliance — bottom-up. No single layer is new; the coupling is." },
+      { term: "Evidence bands (CAN/PRO/IMP/EXP/RES/FAIL)", tag: "CAN", cls: "measured",
+        ans: "Every claim carries a band: CAN = cited fact, PRO = proposed mechanism, IMP = implemented in the repo, EXP = experiment, RES = measured result, FAIL = openly reported failure. NOT-RUN markers mark gaps explicitly. Nothing is silently mixed." },
+    ],
+  },
+
+  {
+    chapter: "2 · The BLE radio floor — what bytes can physically ride",
+    lead: "Before any protocol there is the radio. BLE's advertising files are the whole transport, and their ceilings force the packet design.",
+    items: [
+      { term: "BLE advertising channels 37–39", tag: "CAN", cls: "measured",
+        ans: "BLE has 40 RF channels; exactly 3 (37–39) are dedicated advertising channels, the rest are data channels. Advertising packets ride the 3; discovery is itself a scheduling problem across channel and time." },
+      { term: "The byte ceilings", tag: "CAN", cls: "measured",
+        ans: "Legacy advertising payload = 31 B total; type 0xFF manufacturer block = 27 B usable; a custom AD record can reach 29 B; iOS background serializes/coalesces to ≤ 23 B (dual-AD) with overflow items delayed. The packet is designed to fit the tightest: 23 B." },
+      { term: "Scan/advertise half-duplex trade", tag: "CAN", cls: "measured",
+        ans: "A device alternates between advertiser and scanner. Two phones meet as a trade — A's advertisement must overlap B's scan window. Discovery is stochastic, not scheduled; the protocol uses a willing-to-advertise discipline." },
+      { term: "Energy asymmetry", tag: "RES", cls: "measured",
+        ans: "Transmitting an advert slot is cheap (~1.32 µAh/s in the constant model); listening on the advertising channel is ~10× (≈14.23 µAh/s at 10 Hz scan). Co-design: spend broadcast slots, hoard listen time." },
+      { term: "Body shadowing (~50 dB)", tag: "CAN", cls: "measured",
+        ans: "A human body can occlude ~50 dB. That breaks the RSSI→distance monotonic assumption — a fundamental limit, which is why geometry relies on witnesses, not on one RSSI sample." },
+      { term: "Connection-free topology", tag: "IMP", cls: "measured",
+        ans: "Edges are formed by hearing advertisements, never by opening GATT connections. This dodges the OS ~8-concurrent-connection ceiling: node degree is bounded by duty cycle and energy, not by the connection cache. The adversarial critique (Sec 39.2) is answered exactly here." },
+      { term: "Byte-budget audit", tag: "RES", cls: "measured",
+        ans: "56 bits of core payload + Hamming(7,4) ECC = 13 B total — fits the 27 B Type-0xFF ceiling and the 23 B iOS dual-AD ceiling with headroom; extensions are chunked." },
+    ],
+  },
+
+  {
+    chapter: "3 · Packet & coding — the 13-byte frame",
+    lead: "The whole protocol lives in 56 bits + error correction. This chapter is that envelope.",
+    items: [
+      { term: "The 56-bit envelope", tag: "IMP", cls: "measured",
+        ans: "version(2) · type(4) · seq(8) · src-id(8) · dst-hint(3) · hop-budget(5) · payload(26) = 56 bits = 7 B; ECC doubles it to 13 bytes under every ceiling." },
+      { term: "Hamming(7,4) FEC", tag: "IMP", cls: "measured",
+        ans: "Nibble-level error correction on the 13-byte frame. Verified: 2,240 boundary cases + 100,000 random round-trips pass; 14-bit-flip FEC recovers; canonical vector 17a53ee2998f42." },
+      { term: "Envelope MAC (16-bit)", tag: "IMP", cls: "measured",
+        ans: "A rolling authenticator over (SOS_ID ‖ EPOCH ‖ PKT_TYPE), keyed by the incident team key, sits inside the payload. It defeats casual spoofing and replay sniffing; collision odds ~2⁻¹⁶ per attempt — an honest guard, not full crypto." },
+      { term: "Transaction taxonomy", tag: "IMP", cls: "measured",
+        ans: "Six classes: hello/presence, rpt (relationship report), sos (gradient beacon), ack (receipt), cmd (mode/rate), chunk (reassembled application data). Each maps to a packet type, cadence, and priority." },
+      { term: "v2/v3 codec compatibility", tag: "IMP", cls: "measured",
+        ans: "The version field selects the codec; v3 extends payload interpretation, never the frame contract — a versioned fleet (mixed apps/OS versions) parses both." },
+      { term: "Relay/forward/suppress/cache gate", tag: "IMP", cls: "measured",
+        ans: "Every arrival passes one of four decisions — relay (new, budget>0, meter open), forward (targeted), suppress (deduped/meter closed/absorbed), cache (budget exhausted, mule slot). This is core/protocol.py dispatch." },
+      { term: "Timers & stale-edge TTL", tag: "RES", cls: "measured",
+        ans: "Trickle interval I_min→I_max with redundancy K (RFC-6206 style) trading churn vs silence; stale edges decay on a re-aging schedule so a ghost never outlives its truth by more than one horizon." },
+    ],
+  },
+
+  {
+    chapter: "4 · Topology & the SOS gradient — the mesh core",
+    lead: "How a crowd turns heard-radios into a navigable hop field, safely.",
+    items: [
+      { term: "The SOS gradient", tag: "IMP", cls: "measured",
+        ans: "An SOS labels every relaying node with distance-to-source: hop count, e2e latency, residual budget, and gradient direction. Gradient direction is derived from the spatial graph — SOS is a navigable signal, not just a beacon." },
+      { term: "Hop adoption", tag: "IMP", cls: "measured",
+        ans: "A node adopts hop H when it hears a live claim of H−1; it holds only numbers it personally adopted. TTL 8 caps the radius; the gradient does not try to own the world." },
+      { term: "Freshness & expiry", tag: "IMP", cls: "measured",
+        ans: "Reference build: nodes expire at 120 s, edges at 60 s of silence, route claims live 120 s. Expiry tracks physical reach, not a buddy list." },
+      { term: "One-hop backing / the ghost rule", tag: "IMP", cls: "measured",
+        ans: "A device advertises hop H only while it still re-hears a live H−1 claim. Lose the backer and you fall silent — gradients collapse one ring at a time from the origin. This structurally forbids fabricated routes (watch it in the Gradient sim)." },
+      { term: "Ghost-heal & mule overwrite", tag: "IMP", cls: "measured",
+        ans: "A ghost advertises its last-known gradient with rising uncertainty, or lets a fresher relay overwrite it (mule slots). Honest subtraction beats invented directions." },
+      { term: "Trickle broadcast discipline", tag: "RES", cls: "measured",
+        ans: "Jittered, duty-cycled advertising: small frames, frequently, predictably but not colliding — steady-state receiver load is O(k) frames/s, not O(N). Async coverage restored from 1.51% → 99.86% under iOS coalescing (run exp_009_async_trickle)." },
+      { term: "Local-report absorption / anti-storm", tag: "RES", cls: "measured",
+        ans: "A node absorbs its neighbors' re-listened reports locally and re-broadcasts only its delta; the trickle meter closes for repeated content. SOS bypasses absorption — the one accepted storm vector, for emergency latency." },
+      { term: "Quantized spatial congruence", tag: "PRO", cls: "open",
+        ans: "Trickle resets I_min on inconsistency; raw spatial state is never \u201cconsistent\u201d, so congruence is defined on a quantized snapshot anchor, with at-threshold drift re-using I_max. The corrective the adversarial critique demanded (E31)." },
+      { term: "SOS state machine", tag: "IMP", cls: "measured",
+        ans: "IDLE → ARMING → ARMED → FIRING → PROPAGATING → CLEAR (→ IDLE). Arm/fire separation lets a non-typing victim arm by press; a motion sentinel fires only where sensor evidence says \u201cI am down\u201d; CLEAR kills ghost gradients." },
+      { term: "Dynamic topology & churn", tag: "IMP", cls: "measured",
+        ans: "Topology is a flow: arrival (probe → OBSERVED → attach), departure (age-out, no ghost unless SOS), re-appearance (re-register if envelope-consistent). Churn lowers I_min; stationary silence raises I_max." },
+      { term: "Partitions & the merge protocol", tag: "IMP", cls: "measured",
+        ans: "The system must begin partitioned and converge later. Merge: bridge discovery → frame tie-break (the more witnessed frame survives) → relative-coordinate recompute → re-absorption with meter opened, then closed." },
+      { term: "Reconnection failure signature", tag: "IMP", cls: "measured",
+        ans: "If reconciliation fails, the engine holds both frames as separate OBSERVED tiers, marks \u201cframe ambiguity\u201d and retries with backoff. Honest ambiguity is preferred over false consensus." },
+    ],
+  },
+
+  {
+    chapter: "5 · Sensing & relative localization",
+    lead: "What a commodity phone can honestly measure, and the traps in turning that into \u201cwhere\u201d.",
+    items: [
+      { term: "Sensor classes", tag: "CAN", cls: "measured",
+        ans: "RF ranging (RSSI→distance, crude), IMU (PDR: steps+heading, drifts), barometer (resolution yes, absolute offset noisy — good for change/floor-gating), magnetometer (compass, distorted indoors), optional UWB/arrays only as accelerators, plus crowd side-channels." },
+      { term: "Sensing honesty contract", tag: "IMP", cls: "measured",
+        ans: "Every edge carries (distance, direction, accuracy) where accuracy derives from the weakest sensor in the chain. Uncertainty tiers are stored; a drifty compass never masquerades as survey-grade." },
+      { term: "The frame problem (FAIL)", tag: "FAIL", cls: "measured",
+        ans: "The central trap: phones report sensor-local headings, and propagating vectors in the local frame shears the whole structure. The first implementation corrupted gradients exactly this way; world-relative propagation fixed it — openly reported as a FAIL." },
+      { term: "Hop-length error vs density", tag: "RES", cls: "measured",
+        ans: "Relative-position error grows with hop-chain length, but more slowly at higher density (more witnesses bound direction). Simulated at 2,000 nodes, 50 MC, 200×200 m." },
+      { term: "Directional-coverage loss", tag: "RES", cls: "measured",
+        ans: "Body shadowing leaves some edges with no direction at all. Missing-direction edges are 1-DoF placeholders with wide uncertainty: routing still uses them, navigation marks them \u201cdirection unknown\u201d." },
+      { term: "Uncertainty tiers", tag: "IMP", cls: "measured",
+        ans: "EXACT (cross-checked, navigation-grade) · OBSERVED (one-shot, routing-grade) · DERIVED (chain-computed, route-hint) · GHOSTED (stale, candidate) · Unknown. No tier upgrade without a witness — the anti-rumor axiom." },
+      { term: "Landmark conflation (FAIL)", tag: "FAIL", cls: "measured",
+        ans: "The first Kalman landmark tracker conflated neighbours at ~3.5 m spacing when 3-sigma ≈ 3.3 m: the arrow snapped between them. Fixed with multi-hypothesis gating plus graph-cycle consistency on associations — reported so others don't relive it." },
+      { term: "VRLG — virtual relative landmark graph", tag: "IMP", cls: "measured",
+        ans: "A labelled graph whose vertices are devices plus virtual landmarks, coordinates relative to a trusted landmark frame. Derivative of DV-hop/APS & AFL lineage, but with an explicit shared frame. It is the canonical \u201cwhere\u201d answer-buffer." },
+      { term: "Report discipline (rpt)", tag: "IMP", cls: "measured",
+        ans: "Neighborhood reports are on-change chirps gated by the trickle meter — the information-injection channel for every layer above discovery. Propagated: deltas, landmark frames, gradient labels, freshness. Not propagated: raw RSSI, IMU logs, absolute coords." },
+    ],
+  },
+
+  {
+    chapter: "6 · Consistency & geometry — the anti-rumor authority",
+    lead: "A gossip graph that is 80% true and 20% rumor navigates worse than one that is honestly incomplete. This is the machinery that keeps topology truthful.",
+    items: [
+      { term: "The consistency engine", tag: "IMP", cls: "measured",
+        ans: "Local, cheap cross-checks that are first-class citizens: cross-edge agreement, signed-direction cycle closure, merge-time recompute, and aging. Cost is O(neighbour set) per event — phone-scale." },
+      { term: "Cheating-edge rejection", tag: "PRO", cls: "open",
+        ans: "An adversarial node injecting impossible edges fails closed-cycle geometry quickly — local cost, no cloud. Unit-tested; live-radio exploit testing is E-series open (NOT-RUN)." },
+      { term: "Kabsch/SVD reflection rule", tag: "PRO", cls: "open",
+        ans: "A naive SVD registration can return a mirror image (det R = −1) when point sets are near-coplanar. The engine checks det(R) ≈ +1, sign-flips the final V column on −1 (standard Kabsch correction), and rejects any frame whose residual stays negative. E32 verifies (NOT-RUN)." },
+      { term: "Robust PGO / false loop closures", tag: "PRO", cls: "open",
+        ans: "Where pose-graph optimization is used, it uses robust loss (Huber/Cauchy) or switchable constraints so one false RSSI loop closure cannot warp a trajectory, plus incremental (iSAM2-style) solves for mobile CPU. Full-scale PGO-with-switchables is a future E item." },
+      { term: "Reference-frame resolution", tag: "IMP", cls: "measured",
+        ans: "All coordinates live in a shared world-relative frame chosen at VRLG initialisation; device frames are detected and their rotation measured, never assumed. The FAIL report documents why this matters." },
+      { term: "Coupling: SOS + spatial graph", tag: "RES", cls: "measured",
+        ans: "Gradient labels and spatial labels ride the same lane, so a relay must hold both gradient and spatial context before forwarding a navigable SOS, and the consistency engine applies one honesty rule to both. Flooding alone says an SOS exists; coupling says where it is." },
+      { term: "The anti-rumor lemma", tag: "PRO", cls: "open",
+        ans: "Where edges carry cycle-checkable signed directions, a gradient cannot loop back to its source: the closed-walk check closes to ∅ and the ghost rule suppresses the re-send. Scoped honestly: on direction-poor/tree subgraphs no cycle check exists and only ghost demotion guards. Provisional on E31/E32." },
+    ],
+  },
+
+  {
+    chapter: "7 · Guidance — from graph to \u201cwalk that way\u201d",
+    lead: "The human-facing layer: how a hop + geometry turns into a truthful arrow, and what the terminal shows.",
+    items: [
+      { term: "The conditional direction lemma", tag: "PRO", cls: "open",
+        ans: "If a path of live H−1 claims exists to you, your next hop is on a path to the origin — under the freshness condition and honest neighbour claims. The caveats are explicit; verification is E31/E32, marked NOT-RUN." },
+      { term: "Path discovery on the VRLG", tag: "IMP", cls: "measured",
+        ans: "Shortest-path cost = hop-weighted duration + uncertainty penalty, where penalty uses edge tier. The router therefore avoids ghosted and single-hearsay edges; the result is a hop-path plus a spatial trace." },
+      { term: "Rendering modes", tag: "IMP", cls: "measured",
+        ans: "Composite arrow (steepest descent, glanceable), edge-of-screen reverse-chevron icons (poor-man's AR), a purely-relative path polyline, and an orbital track (\u201c40 m at heading 115°, ~55 steps\u201d). \u201cDirection unknown\u201d is always explicit — never an invented arrow." },
+      { term: "Z-axis & floor transitions", tag: "PRO", cls: "open",
+        ans: "Barometer evidence gates floor-change events, not absolute floors. Routing works over VRLG floor-edges; navigation says \u201cchange level\u201d, never \u201cgo to floor 3\u201d, because absolute floor identity is unavailable." },
+      { term: "Terminal-beacon early binding", tag: "RES", cls: "measured",
+        ans: "The terminal (last anchor, the victim's device) starts advertising SOS presence immediately, before the graph converges — simulated order-of-magnitude ETA gains for responder localisation." },
+      { term: "Fallback ladders", tag: "IMP", cls: "measured",
+        ans: "Communication: BLE-native → BLE-state/lease escalation → WiFi-direct → USB/Ethernet chains → foot mule. Localization: VRLG geometric → topological → hop-count → terminal beacon → nomadic relay. Every step is a declared mode, not a surprise." },
+      { term: "Failure response loop", tag: "IMP", cls: "measured",
+        ans: "DETECT → CLASSIFY (transient/structural) → RESPOND → FALLBACK → RECOVER, applied uniformly across communication, localization, navigation. Failure modes FM1–FM12 each enumerate this loop." },
+    ],
+  },
+
+  {
+    chapter: "8 · Navigation tiers — the strength ladder, weakest to strongest",
+    lead: "A phone picks the strongest tier it can honestly measure on the current link. The end of this ladder is direction — the \u201cBLE direction\u201d question, answered honestly.",
+    items: [
+      { term: "Tier 1 · Hop gradient", tag: "IMP", cls: "measured",
+        ans: "Every phone has it: adopt, advertise while backed, walk toward the freshest lower-hop neighbour. Purely topological; a compass-free, maths-free ground floor." },
+      { term: "Tier 2 · RSSI near/far band", tag: "IMP", cls: "measured",
+        ans: "Threshold on dBm → NEAR/FAR. Even a BLE4 phone can do it; steers around corners without a range number. Risk: a metal wall reads as distance when it is attenuation." },
+      { term: "Tier 3 · RSSI log-distance", tag: "PRO", cls: "open",
+        ans: "d = d0·10^((P0−R)/10n). Open-air physics of log-decay; walls and crowds twist n. Coefficients are a field-open question (E15), NOT-RUN — the site says so wherever it appears." },
+      { term: "Tier 4 · Compass heading", tag: "IMP", cls: "measured",
+        ans: "Peer reports a CL-relative bearing; your magnetometer turns it into \u201cwalk 023° until the hop drops\u201d. Indoors, rebar bends the compass — a hint, never the whole map." },
+      { term: "Tier 5 · IMU motion vector", tag: "IMP", cls: "measured",
+        ans: "Step detection + heading integrates your own pace — no radio needed this second, but drift accumulates; only as good as the last trusted fix. AR-gated PDR (run exp_011_ar_gated_pdr) suppresses 100% of pocket/mosh false vectors and cuts drift 9.86×." },
+      { term: "Tier 6 · Rotate-to-find (sweep)", tag: "PRO", cls: "open",
+        ans: "Sweep 360°, log RSSI vs device bearing, take the peak. On plain phones this is RSSI-class observation, not AoA hardware; bearings are provisional on E17 (NOT-RUN). The manuscript is explicit: honesty over fantasy." },
+      { term: "Tier 7 · Elevation / floor (baro)", tag: "PRO", cls: "open",
+        ans: "ΔP → Δelevation via the hypsometric relation, binned to floors or FLOOR_UNCERTAINTY. HVAC and weather drafts are real; cross-floor resolution is E21/E22, NOT-RUN." },
+      { term: "Why not AoA/AoD on phones", tag: "CAN", cls: "measured",
+        ans: "BLE 5.1 angle of arrival needs a switched antenna array and CTE IQ sampling in the locator; commodity phones have none. The adversarial critique (§39.1) is accepted and baked in: the route out of a direction hole is corruptible-but-correctable witnesses, never a phase array." },
+      { term: "UWB / channel-sounding as accelerants, not requirements", tag: "CAN", cls: "measured",
+        ans: "IEEE 802.15.4z UWB and future BLE channel sounding can upgrade edge quality when present (DirectionCapability negotiation), but are walled/non-universal. Everything navigates on the weakest common tier." },
+    ],
+  },
+
+  {
+    chapter: "9 · Security & privacy — trust without a server",
+    lead: "No accounts, no cloud, no PKI. Trust is per-incident, pseudonymous, and honest about what it cannot promise.",
+    items: [
+      { term: "Team key from a text link", tag: "IMP", cls: "measured",
+        ans: "Everyone who scans the same incident link derives the same team key — the whole crowd authenticates each other with zero server sync. The link is the entire secret-distribution channel." },
+      { term: "Anti-spoofing", tag: "IMP", cls: "measured",
+        ans: "Envelope MAC over (SOS_ID ‖ EPOCH ‖ PKT_TYPE) + sequence replay guard. 16-bit forgery ≈ 0.15–0.18% per message at unit-test level — the audit replays/forges all day and the graph never moves." },
+      { term: "Unlinkability", tag: "IMP", cls: "measured",
+        ans: "Short-lived src-id aliases rotate on a schedule so a passive observer cannot correlate trajectories across rotations. Linkability is a declared open gap (RQ18), not a solved anonymity claim." },
+      { term: "Graph poisoning defense", tag: "IMP", cls: "measured",
+        ans: "Closed-cycle checks reject impossible edges; a forged SOS with no witnessed gradient dies at first tier-demotion; identity loss shows as a tier drop." },
+      { term: "DTN crypto attacks (TOCTOU / TOFU / traceability)", tag: "PRO", cls: "open",
+        ans: "Adopted as explicit threat cases, not solved facts: key-pinning + re-verify at every handoff (TOCTOU), out-of-band QR fingerprint verification for first contact (TOFU without PKI), no single network-wide broadcast key + no unbounded payloads (broadcast/DoS), and alias rotation + IRK hygiene (traceability)." },
+      { term: "Client-only privacy stance", tag: "PRO", cls: "open",
+        ans: "No server gathers graph data; computation is on-device. An observer can learn presence/density and SOS traffic volume — never positions without participating. Passive-linkability of star nodes remains an honest research gap." },
+      { term: "Governance & at-risk communities", tag: "MAY", cls: "open",
+        ans: "Ephemeral by design (store TTLs, alias rotation); a victim can refuse to advertise while still listening (tiered disclosure). Civil-society deployments require explicit consent and traceability-impact statements — governance work, not solved protocol." },
+    ],
+  },
+
+  {
+    chapter: "10 · Platforms, energy, scale — the OS-phase reality",
+    lead: "Android and iOS carve the discipline. This chapter is where theory meets the operating system.",
+    items: [
+      { term: "Android admission & foreground service", tag: "IMP", cls: "measured",
+        ans: "Android 12+ gates BLE on fine-location; API 34 requires an explicit foreground-service type (CONNECTED_DEVICE / LOCATION) with a persistent notification. The app runs inside the FGS when participating and degrades to receiver-only otherwise — no \u201cinvisible mesh\u201d illusion." },
+      { term: "Background survival", tag: "IMP", cls: "measured",
+        ans: "Foreground service + state-machine continuity; opportunists sync via scheduled scan windows (WorkManager-style), and process deaths re-seed from envious neighbours. Quantized report discipline matches the platform's execution budget." },
+      { term: "Vendor variance", tag: "PRO", cls: "open",
+        ans: "OEM kill-layers throttle BLE scanning/advertising in unquantified ways. RQ21 acknowledges the matrix; a device matrix is E21, NOT-RUN." },
+      { term: "iOS ceiling & background modes", tag: "RES", cls: "measured",
+        ans: "Background advertising coalesces to ≤ 23 B; the 13-byte core fits, extensions chunk into overflow. iOS background BLE is a reserved capability; CoreBluetooth arbiteres cadence. Equal-degree Android/iOS participation is disclaimed honestly (RQ16)." },
+      { term: "Energy regime & budgeting", tag: "RES", cls: "measured",
+        ans: "Simulated constant-model duty: a 3-hour background shift costs order-units of mA·h; emergency-aware 10× bursts are explicitly budgeted and accounted. No field battery curves — the numbers are protocol-constant-derived, flagged as such." },
+      { term: "Scalability envelope", tag: "RES", cls: "measured",
+        ans: "Qualitative results at 2,000 nodes / 50 MC / 200×200 m / hops 1–11: density helps topology, landmarks dominate error, absorption suppresses storms, early-binding gates improve terminal ETA. Operational venue scale is expressly unproven." },
+      { term: "Theory of scaling", tag: "PRO", cls: "open",
+        ans: "VRLG is bandwidth-friendly: small deltas, local stores, O(neighbour set) consistency checks. The 2,000-node envelope is a simulation bound, not a proven operational bound." },
+    ],
+  },
+
+  {
+    chapter: "11 · Evidence, critique, and the honest exit",
+    lead: "What was actually measured (with run-ids), what a hostile review said, and where the next researcher's feet are.",
+    items: [
+      { term: "The experimental program (E1–E23)", tag: "RES", cls: "measured",
+        ans: "Executed as unit/simulation: E1, E2, E3, E4, E5, E6, E7, E8, E9, E10, E11, E12, E14, E16, E18, E19, E20, E23. NOT-RUN: E13 (baro gating), E15 (fallback signatures), E17 (iOS overflow), E21 (device matrix), E22 (real-field smoke), plus critique-driven E31/E32." },
+      { term: "Signature results (run-anchored)", tag: "RES", cls: "measured",
+        ans: "E3/exp_002: contention success 0.023→0.901 with k=3 suppression. exp_009: async coverage 1.51%→99.86%, delivery 99.98% under 70% background coalescing. exp_011: AR-gated PDR cuts drift 32.9 m→3.3 m (9.86×), 100% false-vector suppression. exp_012: terminal arrival ≤5 m 79.92%→88.35%." },
+      { term: "RQ-by-RQ status", tag: "RES", cls: "measured",
+        ans: "Each RQ1–RQ21 is tagged: answered-in-sim with run-id, qualitative, or provisional-on-E31 / NOT-RUN. The reviewer panel flagged exactly two made-up-looking numbers; both are now measured or provisional." },
+      { term: "The adversarial critique (Sec 39)", tag: "PRO", cls: "open",
+        ans: "An external critique attacked AoA feasibility, invisible-mesh background operation, Trickle in perpetual spatial inconsistency, Kabsch/SVD reflections, robust PGO, and DTN crypto. Valid points are designed-in as repair rules (E31, E32, det(R) rule, OOB/QR, key pinning); the framing that the paradigm is infeasible is rejected." },
+      { term: "Limitations", tag: "CAN", cls: "measured",
+        ans: "No hardware field runs; simulation lacks true shadowing/overflow/randomization; RSSI is coarse under ~50 dB occlusion; 16-bit MAC is a guard; energy is constant-model; vendor/sensor variance unquantified; HCI claims are design; venue scale unproven." },
+      { term: "Novelty / IP markers", tag: "MAY", cls: "open",
+        ans: "The companion IP analysis isolates candidate assemblies C1–C8, each with prior art, mechanism, difference, and risk; markers are [MAY, LEGAL-REVIEW-RESERVED]. No patentability position is taken; candidate assemblies are integrations of known components." },
+      { term: "Remaining research gaps", tag: "OPEN", cls: "notrun",
+        ans: "Field hardware validation (E22/E13/E17/E21), app-store policy run, full crypto under BLE budget, HCI/glanceability measurement, scaling beyond 2,000 nodes with reconnection storms, and live-radio adversarial robustness. The honest exit report names them all." },
+    ],
+  },
+];
+</script>
+<script>
+"use strict";
+/* Find Us / Crowd Compass — interactive explainer shell.
+   Owns: hash routing, the simulation host (buttons/loop/lifecycle), readouts,
+   tier switching, and the walkthrough-player plumbing. All sim logic lives in
+   sims.js and registers via window.SIMS. */
+
+(function () {
+  const $ = (sel, root) => (root || document).querySelector(sel);
+  const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+
+  window.dom = { $, $$ };
+
+  // Deterministic PRNG so every reset reproduces the same world (and the
+  // walkthrough player renders the same frame for the same scrub position).
+  function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  window.Utils = {
+    prng: mulberry32,
+    clamp: (v, lo, hi) => Math.max(lo, Math.min(hi, v)),
+    fmtMs: (v) => (v * 1000).toFixed(1) + " ms",
+    fmtHz: (v) => v.toFixed(1) + " frames/s",
+  };
+
+  /* ---------------- routing ---------------- */
+  const pages = dom.$$("[data-page]");
+  const tabLinks = dom.$$("#tabs a");
+  function show(name) {
+    pages.forEach((p) => { p.hidden = p.dataset.page !== name; });
+    tabLinks.forEach((a) => a.classList.toggle("active", a.dataset.tab === name));
+  }
+  function route() {
+    const key = (location.hash || "#overview").replace("#", "");
+    show((key && dom.$(`[data-page="${key}"]`)) ? key : "overview");
+  }
+  window.addEventListener("hashchange", route);
+  route();
+
+  /* ---------------- sim host ---------------- */
+  window.SIMS = window.SIMS || {};
+
+  function mkContext(canvas) {
+    const ctx = canvas.getContext("2d");
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    // Authoring space = the canvas width/height attributes (e.g. 840×420).
+    // The whole scene is drawn in that space and uniformly scaled to the CSS
+    // box, so every sim (which uses absolute coords up to 840) fits any screen.
+    const designW = canvas.width || 840;
+    const designH = canvas.height || 420;
+    const cssW = canvas.clientWidth || designW;
+    const cssH = cssW * (designH / designW); // keep the authoring aspect ratio
+    const k = cssW / designW; // uniform scale factor
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    return { ctx, W: designW, H: designH, cssW, cssH, DPR: dpr, SCALE: k };
+  }
+
+  class Host {
+    constructor(canvas) {
+      this.canvas = canvas;
+      this.name = canvas.dataset.sim;
+      this.def = window.SIMS[this.name];
+      this.card = canvas.closest(".sim-card");
+      this.run = false;
+      this.t = 0;
+      this.c = mkContext(canvas);
+      // Mix the SIM's methods + data onto the host so sims can call sibling
+      // methods via `this` (e.g. advance → this.onStep), like a prototype.
+      // NEVER clobber Host control methods: a SIM that ships its own draw()/
+      // step()/setScene() would otherwise replace Host.draw and crash the
+      // canvas loop (that path is only reachable via this.def.*).
+      const OWN = new Set(["draw", "loop", "play", "pause", "step", "setScene",
+        "bind", "bindPlayerExtras", "constructor", "canvas", "card", "run",
+        "t", "c", "def", "name", "read"]);
+      for (const k of Object.keys(this.def)) if (!OWN.has(k)) this[k] = this.def[k];
+      this.def.reset.call(this);
+      this.bind();
+    }
+    bind() {
+      const card = this.card;
+      dom.$$("[data-sim-btn]", card).forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const fn = btn.dataset.simBtn;
+          if (fn === "reset") { this.run = false; this.t = 0; this.def.reset.call(this); this.draw(); }
+          else if (fn === "play") { this.play(); }
+          else if (fn === "pause") { this.pause(); }
+          else if (fn === "step") { this.step(); }
+        });
+      });
+      if (this.name === "player") this.bindPlayerExtras();
+    }
+    bindPlayerExtras() {
+      const scrub = dom.$("#w-scrub");
+      if (scrub) {
+        scrub.addEventListener("input", () => {
+          this.run = false;
+          this.t = Number(scrub.value);
+          this.draw();
+        });
+      }
+      dom.$$("[data-scene]").forEach((b) => {
+        b.addEventListener("click", () => {
+          this.setScene(Number(b.dataset.scene));
+          dom.$$("[data-scene]").forEach((x) => x.classList.toggle("active", x === b));
+        });
+      });
+    }
+    play() { this.run = true; }
+    pause() { this.run = false; }
+    step() {
+      if (this.def.step) this.def.step.call(this);
+      else if (this.def.advance) this.def.advance.call(this, 1 / 30);
+      else this.def.tick.call(this, 1, ++this.t);
+      this.draw();
+    }
+    setScene(i) { this.def.setScene && this.def.setScene.call(this, i); this.run = false; this.draw(); }
+    draw() {
+      // Re-create the context if the layout actually changed (hidden tabs start
+      // 0×0; rotations and sidebar resizes change cssW).
+      const cw = this.canvas.clientWidth || this.canvas.width;
+      if (cw !== this.c.cssW) this.c = mkContext(this.canvas);
+      const g = this.c;
+      g.ctx.save();
+      // Draw in authoring space over a DPR × SCALE-scaled bitmap.
+      g.ctx.setTransform(g.DPR * g.SCALE, 0, 0, g.DPR * g.SCALE, 0, 0);
+      this.def.draw.call(this, g);
+      g.ctx.restore();
+      const ro = dom.$("#" + this.name + "-readout");
+      if (ro && this.read) ro.textContent = this.read;
+    }
+    loop(dt) {
+      if (!this.run) return;
+      const dts = this.def.speed ? dt * this.def.speed : dt;
+      this.t += dts;
+      this.def.advance ? this.def.advance.call(this, dts) : this.def.tick.call(this, dts, this.t);
+      this.draw();
+    }
+  }
+
+  const hosts = [];
+  function scanHosts() {
+    dom.$$("canvas[data-sim]").forEach((cv) => {
+      if (cv._host) return;
+      const host = new Host(cv);
+      cv._host = host;
+      hosts.push(host);
+      host.draw();
+    });
+  }
+
+  // Global play/pause when the page is hidden.
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) hosts.forEach((h) => { h.run = false; });
+  });
+
+  let last = performance.now();
+  function raf(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    hosts.forEach((h) => h.loop(dt));
+    requestAnimationFrame(raf);
+  }
+
+  /* ---------------- tier switch ---------------- */
+  const TIER_DESC = {
+    gradient: "Gradient is the ground floor: every device knows only its adopted hop. Guidance says: pick the freshest neighbour claiming hop-1. No compass, no maths — just freshness and the one-hop rule.",
+    rssiBand: "Before any ranging, even a BLE4 phone can say CLOSE vs FAR: RSSI above a threshold = near, below = far. That is already enough to steer around corners: move until the bad neighbour gets NEAR.",
+    rssiLog: "RSSI decays with log-distance in the clear. Two phones can stretch RSSI into a coarse range estimate — but walls and crowds twist the constant, which is exactly why the coefficients are a NOT-RUN, field-open question.",
+    heading: "A phone with a magnetometer can hold a heading. When a peer reports a CL-relative bearing, your compass turns it into 'walk 023° until the hop drops'. This needs the bearing source to be honest (see rotate-to-find).",
+    motion: "An IMU integrates steps into a motion vector: your direction of travel, your own pace. Dead reckoning keeps the arrow pointing the way you actually walked, even when no radio measurement is available this second.",
+    sweep: "Rotate-to-find: sweep 360°, log RSSI vs device bearing, take the peak. On plain phones this is RSSI-class observation, not AoA hardware. The manuscript is explicit: bearings from sweeps are provisional on experiments E17 — honesty over fantasy.",
+    baro: "Barometric pressure differences stack with height. A baro differential between two phones bins into an elevation delta — with a FLOOR_UNCERTAINTY bin because HVAC and weather drafts are real. Cross-floor resolution is E21/E22, NOT-RUN.",
+  };
+  const TIER_CAPTION = {
+    gradient: "The only tier every phone has. Risk: none — it is purely topological.",
+    rssiBand: "Cheap and robust. Risk: a metal wall reads 'distance' when it is really attenuation.",
+    rssiLog: "Needs a live peer link and calibrated constants. Risk: multi-path makes meters optimistic.",
+    heading: "Needs a magnetometer and a believable bearing. Risk: indoors, steel rebar bends the compass.",
+    motion: "Needs an IMU. Risk: drift — the vector is only as good as the last trusted fix.",
+    sweep: "Needs motion (spinning in place). Risk: RSSI variance can fake a peak. Provisional on E17.",
+    baro: "Needs two devices and careful calibration. Risk: drafts. Floor bins are a research target.",
+  };
+  function buildTierSwitch() {
+    const band = dom.$("#tier-switch");
+    if (!band) return;
+    band.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-tier]");
+      if (!btn) return;
+      dom.$$("button[data-tier]", band).forEach((x) => x.classList.toggle("active", x === btn));
+      const name = btn.dataset.tier;
+      dom.$("#tier-title").textContent = {
+        gradient: "Hop gradient",
+        rssiBand: "RSSI near / far band",
+        rssiLog: "RSSI log-distance",
+        heading: "Compass relative heading",
+        motion: "IMU motion vector",
+        sweep: "Rotate-to-find",
+        baro: "Elevation / floor",
+      }[name];
+      const tierHost = hosts.find((h) => h.name === "tiers");
+      if (tierHost) { tierHost.run = false; tierHost.t = 0; tierHost.def.setTier.call(tierHost, name); tierHost.draw(); }
+      dom.$("#tier-desc").innerHTML =
+        "<b>Gist</b><span>" + TIER_DESC[name] + "</span>" +
+        "<b>Method</b><span>" + tierMethod(name) + "</span>";
+      dom.$("#tier-caption").innerHTML = "Risk: " + TIER_CAPTION[name];
+      dom.$("#tier-status").innerHTML = statusTag(name);
+    });
+  }
+  function tierMethod(name) {
+    return {
+      gradient: "adopt hop H when a live H−1 claim is fresher; advertise only while backed",
+      rssiBand: "threshold on dBm into NEAR/FAR; guide on band transitions",
+      rssiLog: "d = d0·10^((P0−R)/10n) with n from live link calibration",
+      heading: "bearing from peer + compass heading fused; CL-relative",
+      motion: "step detection → unit step vectors; integrate over time",
+      sweep: "360° sample of RSSI vs heading; peak = presumed bearing (RSSI-class)",
+      baro: "ΔP → Δelevation via hypsometric formula; bin to floors or FLOOR_UNCERTAINTY",
+    }[name];
+  }
+  function statusTag(name) {
+    const open = { sweep: 1, rssiLog: 1, baro: 1 };
+    if (open[name]) return "<b>FIELD OPEN</b> — physics modelled, field coefficients not yet measured";
+    return "<b>IMPLEMENTED</b> in the engine (Kotlin + Swift) — tier negotiation is live in both apps";
+  }
+
+  /* ---------------- concepts curriculum ---------------- */
+  function renderConcepts() {
+    const root = dom.$("#concepts-root");
+    if (!root || !window.CONCEPTS) return;
+    const CHIP_CLS = { measured: "chip-measured", model: "chip-model", open: "chip-open", notrun: "chip-notrun" };
+    let h = '<nav class="concepts-jump">';
+    window.CONCEPTS.forEach((ch, i) => { h += '<a href="#chap' + i + '">' + ch.chapter.split("·")[0].trim() + "</a>"; });
+    h += "</nav>";
+    window.CONCEPTS.forEach((ch, i) => {
+      h += '<section class="conch" id="chap' + i + '">';
+      h += "<h3>" + ch.chapter + "</h3>";
+      if (ch.lead) h += '<p class="conlead">' + ch.lead + "</p>";
+      ch.items.forEach((it) => {
+        h += '<div class="con">';
+        h += '<div class="con-h"><b class="ct">' + it.term + "</b>" +
+          '<span class="chip ' + (CHIP_CLS[it.cls] || "chip-open") + '">' + it.tag + "</span></div>";
+        h += '<p class="ca">' + it.ans + "</p>";
+        h += "</div>";
+      });
+      h += "</section>";
+    });
+    root.innerHTML = h;
+  }
+
+  /* ---------------- init ---------------- */
+  window.addEventListener("resize", () => {
+    hosts.forEach((h) => { h.c = mkContext(h.canvas); h.draw(); });
+  });
+
+  // Boot order: build switch + scan (defines SIMS module in sims.js loaded after
+  // app.js, so scanning must happen when both scripts exist).
+  document.addEventListener("DOMContentLoaded", () => {
+    renderConcepts();
+    buildTierSwitch();
+    scanHosts();
+    requestAnimationFrame(raf);
+  });
+})();
+</script>
+<script>
+"use strict";
+/* Find Us / Crowd Compass — simulation engines.
+   Each SIM is registered into window.SIMS for the host in app.js. A SIM is an
+   object with: reset(), tick(dt, t) OR advance(dt), draw(ctx), optional
+   step()/setTier()/setScene(), optional speed (sim-seconds per real second).
+
+   Honesty: every SIM is a teaching port of the repo engine's *rules*
+   (adopt-on-live-fresher-claim, one-hop backing, TTL/dedup/freshness). None of
+   them are field measurements. Readouts say which is which. */
+
+(function () {
+  // ---- palette ----
+  const C = {
+    bg: "#0a0e14", ok: "#7ee787", warn: "#f2cc60", bad: "#ff7b72",
+    accent: "#4cc2ff", dim: "#9aa7b6", line: "#2a3243", ink: "#e6edf3",
+    hop: ["#ff7b72", "#7ee787", "#f2cc60", "#4cc2ff", "#b39dff"],
+  };
+  function circle(g, x, y, r, fill, stroke, lw) {
+    const ctx = g.ctx;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw || 1.5; ctx.stroke(); }
+  }
+  function line(g, x1, y1, x2, y2, color, w, dash) {
+    const ctx = g.ctx;
+    ctx.strokeStyle = color; ctx.lineWidth = w || 1.5; ctx.setLineDash(dash || []);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  // Authoring fonts are bumped so that after uniform design-space scaling
+  // (≈0.78 on desktop) they read like the sizes the sims were written with.
+  const FONT_K = 1.3;
+  function text(g, s, x, y, color, size, align) {
+    const ctx = g.ctx;
+    ctx.fillStyle = color || C.dim;
+    ctx.font = Math.round((size || 12) * FONT_K) + "px " + (g.font || "ui-monospace, Menlo, monospace");
+    ctx.textAlign = align || "left"; ctx.textBaseline = "middle";
+    ctx.fillText(s, x, y);
+  }
+  function muted(ctx, alpha) { ctx.save(); ctx.globalAlpha = alpha; }
+  function phone(g, x, y, label, hopC, r) {
+    circle(g, x, y, r || 13, "#121a28", hopC || C.dim, 2);
+    text(g, label, x, y, C.ink, 11, "center");
+  }
+  const P = { mulberry32: (s) => { let a = s >>> 0; return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; } };
+
+  /* ============================================================
+     MESH ENTRY — how a third device joins a working mesh
+     ============================================================ */
+  const MESH_STEPS = 7;
+  window.SIMS["mesh-entry"] = {
+    speed: 1,
+    reset() {
+      if (!this._ptr) {
+        this._ptr = true;
+        // allow replay by re-reading log/state nodes each draw
+      }
+      this.fStep = 0;
+      this.foreignSpawned = false;
+      this._auto = 0;
+      this.state = { foreignRejected: 0, hopsAdopted: 0, macOk: 0, edges: 0 };
+      this.frame = 0;
+    },
+    advance(dt) {
+      this._auto += dt;
+      if (this._auto >= 1.7) {
+        this._auto = 0;
+        if (this.fStep < MESH_STEPS - 1) { this.fStep += 1; this.onStep(); }
+        else { this.run = false; }
+      }
+    },
+    step() {
+      if (this.fStep < MESH_STEPS - 1) this.fStep += 1;
+      this.onStep();
+    },
+    onStep() {
+      const s = Math.floor(this.fStep);
+      const log = dom.$("#mesh-log");
+      const kv = dom.$("#mesh-state");
+      const msgs = [
+        "A new device (N) appears at the edge of radio range. It is running FindUs, has no idea what is nearby.",
+        "N starts dual-role: it ADVERTISES its own identity heartbeat. Advertising is broadcast — even a joining phone is heard instantly.",
+        "N's owner scans the incident link someone shared. The phone derives the same team key every responder derived, from the same text. No server.",
+        "N hears R3's frame. Envelope MAC over (SOS_ID ‖ EPOCH ‖ PKT_TYPE) verifies → R3 may touch N's graph. A nearby spammer fails the same MAC and is counted but dropped.",
+        "R3's claim is hop 3 and live (120 s freshness). N adopts hop 4. It now holds one honest number towards the origin.",
+        "N may now advertise hop 4 — but only because R3's hop-3 claim is still live. The one-hop backing rule is in force.",
+        "Done. N is a full relay: a third person just joined the mesh with no tower, no cloud, no account.",
+      ];
+      const stateLines = {
+        0: [["Wire id", "hidden (no incident yet)"], ["Foreign rejected", "0"], ["Hops adopted", "none"]],
+        1: [["Wire id", "hb-… local"], ["Advertising", "identity only"], ["Foreign rejected", "0"]],
+        2: [["Team key", "derived from link"], ["Incident signed in", "yes"], ["Foreign rejected", "0"]],
+        3: [["MAC verify R3", "PASS"], ["MAC verify spammer", "REJECT"], ["Foreign rejected", "1"]],
+        4: [["Adopted hop", "4 (from R3, live)"], ["Backed by", "R3 @ hop 3"], ["Foreign rejected", "1"]],
+        5: [["Advertising", "hop 4 (backed)"], ["Ghost rule", "active"], ["Foreign rejected", "1"]],
+        6: [["Role", "full relay"], ["Hops held", "1 (hop 4)"], ["Graph edges", "1 (↔ R3)"]],
+      };
+      log.innerHTML = "";
+      for (let i = 0; i <= s; i++) {
+        const li = document.createElement("li");
+        li.textContent = msgs[i];
+        log.appendChild(li);
+      }
+      const sl = stateLines[s];
+      kv.innerHTML = sl.map(([k, v]) => "<b>" + k + "</b><span>" + v + "</span>").join("");
+    },
+    draw(g) {
+      const W = g.W, H = g.H;
+      const ctx = g.ctx;
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+      const s = Math.floor(this.fStep);
+      const unit = (W - 60) / 6;
+      const srcX = 60, y0 = H / 2;
+      const ex = 30;
+
+      const nodes = [
+        { x: srcX + unit * 0.5, y: y0 - 40, label: "O", hop: 0 },
+        { x: srcX + unit * 1.5, y: y0 + 30, label: "R1", hop: 1 },
+        { x: srcX + unit * 2.5, y: y0 - 30, label: "R2", hop: 2 },
+        { x: srcX + unit * 3.5, y: y0 + 20, label: "R3", hop: 3 },
+      ];
+      // newcomer slides in from the right during steps 0..6
+      const nx = srcX + unit * 4.2 + Math.max(0, 1 - (s + 1) / 6) * 240;
+      const ny = y0 - 20;
+      nodes[4] = { x: nx, y: ny, label: "N", hop: s >= 4 ? 4 : -1, active: true };
+
+      // edges
+      muted(ctx, 0.25);
+      line(g, nodes[0].x, nodes[0].y, nodes[1].x, nodes[1].y, C.dim, 1, s >= 1 ? [] : [2,4]);
+      line(g, nodes[1].x, nodes[1].y, nodes[2].x, nodes[2].y, C.dim, 1, s >= 1 ? [] : [2,4]);
+      line(g, nodes[2].x, nodes[2].y, nodes[3].x, nodes[3].y, C.dim, 1, s >= 1 ? [] : [2,4]);
+      ctx.restore();
+      // entry edge (N-R3)
+      if (s >= 3) line(g, nodes[3].x, nodes[3].y, nodes[4].x, nodes[4].y, C.ok, 2);
+
+      const colourFor = (hop) => (hop < 0 ? C.dim : C.hop[Math.min(hop, 4)]);
+      nodes.forEach((n, i) => {
+        if (i === 4 && s < 3) { phone(g, n.x, n.y, "N", C.accent, 12); return; }
+        phone(g, n.x, n.y, i === 4 ? "N" : n.label, colourFor(n.hop), 13);
+        if (n.hop >= 0) text(g, "hop " + n.hop, n.x, n.y + 30, colourFor(n.hop) === C.dim ? C.dim : colourFor(n.hop), 11, "center");
+      });
+
+      // caption of current step
+      const msgs = [
+        "Step 1 · a stranger appears at the edge of range",
+        "Step 2 · N advertises its identity — heard instantly, nothing asked",
+        "Step 3 · Team key derived from the shared incident link",
+        "Step 4 · R3's frame passes the envelope MAC; spammer rejected",
+        "Step 5 · N adopts hop 4 — one honest number towards the origin",
+        "Step 6 · N advertises hop 4, backed by R3's live hop-3 claim",
+        "Step 7 · N is a relay. A third person just joined the mesh.",
+      ];
+      text(g, msgs[s], 30, H - 26, C.accent, 13);
+      text(g, "● origin (hop 0)", 30, 26, C.hop[0], 11);
+      text(g, s >= 3 ? "✓ MAC-passed link (counted, never stored if invalid)" : "radio range", W - 30, 26, C.dim, 11, "right");
+      if (s >= 3) {
+        circle(g, srcX + unit * 4.9, y0 - 70, 9, "#28222a", C.bad, 2);
+        text(g, "spammer ✗", srcX + unit * 4.9, y0 - 88, C.bad, 11, "center");
+      }
+    },
+  };
+
+  /* ============================================================
+     NAV TIERS
+     ============================================================ */
+  window.SIMS["tiers"] = {
+    speed: 1,
+    tier: "gradient",
+    setTier(name) { this.tier = name; this.reset(); },
+    attachPointer() {
+      if (this._ptr) return; this._ptr = true;
+      this.pointer = { active: false, move: false };
+      const cv = this.canvas;
+      const toPos = (e) => {
+        const r = cv.getBoundingClientRect();
+        const k = (this.c && this.c.SCALE) || 1; // CSS px → authoring space
+        return { x: ((e.clientX || e.touches[0].clientX) - r.left) / k, y: ((e.clientY || e.touches[0].clientY) - r.top) / k };
+      };
+      const down = (e) => { this.pointer.active = true; Object.assign(this.pointer, toPos(e)); };
+      const move = (e) => {
+        if (!this.pointer.active) return;
+        Object.assign(this.pointer, toPos(e)); this.pointer.move = true;
+      };
+      const up = () => { this.pointer.active = false; };
+      cv.addEventListener("mousedown", down); cv.addEventListener("mousemove", move);
+      cv.addEventListener("mouseup", up); cv.addEventListener("mouseleave", up);
+      cv.addEventListener("touchstart", down, { passive: true });
+      cv.addEventListener("touchmove", move, { passive: true });
+      cv.addEventListener("touchend", up);
+    },
+    reset() {
+      this.attachPointer();
+      this.angle = 0; this.t2 = 0;
+      this.A = { x: 170, y: 210, r: 90 };
+      this.B = { x: 640, y: 210, r: 90 };
+      this.orientation = 0;
+      this.steps = [];
+      this.px = 200; this.py = 210;
+      this.sweepSamples = [];
+      this.baroNoise = 0;
+    },
+    tick(dt, t) {
+      this.t2 += dt;
+      // keep A/B draggable near their anchors when pointer active
+      if (this.pointer && this.pointer.move) {
+        if (this.tier === "rssiBand" || this.tier === "rssiLog") {
+          const p = this.pointer;
+          if (Math.hypot(p.x - this.B.x, p.y - this.B.y) < 46) this.B = { x: p.x, y: p.y };
+          if (Math.hypot(p.x - this.A.x, p.y - this.A.y) < 46) this.A = { x: p.x, y: p.y };
+        }
+      }
+      if (this.tier === "heading") this.angle = (this.angle + dt * 36) % 360;
+      if (this.tier === "motion") {
+        const heading = this.t2 * 40;
+        this.steps.push({ x: this.px, y: this.py });
+        this.px += Math.cos((heading * Math.PI) / 180) * 2.2;
+        this.py += Math.sin((heading * Math.PI) / 180) * 2.2;
+        if (this.steps.length > 60) this.steps.shift();
+      }
+      if (this.tier === "sweep") {
+        this.angle = (this.angle + dt * 55) % 360;
+        // log a couple samples per degree change
+        if (this.sweepSamples.length < 120) {
+          const az = this.angle;
+          // signal stronger when the phone points at B
+          const relAz = (Math.atan2(this.B.y - this.A.y, this.B.x - this.A.x) * 180) / Math.PI;
+          const diff = Math.abs(az - relAz) % 360; const d = Math.min(diff, 360 - diff);
+          this.sweepSamples.push({ az, rssi: -78 - d * 0.22 + (P.mulberry32(this.sweepSamples.length)() * 4 - 2) });
+        }
+        if (this.t2 > 8 && this.sweepSamples.length > 30 && !this.pour) {
+          this.pour = true; // mark bearing ready once
+        }
+        if (this.t2 > 11) { this.t2 = 0; this.sweepSamples = []; this.pour = false; }
+      }
+      if (this.tier === "baro") this.baroNoise = Math.sin(this.t2 * 9) * 0.08 + (window.Utils ? Utils.clamp(Math.random() * 0.1 - 0.05, -0.2, 0.2) : 0);
+    },
+    draw(g) {
+      this.drawTier(g, this.tier);
+    },
+    drawTier(g, tier) {
+      const W = g.W, H = g.H;
+      const ctx = g.ctx;
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+      // RSSI tiers share draggable anchors — keep them on the canvas whatever
+      // the window size (default anchor B sits at x=640, off-screen on phones).
+      if (tier === "rssiBand" || tier === "rssiLog") {
+        this.A.x = Utils.clamp(this.A.x, 45, W - 45); this.A.y = Utils.clamp(this.A.y, 55, H - 55);
+        this.B.x = Utils.clamp(this.B.x, 45, W - 45); this.B.y = Utils.clamp(this.B.y, 55, H - 55);
+      }
+
+      if (tier === "gradient") { this.gradientTier(g); }
+      else if (tier === "rssiBand") { this.bandTier(g); }
+      else if (tier === "rssiLog") { this.logTier(g); }
+      else if (tier === "heading") { this.headingTier(g); }
+      else if (tier === "motion") { this.motionTier(g); }
+      else if (tier === "sweep") { this.sweepTier(g); }
+      else if (tier === "baro") { this.baroTier(g); }
+    },
+
+    gradientTier(g) {
+      const W = g.W, H = g.H;
+      const chain = [0, 1, 2, 3, 4, 5];
+      chain.forEach((hop, i) => {
+        const x = 110 + i * 125, y = H / 2;
+        circle(g, x, y, 15, "#121a28", C.hop[Math.min(hop, 4)], 3);
+        text(g, "hop " + hop, x, y - 34, C.hop[Math.min(hop, 4)], 13, "center");
+        text(g, hop === 0 ? "victim" : "responder", x, y + 32, C.dim, 11, "center");
+        const pulse = (this.t2 * 1.4 + i) % 5;
+        if (pulse < 1) circle(g, x + (i < 5 ? 55 : 0), y, 26, "rgba(78,194,255,0.10)");
+        if (i < 5) line(g, x + 16, y, x + 109, y, C.accent, 2);
+      });
+      text(g, "grades: walk UP the chain toward hop 0 · ties broken by freshness (newest claim wins)", W / 2, H - 34, C.dim, 12, "center");
+      text(g, "freshness 120 s · one live hop-1 claim is enough to keep advertising", W / 2, H - 16, C.dim, 12, "center");
+    },
+
+    bandTier(g) {
+      const W = g.W, H = g.H;
+      const dist = Math.hypot(this.A.x - this.B.x, this.A.y - this.B.y);
+      const threshold = 210;
+      const d = (dist - threshold) / 165; // -1..+~2
+      const near = d <= 0;
+      const peak = this.pointer && this.pointer.move ? 0 : 1;
+      circle(g, this.A.x, this.A.y, 13, "#121a28", C.accent, 2);
+      text(g, "you", this.A.x, this.A.y, C.accent, 12, "center");
+      circle(g, this.B.x, this.B.y, 13, "#121a28", near ? C.ok : C.warn, 2);
+      text(g, "peer", this.B.x, this.B.y, C.dim, 12, "center");
+      circle(g, this.B.x, this.B.y, threshold, "rgba(126,231,135,0.06)", "rgba(126,231,135,0.35)", 1.5);
+      text(g, "threshold band", this.B.x + threshold + 24, this.B.y - threshold, C.ok, 11);
+      text(g, "drag the PEER into/out of the band →", W / 2, 24, C.dim, 12, "center");
+      text(g, near ? "NEAR — steer toward it" : "FAR — move until the band flips", W / 2, H - 22, near ? C.ok : C.warn, 15, "center");
+      text(g, "no range number, only a band — BLE4 safe", W / 2, H - 4, C.dim, 11, "center");
+    },
+
+    logTier(g) {
+      const W = g.W, H = g.H;
+      const dist = Math.max(22, Math.hypot(this.A.x - this.B.x, this.A.y - this.B.y));
+      const n = 2.4, d0 = 1, P0 = -55;
+      const rssi = P0 + 10 * n * Math.log10(dist / d0);
+      const est = d0 * Math.pow(10, (P0 + 62) / (10 * n)); // cosmetic anchor
+      line(g, 20, H - 30, W - 20, H - 30, C.line, 1);
+      line(g, 40, 120, W - 40, 120, C.dim, 0.6);
+      circle(g, this.A.x, this.A.y, 13, "#121a28", C.accent, 2);
+      text(g, "you", this.A.x, this.A.y, C.accent, 12, "center");
+      circle(g, this.B.x, this.B.y, 13, "#121a28", C.ok, 2);
+      text(g, "peer", this.B.x, this.B.y, C.dim, 12, "center");
+      line(g, this.A.x, this.A.y, this.B.x, this.B.y, "rgba(78,194,255,0.25)", 2);
+      const mx = Math.min(W - 60, 60 + (dist / 560) * (W - 120));
+      circle(g, mx, H - 30, 5, C.warn);
+      text(g, "RSSI ≈ " + rssi.toFixed(1) + " dBm → range ≈ " + est.toFixed(1) + " m", W / 2, H - 60, C.warn, 14, "center");
+      text(g, "d = d0 · 10^((P0 − R)/10n)  — open-air model; walls & crowds twist n (that is a NOT-RUN problem)", W / 2, H - 8, C.dim, 11, "center");
+      text(g, "drag peer → RSSI and estimate move together", W / 2, 24, C.dim, 12, "center");
+    },
+
+    headingTier(g) {
+      const W = g.W, H = g.H;
+      const cx = 300, cy = H / 2;
+      const relAz = Math.atan2(this.B.y - this.A.y, this.B.x - this.A.x) * 180 / Math.PI;
+      const my = this.angle;
+      text(g, "compass heading " + my.toFixed(0) + "°", 30, 28, C.accent, 14);
+      // compass rose
+      circle(g, cx, cy, 150, "rgba(30,40,60,0.5)", C.line, 2);
+      for (let a = 0; a < 360; a += 15) {
+        const r1 = a % 90 === 0 ? 140 : 145;
+        const rad = (a - 90) * Math.PI / 180;
+        line(g, cx + Math.cos(rad) * r1, cy + Math.sin(rad) * r1,
+          cx + Math.cos(rad) * 150, cy + Math.sin(rad) * 150, a % 90 === 0 ? C.ink : C.dim, 1);
+      }
+      const radHead = (my - 90) * Math.PI / 180;
+      line(g, cx, cy, cx + Math.cos(radHead) * 90, cy + Math.sin(radHead) * 90, C.ink, 3);
+      // desired bearing line
+      const radB = (relAz - 90) * Math.PI / 180;
+      line(g, cx, cy, cx + Math.cos(radB) * 110, cy + Math.sin(radB) * 110, C.ok, 2, [6,4]);
+      circle(g, cx + Math.cos(radB) * 110, cy + Math.sin(radB) * 110, 6, C.ok);
+      const turn = ((relAz - my + 540) % 360) - 180;
+      text(g, "CL-relative bearing to peer " + relAz.toFixed(0) + "°", cx, cy - 176, C.dim, 12, "center");
+      text(g, "turn " + (turn >= 0 ? "RIGHT " : "LEFT ") + Math.abs(turn).toFixed(0) + "°", cx, H - 30, turn < 6 && turn > -6 ? C.ok : C.warn, 16, "center");
+      text(g, "indoors, rebar bends the compass — heading is a hint, never the whole map", cx, H - 10, C.dim, 11, "center");
+    },
+
+    motionTier(g) {
+      const W = g.W, H = g.H;
+      this.steps.forEach((s, i) => {
+        if (i === 0) return;
+        const p = this.steps[i - 1];
+        line(g, p.x, p.y, s.x, s.y, i % 3 === 0 ? C.accent : C.dim, 1.5);
+      });
+      this.steps.forEach((s, i) => circle(g, s.x, s.y, 2.4, i === this.steps.length - 1 ? C.ok : C.dim));
+      if (this.steps.length > 1) {
+        const a = this.steps[this.steps.length - 1], b = this.steps[this.steps.length - 12];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const len = Math.hypot(dx, dy) || 1;
+        const hx = a.x + (dx / len) * 26, hy = a.y + (dy / len) * 26;
+        line(g, a.x, a.y, hx, hy, C.ok, 3);
+        text(g, "motion vector (your own pace, no radio needed)", 30, 28, C.accent, 14);
+        text(g, "last 12 steps → matters more than any single RSSI guess", W - 30, 28, C.dim, 12, "right");
+        text(g, "drift warning: integrate too long without a fix and the arrow rotates", W / 2, H - 18, C.warn, 12, "center");
+      } else {
+        text(g, "walk a little — steps will accumulate into a motion vector", W / 2, H / 2 - 20, C.dim, 14, "center");
+      }
+    },
+
+    sweepTier(g) {
+      const W = g.W, H = g.H;
+      const cx = 250, cy = 210;
+      circle(g, cx, cy, 140, "rgba(20,30,45,0.5)", C.line, 2);
+      line(g, cx, cy, cx, cy - 90, C.dim, 1.5, [4,4]);
+      const radH = (this.angle - 90) * Math.PI / 180;
+      line(g, cx, cy, cx + Math.cos(radH) * 60, cy + Math.sin(radH) * 60, C.warn, 4);
+      // samples on right polar plot
+      const sc = cx + 240;
+      circle(g, sc + 130, cy, 130, "rgba(20,30,45,0.5)", C.line, 2);
+      if (this.sweepSamples.length) {
+        this.sweepSamples.forEach((s2) => {
+          const r = 130 * Utils.clamp((s2.rssi + 95) / 40, 0, 1);
+          const ang = (s2.az - 90) * Math.PI / 180;
+          circle(g, sc + 130 + Math.cos(ang) * r, cy + Math.sin(ang) * r, 1.8, "rgba(126,231,135,0.55)");
+        });
+        // peak
+        const best = this.sweepSamples.reduce((m, s2) => (s2.rssi > m.rssi ? s2 : m), this.sweepSamples[0]);
+        const peakRad = (best.az - 90) * Math.PI / 180;
+        line(g, sc + 130, cy, sc + 130 + Math.cos(peakRad) * 118, cy + Math.sin(peakRad) * 118, C.ok, 2);
+        text(g, "bearing " + best.az.toFixed(0) + "°", sc + 130, cy - 160, C.ok, 13, "center");
+      }
+      text(g, "rotate-to-find (plain phone, RSSI-class)", 30, 28, C.accent, 14);
+      text(g, "sweep 360° · record RSSI vs heading · pick the peak", W - 30, 28, C.dim, 12, "right");
+      const note = this.pour ? "bearing noted — PROVISIONAL: sweep accuracy is experiment E17, still NOT-RUN" : "turning… samples accumulating on the right";
+      text(g, note, W / 2, H - 18, this.pour ? C.warn : C.dim, 12, "center");
+      text(g, "the arrow is RSSI-variance-shaped, not AoA hardware", 30, H - 18, C.dim, 11);
+    },
+
+    baroTier(g) {
+      const W = g.W, H = g.H;
+      // two phones on stacked floors
+      const dPb = Utils.clamp((this.pointer && this.pointer.move ? (this.pointer.x / W) * 3 - 1.5 : 0.6) + this.baroNoise, -1.5, 1.5);
+      const m = 8.4; // m per hPa
+      const elev = dPb * m;
+      const floor = Math.round(elev / 3.2);
+      const uncertainty = Math.abs(elev - floor * 3.2) > 1.2;
+      const baseH = 200;
+      [-1, 0, 1].forEach((fl) => {
+        line(g, 60, baseH - fl * 60 - 60, W - 60, baseH - fl * 60 - 60, C.line, 1);
+        text(g, "floor " + fl, 40, baseH - fl * 60 - 60, C.dim, 11, "right");
+      });
+      // device A at floor 0, device B at computed floor
+      const fax = 260, fb = Math.round(dPb * m / 3.2);
+      circle(g, fax - 120, baseH - 0 * 60 - 60, 13, "#121a28", C.accent, 2);
+      text(g, "A @ floor 0", fax - 120, baseH - 0 * 60 - 60, C.accent, 11, "center");
+      const by = baseH - fb * 60 - 60;
+      circle(g, fax + 80, Utils.clamp(by, 60, H - 60), 13, "#121a28", C.ok, 2);
+      text(g, "B @ " + (uncertainty ? "~" : "") + "floor " + fb, fax + 80, Utils.clamp(by, 60, H - 60), C.ok, 11, "center");
+      text(g, "ΔP = " + dPb.toFixed(2) + " hPa → Δelev ≈ " + (dPb * m).toFixed(1) + " m", W / 2, 34, C.warn, 14, "center");
+      text(g, "move across the canvas horizontally to change the pressure delta", W / 2, 56, C.dim, 12, "center");
+      text(g, uncertainty ? "FLOOR_UNCERTAINTY — drafts & HVAC corrupt the bin (E21/E22, NOT-RUN)" : "floor bin usable within tolerance", W / 2, H - 24, uncertainty ? C.warn : C.ok, 13, "center");
+    },
+  };
+
+  /* ============================================================
+     GRADIENT & GHOST RULE
+     ============================================================ */
+  window.SIMS["gradient"] = {
+    speed: 6, // sim-seconds per real second
+    reset() {
+      this.range = Number((dom.$("#g-range") || {}).value || 150);
+      this.originSilent = !!(dom.$("#g-fail") || {}).checked;
+      const rng = P.mulberry32(424242);
+      this.nodes = [];
+      for (let i = 0; i < 42; i++) {
+        this.nodes.push({
+          x: 40 + rng() * 760, y: 40 + rng() * 340,
+          hop: -1, lastAd: -1e9, live: false, ring: rng,
+        });
+      }
+      this.T = 0;
+      this.origin = { x: 70, y: 190, hop: 0, lastAd: 0, live: true };
+      this.maxHop = 0; this.adopted = 1;
+      // gradient slider + checkbox live binding (once)
+      const range = dom.$("#g-range");
+      if (range && !range._bound) { range._bound = true; range.oninput = () => { this.range = Number(range.value); }; }
+      const fail = dom.$("#g-fail");
+      if (fail && !fail._bound) { fail._bound = true; fail.onchange = () => { this.originSilent = fail.checked; }; }
+    },
+    tick(dt, t) {
+      this.T += dt;
+      const F = 20, P = 6; // freshness (sim-s) and advertise period
+      // origin advertises unless silenced
+      if (!this.originSilent && this.T - this.origin.lastAd > P) this.origin.lastAd = this.T;
+      if (this.originSilent && this.T < 40) this.origin.lastAd = this.T; // live until the 40 s cut
+      // adoption + backing pass
+      this.adopted = 1; this.maxHop = 0; let liveCount = 0;
+      for (const n of this.nodes) {
+        let bestHop = -1;
+        for (const o of [this.origin].concat(this.nodes)) {
+          if (o === n) continue;
+          if (o.hop < 0) continue;
+          if (Math.hypot(o.x - n.x, o.y - n.y) > this.range) continue;
+          if (this.T - o.lastAd > F) continue; // stale claim
+          if (o.hop + 1 <= 8 && (bestHop < 0 || o.hop + 1 < bestHop)) bestHop = o.hop + 1;
+        }
+        n.hop = bestHop;
+        if (bestHop >= 0) {
+          this.adopted++;
+          if (bestHop > this.maxHop) this.maxHop = bestHop;
+          // advertise only if still backed (lastAd refreshes only while backed)
+          if (this.T - n.lastAd > P && this.backed(n)) n.lastAd = this.T;
+          if (this.T - n.lastAd <= F) liveCount++;
+        }
+      }
+      this.liveCount = liveCount;
+      this.stateLine = "adopted=" + this.adopted + " · maxHop=" + this.maxHop + " · live advertisers=" + liveCount +
+        (this.originSilent && this.T >= 40 ? "  ← origin silent: gradient collapsing (ghost rule)" : "");
+    },
+    backed(n) {
+      for (const o of [this.origin].concat(this.nodes)) {
+        if (o === n || o.hop !== n.hop - 1) continue;
+        if (Math.hypot(o.x - n.x, o.y - n.y) > this.range) continue;
+        if (this.T - o.lastAd <= 20) return true;
+      }
+      return n.hop === 1 && this.T - this.origin.lastAd <= 20;
+    },
+    draw(g) {
+      const W = g.W, H = g.H;
+      const ctx = g.ctx;
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+      // links for backs
+      const all = [this.origin].concat(this.nodes);
+      for (let i = 0; i < all.length; i++) {
+        for (let j = i + 1; j < all.length; j++) {
+          const a = all[i], b = all[j];
+          if (Math.hypot(a.x - b.x, a.y - b.y) <= this.range) {
+            line(g, a.x, a.y, b.x, b.y, "rgba(140,150,170,0.12)", 1);
+          }
+        }
+      }
+      circle(g, this.origin.x, this.origin.y, 15, C.hop[0], C.ink, 2);
+      text(g, "hop 0 · victim", this.origin.x, this.origin.y - 26, C.hop[0], 12, "center");
+      if (this.originSilent && this.T >= 40) text(g, "✕ silent", this.origin.x + 22, this.origin.y + 22, C.bad, 11, "center");
+      for (const n of this.nodes) {
+        if (n.hop < 0) continue;
+        const age = this.T - n.lastAd;
+        const alive = age <= 20;
+        circle(g, n.x, n.y, 11, "#121a28", alive ? C.hop[Math.min(n.hop, 4)] : "rgba(154,167,182,0.4)", 2);
+        text(g, n.hop, n.x, n.y, alive ? C.ink : C.dim, 10, "center");
+      }
+      text(g, this.stateLine || "", W / 2, 22, C.accent, 13, "center");
+      text(g, "colour = hop ring · dimmed/wireless circle = claim aged out (ghost killed)", W / 2, H - 14, C.dim, 11, "center");
+      // ring range circle around origin hint
+      circle(g, this.origin.x, this.origin.y, this.range, "rgba(78,194,255,0.05)", "rgba(78,194,255,0.25)", 1);
+    },
+  };
+
+  /* ============================================================
+     TRICKLE
+     ============================================================ */
+  window.SIMS["trickle"] = {
+    speed: 1,
+    reset() {
+      this.count = Number((dom.$("#t-count") || {}).value || 12);
+      this.window = 1200;
+      const rng = P.mulberry32(1337);
+      this.devices = [];
+      for (let i = 0; i < this.count; i++) {
+        this.devices.push({ slot: rng() * this.window, skew: 1 + (rng() - 0.5) * 0.5, on: rng() > 0.5 ? 1 : 0 });
+      }
+      this.T = 0;
+      const tcount = dom.$("#t-count");
+      if (tcount && !tcount._bound) { tcount._bound = true; tcount.oninput = () => { this.count = Number(tcount.value); this.reset(); }; }
+    },
+    tick(dt, t) { this.T += dt * 1000; if (this.T > this.window * 2) this.T %= this.window; },
+    draw(g) {
+      const W = g.W, H = g.H;
+      const ctx = g.ctx;
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+      const slotW = (W - 60) / this.window;
+      const rowH = H / Math.max(1, this.count);
+      let bursts = 0;
+      for (let i = 0; i < this.count; i++) {
+        const d = this.devices[i];
+        const y = i * rowH + rowH * 0.18;
+        line(g, 40, i * rowH, W - 20, i * rowH, "rgba(42,50,67,0.6)", 1);
+        text(g, "D" + (i + 1), 12, y + 4, C.dim, 10, "right");
+        // slot within each window (draw two windows for continuity)
+        for (let win = 0; win < 2; win++) {
+          const tOff = this.T - this.window * win;
+          const slotT = ((d.slot * d.skew - tOff) % this.window + this.window) % this.window;
+          const x = 40 + slotT * slotW;
+          circle(g, x, y + 4, 5, d.on ? C.accent : C.ok);
+          bursts += d.on ? 1 : 0;
+        }
+      }
+      const ceil = Math.ceil(bursts / 2);
+      const duty = this.count ? (ceil / this.count) * (14 / this.window) : 0;
+      text(g, "bursts in window: " + ceil + "/" + this.count, 40, H - 10, C.dim, 12);
+      text(g, "avg airtime/device ≈ " + (duty * 100).toFixed(2) + "% (" + (duty * 1000 * this.count).toFixed(2) + " ms/s of RX) — the O(k) bound, not O(N)", W - 40, H - 10, C.accent, 12, "right");
+      text(g, "↑ slots are jittered, so bursts rarely collide (red = exact overlap only when timing is unlucky)", W / 2, 16, C.dim, 11, "center");
+    },
+  };
+
+  /* ============================================================
+     SOS FLOOD · DEDUP · REJECTIONS
+     ============================================================ */
+  window.SIMS["dedup"] = {
+    speed: 1,
+    reset() {
+      this.tb = 0;
+      this.events = [];
+      this.accepted = 0; this.dup = 0; this.rejected = 0;
+      this.rng = P.mulberry32(99);
+      const spam = dom.$("#d-spam");
+      if (spam && !spam._bound) { spam._bound = true; spam.oninput = () => { this.spam = Number(spam.value); }; }
+      this.spam = Number((dom.$("#d-spam") || {}).value || 40);
+      this.sosSeq = new Set();
+    },
+    tick(dt, t) {
+      this.tb += dt * 30;
+      const arrivals = 3 + Math.floor(this.rng() * 3);
+      for (let i = 0; i < arrivals; i++) {
+        const r = this.rng();
+        const kind = r < 0.5 ? "grad" : (r < 0.85 ? "dup" : "forg");
+        if (kind === "forg" && this.rng() > this.spam / 80) continue;
+        this.events.push({ x: 60 + this.tb * 14 % 760, kind });
+        if (kind === "grad") this.accepted++;
+        else if (kind === "dup") this.dup++;
+        else this.rejected++;
+      }
+      if (this.events.length > 400) this.events = this.events.slice(-400);
+    },
+    draw(g) {
+      const W = g.W, H = g.H;
+      const ctx = g.ctx;
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+      line(g, 20, H / 2, W - 20, H / 2, C.line, 1);
+      this.events.forEach((e) => {
+        const c = e.kind === "grad" ? C.ok : (e.kind === "dup" ? "rgba(154,167,182,0.6)" : C.bad);
+        const yv = e.kind === "grad" ? H / 2 - 70 : (e.kind === "dup" ? H / 2 + 20 : H / 2 + 70);
+        circle(g, e.x % W, yv, 3, c);
+      });
+      text(g, "gradient updates (accepted)", 30, H / 2 - 78, C.ok, 12);
+      text(g, "duplicates (absorbed by dedup window)", 30, H / 2 + 14, C.dim, 12);
+      text(g, "foreign frames (MAC-rejected, counted)", 30, H / 2 + 64, C.bad, 12);
+      text(g, "accepted=" + this.accepted + " · dup-absorbed=" + this.dup + " · rejected=" + this.rejected, W / 2, 26, C.accent, 14, "center");
+      text(g, "every rejected frame is counted; not one touches the graph", W / 2, H - 12, C.dim, 12, "center");
+    },
+  };
+
+  /* ============================================================
+     MULE BURST
+     ============================================================ */
+  window.SIMS["mule"] = {
+    speed: 1,
+    reset() {
+      const rng = P.mulberry32(7);
+      this.clusterA = [];
+      for (let i = 0; i < 8; i++) {
+        this.clusterA.push({ x: 70 + rng() * 180, y: 60 + rng() * 240, hop: 1 + Math.floor(rng() * 3) });
+      }
+      this.clusterB = [];
+      for (let i = 0; i < 8; i++) {
+        this.clusterB.push({ x: 560 + rng() * 190, y: 60 + rng() * 240, hop: -1 });
+      }
+      this.muleX = 300;
+      this.burst = -1;
+      this.cache = 6;
+      this.T = 0;
+    },
+    tick(dt, t) {
+      this.T += dt;
+      this.muleX += dt * 85;
+      if (this.muleX > 545 && this.burst < 0) {
+        this.burst = this.T;
+        this.clusterB.forEach((n) => { n.hop = this.cache; });
+      }
+      this.cache = Math.max(1, 6 - Math.floor((this.muleX - 300) / 60));
+    },
+    draw(g) {
+      const W = g.W, H = g.H;
+      const ctx = g.ctx;
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+      line(g, 280, 20, 280, H - 20, "rgba(255,123,114,0.5)", 1, [4,4]);
+      line(g, 545, 20, 545, H - 20, "rgba(126,231,135,0.5)", 1, [4,4]);
+      text(g, "GAP", 282, 18, C.bad, 11);
+      text(g, "radio gap (big corridor, thick wall)", 545, H - 8, C.dim, 11, "center");
+      this.clusterA.forEach((n) => {
+        circle(g, n.x, n.y, 11, "#121a28", C.hop[Math.min(n.hop, 4)], 2);
+        text(g, n.hop, n.x, n.y, C.ink, 10, "center");
+      });
+      this.clusterB.forEach((n) => {
+        const alive = n.hop >= 0;
+        circle(g, n.x, n.y, 11, "#121a28", alive ? C.hop[Math.min(n.hop, 4)] : "rgba(154,167,182,0.35)", 2);
+        if (alive) text(g, n.hop, n.x, n.y, C.ink, 10, "center");
+      });
+      // mule
+      circle(g, this.muleX, H / 2, 12, "#1c2536", C.warn, 2);
+      text(g, "mule · cache " + this.cache + " hops", this.muleX, H / 2 + 30, C.warn, 11, "center");
+      if (this.burst >= 0 && this.T - this.burst < 2.5) {
+        for (let i = 0; i < 14; i++) {
+          const a = (i / 14) * Math.PI * 2;
+          line(g, 545, H / 2, 545 + Math.cos(a) * (60 + (this.T - this.burst) * 30), H / 2 + Math.sin(a) * (60 + (this.T - this.burst) * 30), "rgba(126,231,135,0.5)", 1);
+        }
+      }
+      text(g, "MULE_STORE_FORWARD flag: a cached gradient physically carried across the gap", W / 2, 20, C.accent, 13, "center");
+      text(g, "far side lights up once the burst lands — a second mesh joins the first", W / 2, H - 18, C.dim, 12, "center");
+    },
+  };
+
+  /* ============================================================
+     WALKTHROUGH PLAYER (3 scenes)
+     ============================================================ */
+  const P1 = P.mulberry32(2026);
+  const SCENES = [
+    {
+      title: "Walkthrough 1 · The crowd flood",
+      captions: [
+        [0, "An emergency starts at the origin (red). It is the only device that holds hop 0."],
+        [20, "Nearby phones adopt hop 1 — but only while they still hear the origin."],
+        [50, "The gradient radiates outward ring by ring; each device holds one honest number."],
+        [90, "Trickle keeps the broadcast bounded — O(k) small frames per second per receiver, not O(N)."],
+        [130, "TTL 8 caps the radius: a gradient does not try to own the whole world."],
+        [180, "Freshness clocks run: a clique that stops moving begins to age out normally."],
+        [220, "Any phone now sees: ‘my hop, my freshest hop-1 neighbour — walk that way.’"],
+        [270, "Crowd steady-state: bounded load, authenticated frames, honest topology."],
+      ],
+      build() { return { type: "flood" }; },
+    },
+    {
+      title: "Walkthrough 2 · Mule across a gap",
+      captions: [
+        [0, "Two meshes, one emergency each. Between them: a radio gap too wide for hops."],
+        [30, "A mule walks the gap carrying a cached gradient (MULE_STORE_FORWARD)."],
+        [80, "The far side has been quiet — no claims, sleeping topology."],
+        [140, "Burst! The cache lands and the far mesh lights up with adopted hops."],
+        [200, "The two meshes now form one navigable gradient across the whole floor."],
+        [260, "Delivery is as honest as the carrier: cached hops are labelled with their age."],
+      ],
+      build() { return { type: "mule2" }; },
+    },
+    {
+      title: "Walkthrough 3 · Handoff & ghost collapse",
+      captions: [
+        [0, "Rescuers adopt hops 1–3 toward the origin. All arrows point inward. Good."],
+        [40, "The victim is reached. The incident is marked resolved at the source."],
+        [80, "The origin stops advertising its hop-0 claim."],
+        [130, "Without a live hop 0, hop-1 devices lose their backing and fall silent — one ring at a time."],
+        [190, "There is never a ghost gradient: nobody advertises a hop somebody else can no longer back."],
+        [240, "Rescuers see routes dissolve honestly instead of walking toward a phantom."],
+        [285, "Collapse complete in finite time. Honest subtraction beats invented directions."],
+      ],
+      build() { return { type: "collapse" }; },
+    },
+  ];
+
+  window.SIMS["player"] = {
+    speed: 1,
+    setScene(i) {
+      this.scene = i;
+      this.reset();
+      this.t = 0;
+      const s = SCENES[i];
+      dom.$("#w-title").textContent = s.title;
+    },
+    reset() {
+      this.scene = this.scene || 0;
+      const type = SCENES[this.scene].build().type;
+      this.rng = P.mulberry32(2026);
+      this.phones = [];
+      if (type === "flood") {
+        for (let i = 0; i < 60; i++) {
+          this.phones.push({ x: 60 + this.rng() * 720, y: 50 + this.rng() * 320 });
+        }
+        this.origin = this.phones[0];
+        this.origin.x = 90; this.origin.y = 200;
+      } else if (type === "mule2") {
+        for (let i = 0; i < 24; i++) this.phones.push({ x: 40 + this.rng() * 250, y: 50 + this.rng() * 320, zone: 0, hop: -1 });
+        for (let i = 0; i < 24; i++) this.phones.push({ x: 560 + this.rng() * 230, y: 50 + this.rng() * 320, zone: 1, hop: -1 });
+        this.mule = { x: 285, y: 200 };
+      } else {
+        for (let i = 0; i < 40; i++) this.phones.push({ x: 60 + this.rng() * 720, y: 50 + this.rng() * 320, hop: -1 });
+        this.origin = this.phones[0];
+        this.origin.x = 90; this.origin.y = 200;
+      }
+    },
+    advance(dt) {
+      this.t += dt * 30; // scene length ~10 s
+      const max = 300;
+      if (this.t >= max) { this.t = max; this.run = false; }
+      const scrub = dom.$("#w-scrub");
+      if (scrub) scrub.value = this.t;
+    },
+    draw(g) {
+      const scene = SCENES[this.scene];
+      const type = scene.build().type;
+      const t = this.t;
+      const W = g.W, H = g.H;
+      const ctx = g.ctx;
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+      if (type === "flood" || type === "collapse") this.drawCrowd(g, t, type);
+      else this.drawMuleScene(g, t);
+      // caption
+      let cap = scene.captions[scene.captions.length - 1][1];
+      for (const [at, txt] of scene.captions) {
+        if (t >= at) cap = txt;
+      }
+      dom.$("#w-caption").innerHTML = scene.captions.map(([at, txt]) =>
+        "<li" + (t >= at ? ' class="capon"' : "") + ">" + at + "s · " + txt + "</li>").join("");
+      const style = document.createElement("style");
+      style.id = "capstyle";
+      style.textContent = ".caption-list li.capon { color: #e6edf3; }";
+      if (!dom.$("#capstyle")) document.head.appendChild(style);
+      text(g, scene.title + "  ·  t = " + Math.floor(t) + " s", 30, 22, C.accent, 13);
+    },
+    drawCrowd(g, t, type) {
+      const W = g.W, H = g.H;
+      const expand = type === "flood";
+      // determine hops geometrically from origin
+      const origin = this.origin;
+      const F = 20;
+      for (const p of this.phones) {
+        if (p === origin) continue;
+        const d = Math.hypot(p.x - origin.x, p.y - origin.y);
+        const hop = Math.min(8, Math.max(1, Math.ceil(d / 110)));
+        p.hop = hop;
+      }
+      const originLive = !(type === "collapse" && t > 80);
+      for (const p of this.phones) {
+        if (p === origin) continue;
+        const d = Math.hypot(p.x - origin.x, p.y - origin.y);
+        const baseHop = Math.min(8, Math.max(1, Math.ceil(d / 110)));
+        const collapseTo = type === "collapse" ? (t - 80) / 30 : -1; // rings die after 80 s
+        const hop = originLive ? baseHop : Math.max(-1, baseHop - Math.floor(collapseTo));
+        const alive = hop >= 0;
+        const c = hop < 0 ? "rgba(154,167,182,0.25)" : C.hop[Math.min(hop, 4)];
+        circle(g, p.x, p.y, 8, "#141b28", alive ? c : "rgba(154,167,182,0.3)", alive ? 1.5 : 1);
+      }
+      circle(g, origin.x, origin.y, 13, C.bad, C.ink, 2);
+      text(g, "hop 0", origin.x, origin.y - 24, C.bad, 12, "center");
+      if (type === "collapse" && t > 80) text(g, "✕ resolved", origin.x, origin.y + 24, C.bad, 11, "center");
+      // range circles
+      for (const r of [110, 220, 330]) {
+        circle(g, origin.x, origin.y, r, "rgba(78,194,255,0.03)", "rgba(78,194,255,0.22)", 1);
+      }
+    },
+    drawMuleScene(g, t) {
+      const W = g.W, H = g.H;
+      const m = this.mule;
+      const dx = (t / 300) * 300;
+      m.x = 285 + dx;
+      // left zone phones
+      this.phones.filter((p) => p.zone === 0 && p.hop < 0).forEach((p) => { p.hop = 1 + Math.floor(this.rng() * 3); });
+      this.phones.forEach((p) => {
+        if (p.zone === 0) {
+          circle(g, p.x, p.y, 8, "#141b28", C.hop[Math.min(Math.max(p.hop, 1), 4)] || C.hop[1], 1.5);
+          text(g, p.hop, p.x, p.y, C.ink, 9, "center");
+        } else {
+          const lit = m.x > 505 && p.hop > 0;
+          const h = lit ? p.hop : -1;
+          circle(g, p.x, p.y, 8, "#141b28", h < 0 ? "rgba(154,167,182,0.3)" : C.hop[Math.min(h, 4)], 1.5);
+          if (h > 0) text(g, h, p.x, p.y, C.ink, 9, "center");
+        }
+      });
+      line(g, 285, 20, 285, H - 20, "rgba(255,123,114,0.5)", 1, [4,4]);
+      line(g, 540, 20, 540, H - 20, "rgba(126,231,135,0.5)", 1, [4,4]);
+      circle(g, m.x, m.y, 10, "#1c2536", C.warn, 2);
+      text(g, "mule (cached: 6 hops)", m.x, m.y + 26, C.warn, 11, "center");
+      if (m.x > 500 && t < 260) {
+        for (let i = 0; i < 12; i++) {
+          const a = (i / 12) * Math.PI * 2;
+          line(g, m.x, m.y, m.x + Math.cos(a) * 50, m.y + Math.sin(a) * 50, "rgba(126,231,135,0.6)", 1.5);
+        }
+      }
+      // light right zone up
+      if (m.x > 505) this.phones.filter((p) => p.zone === 1).forEach((p) => { if (p.hop < 0) p.hop = 2 + Math.floor(this.rng() * 3); });
+      text(g, "HOT SIDE (has gradient)", 200, 36, C.accent, 12, "center");
+      text(g, "COLD SIDE (sleeping)", 690, 36, C.dim, 12, "center");
+    },
+  };
+
+  /* ============================================================
+     RADIO FLOOR — channels, half-duplex, byte budget
+     ============================================================ */
+  window.SIMS["radio"] = {
+    speed: 1,
+    reset() {
+      this.t = 0;
+      this.period = 0.9; // advert cadence (s)
+      this.burstW = 0.12; // on-air window (s)
+      this.devices = [
+        { ch: 0, slot: 0.10 },
+        { ch: 0, slot: 0.46 },
+        { ch: 1, slot: 0.22 },
+        { ch: 2, slot: 0.60 },
+      ];
+      this.read = "press Run — the now-cursor sweeps one trickle-like period";
+    },
+    tick(dt, t) {
+      this.t += dt;
+      const P = this.period;
+      // an advert slot coincides when two devices on the same channel
+      // have slots closer than the on-air window (this period)
+      const coincidents = this.devices.filter((d) => this.devices.some(
+        (o) => o.ch === d.ch && o !== d && Math.abs(o.slot - d.slot) < this.burstW));
+      this.read = "clock t = " + this.t.toFixed(1) + " s   ·   coincident advert slots this period: " + (coincidents.length ? coincidents.length + " (rare — jitter is the point)" : "none (jitter dodges the collision)");
+    },
+    draw(g) {
+      const W = g.W, H = g.H;
+      const ctx = g.ctx;
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+      const t = this.t, P = this.period;
+
+      const colA = { x: 28, w: 300 };
+      const colB = { x: 350, w: 290 };
+      const colC = { x: 666, w: Math.max(60, W - 666 - 18) };
+
+      // ---- zone A: three advertising channels ----
+      text(g, "3 of 40 RF channels advertise (CH 37 · 38 · 39)", colA.x, 22, C.accent, 13);
+      const y0 = 52, bandH = 58, gap = 14;
+      const chans = ["CH 37 · 2402 MHz", "CH 38 · 2426 MHz", "CH 39 · 2480 MHz"];
+      for (let c = 0; c < 3; c++) {
+        const yb = y0 + c * (bandH + gap);
+        ctx.fillStyle = "#101722"; ctx.fillRect(colA.x, yb, colA.w, bandH);
+        line(g, colA.x, yb + bandH, colA.x + colA.w, yb + bandH, C.line, 1);
+        text(g, chans[c], colA.x, yb + 12, C.dim, 10);
+        this.devices.filter((d) => d.ch === c).forEach((d) => {
+          for (let k = -1; k <= 2; k++) {
+            const at = d.slot + k * P;
+            const dx = (t - at) / P;            // fraction of the window
+            if (dx < 0 || dx > 1) continue;
+            const x = colA.x + dx * colA.w;
+            const w2 = (this.burstW / P) * colA.w;
+            ctx.fillStyle = c === 0 ? C.accent : (c === 1 ? C.ok : C.warn);
+            ctx.fillRect(x, yb + 20, Math.max(3, w2), 16);
+          }
+        });
+      }
+      // "now" cursor sweeping the window
+      const cx = colA.x + ((t / P) % 1) * colA.w;
+      if (cx <= colA.x + colA.w) {
+        line(g, cx, y0 - 6, cx, y0 + 3 * (bandH + gap) - 6, "#ffffff", 1.5);
+        text(g, "now →", Math.min(W - 60, cx + 6), y0 - 12, C.ink, 10);
+      }
+
+      // ---- zone B: half-duplex trade between two phones ----
+      text(g, "half-duplex: advert & scan must overlap", colB.x, 22, C.accent, 13);
+      const advW = 0.18, scanW = 0.4;
+      const rows = [
+        { label: "phone A", adv0: 0.0, y: 80 },
+        { label: "phone B", adv0: 0.5 * P, y: 150 },
+      ];
+      for (const r of rows) {
+        text(g, r.label, colB.x, r.y - 8, C.ink, 11);
+        ctx.fillStyle = "#101722"; ctx.fillRect(colB.x, r.y, colB.w, 34);
+        const wrapAdv = ((t - r.adv0) % P + P) % P / P;
+        const wrapScan = ((t - r.adv0 - P * 0.5) % P + P) % P / P;
+        // advert block (teal) then scan block (greenish) each period
+        ctx.fillStyle = "rgba(78,194,255,0.9)";
+        ctx.fillRect(colB.x + wrapAdv * colB.w, r.y + 4, (advW / P) * colB.w, 12);
+        ctx.fillStyle = "rgba(126,231,135,0.35)";
+        ctx.fillRect(colB.x + wrapScan * colB.w, r.y + 20, (scanW / P) * colB.w, 12);
+      }
+      text(g, "■ advert", colB.x, 215, C.accent, 10);
+      text(g, "■ scan", colB.x + 70, 215, C.ok, 10);
+      // a trade exists when A's advert sits inside B's scan, or vice versa
+      const wraps = {
+        Aadv: ((t - 0) % P + P) % P / P,
+        Ascan: ((t - P * 0.5) % P + P) % P / P,
+        Badv: ((t - P * 0.5) % P + P) % P / P,
+        Bscan: ((t - 0) % P + P) % P / P,
+      };
+      const inScan = (slotT, scanStart) => ((slotT - scanStart) % P + P) % P <= scanW;
+      const trade = inScan(wraps.Aadv, wraps.Bscan) || inScan(wraps.Badv, wraps.Ascan);
+      if (trade) {
+        text(g, "⚡ TRADE — a peer was heard", colB.x, 250, C.ok, 11);
+        text(g, "(adv from one has to land in the other's scan)", colB.x, 268, C.dim, 10);
+      } else {
+        text(g, "no trade this instant — overlap is stochastic", colB.x, 250, C.dim, 10);
+      }
+
+      // ---- zone C: byte budget under each ceiling ----
+      text(g, "the 13 B frame vs the ceilings", colC.x, 22, C.accent, 13);
+      const bars = [
+        { label: "56-bit core + Hamming FEC", b: 13, col: C.accent, y: 70 },
+        { label: "Android Type-0xFF ceiling", b: 27, col: C.warn, y: 110 },
+        { label: "iOS dual-AD ceiling", b: 23, col: C.ok, y: 150 },
+      ];
+      const scale = (colC.w - 60) / 27;
+      for (const bb of bars) {
+        text(g, bb.label, colC.x, bb.y - 6, bb.col, 10);
+        ctx.fillStyle = "#101722"; ctx.fillRect(colC.x, bb.y, colC.w - 60, 20);
+        ctx.fillStyle = bb.col;
+        ctx.fillRect(colC.x, bb.y, bb.b * scale, 20);
+        text(g, bb.b + " B", colC.x + Math.max(bb.b * scale + 6, 40), bb.y + 10, C.ink, 10);
+      }
+      line(g, colC.x + 13 * scale, 56, colC.x + 13 * scale, 190, C.ink, 1, [3, 3]);
+      text(g, "13 B core fits both ceilings — the byte budget is closed", colC.x, 205, C.dim, 10);
+
+      text(g, this.read || "", W / 2, H - 10, C.dim, 12, "center");
+      text(g, "data channels 0–36 stream after discovery — advertising is the meet-the-neighbour floor", W / 2, H - 30, C.dim, 11, "center");
+    },
+  };
+
+  /* ============================================================
+     DIRECTION FINDING — what a phone can and cannot deliver
+     ============================================================ */
+  window.SIMS["dirfind"] = {
+    speed: 1,
+    reset() {
+      this.t = 0;
+      this.angle = 0;
+      this.samples = [];
+      this.peerDeg = 60;
+      this.read = "sweep: rotating…";
+    },
+    tick(dt, t) {
+      this.t += dt;
+      this.angle = (this.angle + dt * 70) % 360;
+      if (this.samples.length < 90 && this.t % 0.05 < 0.01) {
+        const rel = Math.abs(((this.angle - this.peerDeg) % 360 + 360) % 360);
+        const d = Math.min(rel, 360 - rel);
+        this.samples.push({ az: this.angle, rssi: -80 - d * 0.35 + (P.mulberry32(this.samples.length)() * 3 - 1.5) });
+      }
+      if (this.t > 3.6) { this.t = 0; this.samples = []; }
+      if (this.samples.length > 20) this.read = "peak bearing candidate ≈ " + bestBearing(this.samples).toFixed(0) + "°  ·  RSSI-class, provisional (E17)";
+    },
+    draw(g) {
+      const W = g.W, H = g.H;
+      const ctx = g.ctx;
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+      const panW = (W - 40) / 3;
+
+      // ---- panel 1: AoA/AoD not available ----
+      const p1x = 20, p1y = 60, p1w = panW, p1h = 300;
+      ctx.fillStyle = "#101722"; ctx.fillRect(p1x, p1y, p1w, p1h);
+      line(g, p1x, p1y, p1x + p1w, p1y + p1h, C.bad, 2);
+      line(g, p1x + p1w, p1y, p1x, p1y + p1h, C.bad, 2);
+      text(g, "AoA / AoD", p1x + p1w / 2, p1y + 26, C.bad, 14, "center");
+      // tiny antenna-array glyph (crossed out)
+      for (let i = 0; i < 4; i++) circle(g, p1x + p1w / 2 - 45 + i * 30, p1y + 90, 7, "#1c2536", C.bad, 2);
+      text(g, "✕ needs a switched array + CTE IQ", p1x + p1w / 2, p1y + 140, C.bad, 11, "center");
+      text(g, "not present on commodity phones", p1x + p1w / 2, p1y + 160, C.bad, 11, "center");
+      text(g, "BLE 5.1 spec reality · acknowledged §39.1", p1x + p1w / 2, p1y + 200, C.dim, 10, "center");
+
+      // ---- panel 2: swept-RSSI / rotate-to-find ----
+      const p2x = p1x + panW + 10, p2y = p1y, p2w = panW, p2h = p1h;
+      const cx = p2x + p2w / 2, cy = p2y + p2h / 2, R = Math.min(p2w, p2h) / 2 - 34;
+      ctx.fillStyle = "#101722"; ctx.fillRect(p2x, p2y, p2w, p2h);
+      circle(g, cx, cy, R, "rgba(20,30,45,0.5)", C.line, 1.5);
+      for (let a = 0; a < 360; a += 30) {
+        const rad = (a - 90) * Math.PI / 180;
+        line(g, cx + Math.cos(rad) * (R - 8), cy + Math.sin(rad) * (R - 8), cx + Math.cos(rad) * R, cy + Math.sin(rad) * R, C.dim, 1);
+      }
+      // samples
+      this.samples.forEach((s2) => {
+        const r = R * (0.3 + 0.7 * ((-s2.rssi - 74) / 40));
+        const rad = (s2.az - 90) * Math.PI / 180;
+        circle(g, cx + Math.cos(rad) * r, cy + Math.sin(rad) * r, 2, "rgba(126,231,135,0.6)");
+      });
+      // rotating scan line
+      const radH = (this.angle - 90) * Math.PI / 180;
+      line(g, cx, cy, cx + Math.cos(radH) * (R - 16), cy + Math.sin(radH) * (R - 16), C.warn, 2.5);
+      // true peer bearing
+      const radB = (this.peerDeg - 90) * Math.PI / 180;
+      line(g, cx, cy, cx + Math.cos(radB) * (R - 10), cy + Math.sin(radB) * (R - 10), C.ok, 2, [5, 3]);
+      circle(g, cx + Math.cos(radB) * (R - 10), cy + Math.sin(radB) * (R - 10), 6, C.ok);
+      text(g, "swept-RSSI rotate-to-find", p2x + p2w / 2, p2y + 20, C.accent, 13, "center");
+      text(g, "green = peer · amber = scan line · dots = RSSI", p2x + p2w / 2, p2y + p2h - 12, C.dim, 10, "center");
+
+      // ---- panel 3: torso-shadowing cardioid ----
+      const p3x = p2x + panW + 10, p3y = p2y, p3w = panW, p3h = p1h;
+      const cx3 = p3x + p3w / 2, cy3 = p3y + p3h / 2;
+      const peerA = 60 * Math.PI / 180;
+      ctx.fillStyle = "#101722"; ctx.fillRect(p3x, p3y, p3w, p3h);
+      circle(g, cx3, cy3, 16, "#121a28", C.warn, 2);
+      circle(g, cx3, cy3, 12, "#121a28", C.ink, 1);
+      text(g, "body", cx3, cy3 + 34, C.dim, 10, "center");
+      // cardioid: r = 1 - cos(theta - peerA) … strong facing peer, null behind
+      for (let a = 0; a < 360; a += 4) {
+        const rad = a * Math.PI / 180;
+        const k = (1 - Math.cos(rad - peerA)) / 2; // 0..1, 1 toward peer
+        const rr = 14 + k * (R - 20);
+        circle(g, cx3 + Math.cos(rad) * rr, cy3 + Math.sin(rad) * rr, 2.4, "rgba(126,231,135," + (0.25 + 0.6 * k).toFixed(2) + ")");
+      }
+      text(g, "torso-shadowing cardioid", p3x + p3w / 2, p3y + 20, C.accent, 13, "center");
+      text(g, "the body occludes ~50 dB behind you", p3x + p3w / 2, p3y + p3h - 34, C.dim, 10, "center");
+      text(g, "a rotation reads as a cardioid → bearing", p3x + p3w / 2, p3y + p3h - 18, C.dim, 10, "center");
+      text(g, "terminal-handoff exploit · run exp_012", p3x + p3w / 2, p3y + 40, C.ok, 10, "center");
+
+      text(g, this.read || "", W / 2, H - 10, C.warn, 12, "center");
+    },
+  };
+
+  function bestBearing(ss) {
+    return ss.reduce((m, s2) => (s2.rssi > m.rssi ? s2 : m), ss[0]).az;
+  }
+
+  // expose draw helpers for debugging in console
+  window.CanvasKit = { circle, line, text, phone, P };
+})();
+</script>
+</body>
+</html>

@@ -36,6 +36,23 @@ find-us-crowd-compass/
 The core `core/*.py` modules are pure logic (no Bluetooth) and run identically
 on the real transport or the simulated one (spec §64).
 
+## Interactive Website (pure HTML — host it anywhere)
+
+The interactive research explainer is **plain static HTML/CSS/JS with zero
+dependencies** — no build step, no server, no cookies.
+
+- `website/` — the readable multi-file source (edit these).
+- `docs/index.html` — **one self-contained file** (CSS + JS inlined). Copy it
+  to any host: GitHub Pages, Netlify, file://, a USB stick. Regenerate after
+  edits with `node website/build-single.js website docs/index.html`.
+- Download links inside the bundled page point at this repo's
+  `raw.githubusercontent.com` URLs, so the manuscript/PDF downloads work from
+  anywhere once this repo is public.
+
+**GitHub Pages (recommended, 2 min):** Settings → Pages → *Build and deployment*
+→ *Deploy from a branch* → branch `main`, folder `/docs` → Save. The single-file
+site appears at `https://<user>.github.io/find-us-crowd-compass/`.
+
 ## Verified Research Foundation (11 Tasks)
 
 > **Status note:** figures below are simulation-derived. They are retained as a
