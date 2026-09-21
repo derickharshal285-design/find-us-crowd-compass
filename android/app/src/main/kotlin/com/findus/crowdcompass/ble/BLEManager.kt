@@ -33,8 +33,6 @@ import com.findus.packet.CanonicalVectors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -89,10 +87,14 @@ class BLEManager(
         val pkt = buildPacket(sosId, role, epoch)
         val raw = pkt.pack()
         val fec = HammingFEC.encode(raw)
-        val advPayload = BLEFraming.iosBackgroundSafe(fec, 0xFC00, companyId)
 
-        // Dual-AD construction for precise control: service-UUID anchor + carrier.
-        val dualAdvData = buildDualAdvData(advPayload)
+        // Dual-AD through the framework: service-UUID anchor (AD type 0x03)
+        // plus the 13-byte FEC carrier (AD type 0x16 service data). This stays
+        // inside the 31-byte legacy advertisement window.
+        val advData = AdvertiseData.Builder().apply {
+            addServiceUuid(serviceUuid)
+            addServiceData(serviceUuid, fec)
+        }.build()
 
         val settings = AdvertiseSettings.Builder().apply {
             setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
@@ -114,33 +116,11 @@ class BLEManager(
 
         try {
             // Use reflection or raw byte array for dual-AD on Android
-            advertiser.startAdvertising(settings, dualAdvData, advertiseCallback!!)
+            advertiser.startAdvertising(settings, advData, advertiseCallback!!)
         } catch (e: Exception) {
             Log.e("BLEManager", "startAdvertising failed", e)
             isAdvertising.set(false)
         }
-    }
-
-    private fun buildDualAdvData(payload: ByteArray): AdvertiseData {
-        // Manual AD structure construction for dual-AD
-        // AD1: [Len=3, Type=0x03, UUID_lo, UUID_hi]
-        // AD2: [Len=4+payload, Type=0xFF, CoID_lo, CoID_hi, payload...]
-        val ad1 = byteArrayOf(0x03, 0x03, 0x00.toByte(), 0xFC.toByte()) // 0xFC00 little-endian
-        val ad2 = ByteBuffer.allocate(4 + payload.size).order(ByteOrder.LITTLE_ENDIAN).apply {
-            put((3 + payload.size).toByte())      // Len
-            put(0xFF.toByte())                    // Type = Manufacturer Data
-            putShort(companyId.toShort())         // Company ID (0xFFFF little-endian)
-            put(payload)                          // Payload
-        }.array()
-
-        val combined = ByteBuffer.allocate(ad1.size + ad2.size).apply {
-            put(ad1)
-            put(ad2)
-        }.array()
-
-        return AdvertiseData.Builder().apply {
-            setManufacturerData(companyId, combined) // Single AD with combined structures
-        }.build()
     }
 
     fun stopAdvertising() {
@@ -173,23 +153,14 @@ class BLEManager(
 
                 onRssiSample?.invoke(rssi, System.currentTimeMillis())
 
-                // Parse manufacturer data (0xFF) from scan record
-                scanRecord?.manufacturerSpecificData?.let { mfrData ->
-                    for (i in 0 until mfrData.size()) {
-                        val cid = mfrData.keyAt(i)
-                        val data = mfrData.valueAt(i)
-                        if (cid == this@BLEManager.companyId) {
-                            val gradient = parseGradient(data, rssi, device)
-                            if (gradient != null) {
-                                onGradientDiscovered?.invoke(gradient)
-                            }
-                        }
-                    }
-                }
+            // Parse service data (AD type 0x16) — the FEC carrier for the
+            // service-UUID anchor. iOS background scanning filters on this UUID.
+            val carrier = scanRecord?.let { getServiceData(serviceUuid) } ?: return
+            parseGradient(carrier, rssi, device)?.let(onGradientDiscovered!!)
             }
 
             override fun onBatchScanResults(results: List<ScanResult>) {
-                results.forEach { onScanResult(ScanCallback.CALLBACK_TYPE_ALL_MATCHES, it) }
+                results.forEach { onScanResult(ScanSettings.CALLBACK_TYPE_ALL_MATCHES, it) }
             }
 
             override fun onScanFailed(errorCode: Int) {
@@ -266,7 +237,7 @@ class BLEManager(
     }
 
     private fun currentEpoch(): Int {
-        return (System.currentTimeMillis() / 15000) and 0xF // 15 s epochs
+        return ((System.currentTimeMillis() / 15000) and 0xF).toInt() // 15 s epochs
     }
 
     // ─── Background Wake via PendingIntent (Android Doze) ───

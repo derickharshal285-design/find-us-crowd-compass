@@ -1,6 +1,7 @@
 package com.findus.crowdcompass.engine
 
 import java.security.SecureRandom
+import kotlin.math.abs
 
 /**
  * Parity battery — the same assertions the Python reference certifies
@@ -169,10 +170,10 @@ object EngineSelfTest {
         // Fusion chains the same as the Python reference.
         val fused = BearingFusion.fusepatches(listOf(90.0 to 1.0, 95.0 to 1.0))
         ok(fused != null && abs(fused!!.meanDeg - 92.5) < 3.0, "fusion mean ~92.5")
-        ok(fused.sigmaDeg < 30.0, "fusion sigma tight (${"%.1f".format(fused.sigmaDeg)})")
+        ok(fused!!.sigmaDeg < 30.0, "fusion sigma tight (${"%.1f".format(fused!!.sigmaDeg)})")
         val boost = BearingFusion.reciprocalBoost(90.0, 265.0)
         ok(boost != null && abs(boost!!.meanDeg - 88.3) < 3.0,
-            "reciprocal boost mean ~88.3 (got ${"%.1f".format(boost.meanDeg)})")
+            "reciprocal boost mean ~88.3 (got ${"%.1f".format(boost!!.meanDeg)})")
 
         // Tier negotiation: BLE4 never reaches CS; CS requires a CS peer.
         val ble4 = CapabilityRegistry(

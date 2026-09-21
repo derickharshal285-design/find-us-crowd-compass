@@ -153,7 +153,8 @@ class DeviceApp(
         }
         if (version > ev.version) {
             ev.version = version
-            if (ev.lifespanSeconds != null) ev.expiresAt = t + ev.lifespanSeconds
+            val lifespan = ev.lifespanSeconds
+            if (lifespan != null) ev.expiresAt = t + lifespan
         }
     }
 

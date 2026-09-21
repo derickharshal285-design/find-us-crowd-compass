@@ -169,7 +169,7 @@ class Backend {
                 incidentLink = dev.incident?.toLink().orEmpty(),
                 wireId = dev.wireId.value,
             )
-            scheduler = AdvScheduler(scope, { device.outgoing() }) { publish() }
+            scheduler = AdvScheduler(scope, { device.outgoing() }, onSweep = { publish() })
             scheduler!!.onTick()
             startTransport(context)
             loop()

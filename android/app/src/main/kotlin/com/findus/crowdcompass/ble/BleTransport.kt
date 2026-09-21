@@ -27,7 +27,7 @@ object BleTransport {
     const val SERVICE_UUID = "6e897e00-0001-4a2a-8f6f-6669756e6473" // "findus"
     val serviceParcel: ParcelUuid = ParcelUuid.fromString(SERVICE_UUID)
 
-    interface Sink {
+    fun interface Sink {
         /** Called when a raw v3 frame blob arrived from `remote`. */
         fun onFrame(remote: String, blob: ByteArray)
     }

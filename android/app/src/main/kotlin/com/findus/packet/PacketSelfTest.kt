@@ -22,7 +22,7 @@ object PacketSelfTest {
 
         ok(CanonicalVectors.verify(), "canonical vector hex+bits match Python/Swift")
         ok(CanonicalVectors.hex(CanonicalVectors.referencePacket.pack()) ==
-            CanonicalVectors.EXPECTED_HEX, "canonical hex is $EXPECTED_HEX")
+            CanonicalVectors.EXPECTED_HEX,             "canonical hex is ${CanonicalVectors.EXPECTED_HEX}")
 
         val ref = CanonicalVectors.referencePacket
         ok(PacketV2.unpack(ref.pack()) == ref, "reference round-trips")
