@@ -832,6 +832,223 @@
     },
   };
 
+  /* ============================================================
+     RADIO FLOOR — channels, half-duplex, byte budget
+     ============================================================ */
+  window.SIMS["radio"] = {
+    speed: 1,
+    reset() {
+      this.t = 0;
+      this.period = 0.9; // advert cadence (s)
+      this.burstW = 0.12; // on-air window (s)
+      this.devices = [
+        { ch: 0, slot: 0.10 },
+        { ch: 0, slot: 0.46 },
+        { ch: 1, slot: 0.22 },
+        { ch: 2, slot: 0.60 },
+      ];
+      this.read = "press Run — the now-cursor sweeps one trickle-like period";
+    },
+    tick(dt, t) {
+      this.t += dt;
+      const P = this.period;
+      // an advert slot coincides when two devices on the same channel
+      // have slots closer than the on-air window (this period)
+      const coincidents = this.devices.filter((d) => this.devices.some(
+        (o) => o.ch === d.ch && o !== d && Math.abs(o.slot - d.slot) < this.burstW));
+      this.read = "clock t = " + this.t.toFixed(1) + " s   ·   coincident advert slots this period: " + (coincidents.length ? coincidents.length + " (rare — jitter is the point)" : "none (jitter dodges the collision)");
+    },
+    draw(g) {
+      const W = g.W, H = g.H;
+      const ctx = g.ctx;
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+      const t = this.t, P = this.period;
+
+      const colA = { x: 28, w: 300 };
+      const colB = { x: 350, w: 290 };
+      const colC = { x: 666, w: Math.max(60, W - 666 - 18) };
+
+      // ---- zone A: three advertising channels ----
+      text(g, "3 of 40 RF channels advertise (CH 37 · 38 · 39)", colA.x, 22, C.accent, 13);
+      const y0 = 52, bandH = 58, gap = 14;
+      const chans = ["CH 37 · 2402 MHz", "CH 38 · 2426 MHz", "CH 39 · 2480 MHz"];
+      for (let c = 0; c < 3; c++) {
+        const yb = y0 + c * (bandH + gap);
+        ctx.fillStyle = "#101722"; ctx.fillRect(colA.x, yb, colA.w, bandH);
+        line(g, colA.x, yb + bandH, colA.x + colA.w, yb + bandH, C.line, 1);
+        text(g, chans[c], colA.x, yb + 12, C.dim, 10);
+        this.devices.filter((d) => d.ch === c).forEach((d) => {
+          for (let k = -1; k <= 2; k++) {
+            const at = d.slot + k * P;
+            const dx = (t - at) / P;            // fraction of the window
+            if (dx < 0 || dx > 1) continue;
+            const x = colA.x + dx * colA.w;
+            const w2 = (this.burstW / P) * colA.w;
+            ctx.fillStyle = c === 0 ? C.accent : (c === 1 ? C.ok : C.warn);
+            ctx.fillRect(x, yb + 20, Math.max(3, w2), 16);
+          }
+        });
+      }
+      // "now" cursor sweeping the window
+      const cx = colA.x + ((t / P) % 1) * colA.w;
+      if (cx <= colA.x + colA.w) {
+        line(g, cx, y0 - 6, cx, y0 + 3 * (bandH + gap) - 6, "#ffffff", 1.5);
+        text(g, "now →", Math.min(W - 60, cx + 6), y0 - 12, C.ink, 10);
+      }
+
+      // ---- zone B: half-duplex trade between two phones ----
+      text(g, "half-duplex: advert & scan must overlap", colB.x, 22, C.accent, 13);
+      const advW = 0.18, scanW = 0.4;
+      const rows = [
+        { label: "phone A", adv0: 0.0, y: 80 },
+        { label: "phone B", adv0: 0.5 * P, y: 150 },
+      ];
+      for (const r of rows) {
+        text(g, r.label, colB.x, r.y - 8, C.ink, 11);
+        ctx.fillStyle = "#101722"; ctx.fillRect(colB.x, r.y, colB.w, 34);
+        const wrapAdv = ((t - r.adv0) % P + P) % P / P;
+        const wrapScan = ((t - r.adv0 - P * 0.5) % P + P) % P / P;
+        // advert block (teal) then scan block (greenish) each period
+        ctx.fillStyle = "rgba(78,194,255,0.9)";
+        ctx.fillRect(colB.x + wrapAdv * colB.w, r.y + 4, (advW / P) * colB.w, 12);
+        ctx.fillStyle = "rgba(126,231,135,0.35)";
+        ctx.fillRect(colB.x + wrapScan * colB.w, r.y + 20, (scanW / P) * colB.w, 12);
+      }
+      text(g, "■ advert", colB.x, 215, C.accent, 10);
+      text(g, "■ scan", colB.x + 70, 215, C.ok, 10);
+      // a trade exists when A's advert sits inside B's scan, or vice versa
+      const wraps = {
+        Aadv: ((t - 0) % P + P) % P / P,
+        Ascan: ((t - P * 0.5) % P + P) % P / P,
+        Badv: ((t - P * 0.5) % P + P) % P / P,
+        Bscan: ((t - 0) % P + P) % P / P,
+      };
+      const inScan = (slotT, scanStart) => ((slotT - scanStart) % P + P) % P <= scanW;
+      const trade = inScan(wraps.Aadv, wraps.Bscan) || inScan(wraps.Badv, wraps.Ascan);
+      if (trade) {
+        text(g, "⚡ TRADE — a peer was heard", colB.x, 250, C.ok, 11);
+        text(g, "(adv from one has to land in the other's scan)", colB.x, 268, C.dim, 10);
+      } else {
+        text(g, "no trade this instant — overlap is stochastic", colB.x, 250, C.dim, 10);
+      }
+
+      // ---- zone C: byte budget under each ceiling ----
+      text(g, "the 13 B frame vs the ceilings", colC.x, 22, C.accent, 13);
+      const bars = [
+        { label: "56-bit core + Hamming FEC", b: 13, col: C.accent, y: 70 },
+        { label: "Android Type-0xFF ceiling", b: 27, col: C.warn, y: 110 },
+        { label: "iOS dual-AD ceiling", b: 23, col: C.ok, y: 150 },
+      ];
+      const scale = (colC.w - 60) / 27;
+      for (const bb of bars) {
+        text(g, bb.label, colC.x, bb.y - 6, bb.col, 10);
+        ctx.fillStyle = "#101722"; ctx.fillRect(colC.x, bb.y, colC.w - 60, 20);
+        ctx.fillStyle = bb.col;
+        ctx.fillRect(colC.x, bb.y, bb.b * scale, 20);
+        text(g, bb.b + " B", colC.x + Math.max(bb.b * scale + 6, 40), bb.y + 10, C.ink, 10);
+      }
+      line(g, colC.x + 13 * scale, 56, colC.x + 13 * scale, 190, C.ink, 1, [3, 3]);
+      text(g, "13 B core fits both ceilings — the byte budget is closed", colC.x, 205, C.dim, 10);
+
+      text(g, this.read || "", W / 2, H - 10, C.dim, 12, "center");
+      text(g, "data channels 0–36 stream after discovery — advertising is the meet-the-neighbour floor", W / 2, H - 30, C.dim, 11, "center");
+    },
+  };
+
+  /* ============================================================
+     DIRECTION FINDING — what a phone can and cannot deliver
+     ============================================================ */
+  window.SIMS["dirfind"] = {
+    speed: 1,
+    reset() {
+      this.t = 0;
+      this.angle = 0;
+      this.samples = [];
+      this.peerDeg = 60;
+      this.read = "sweep: rotating…";
+    },
+    tick(dt, t) {
+      this.t += dt;
+      this.angle = (this.angle + dt * 70) % 360;
+      if (this.samples.length < 90 && this.t % 0.05 < 0.01) {
+        const rel = Math.abs(((this.angle - this.peerDeg) % 360 + 360) % 360);
+        const d = Math.min(rel, 360 - rel);
+        this.samples.push({ az: this.angle, rssi: -80 - d * 0.35 + (P.mulberry32(this.samples.length)() * 3 - 1.5) });
+      }
+      if (this.t > 3.6) { this.t = 0; this.samples = []; }
+      if (this.samples.length > 20) this.read = "peak bearing candidate ≈ " + bestBearing(this.samples).toFixed(0) + "°  ·  RSSI-class, provisional (E17)";
+    },
+    draw(g) {
+      const W = g.W, H = g.H;
+      const ctx = g.ctx;
+      ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+      const panW = (W - 40) / 3;
+
+      // ---- panel 1: AoA/AoD not available ----
+      const p1x = 20, p1y = 60, p1w = panW, p1h = 300;
+      ctx.fillStyle = "#101722"; ctx.fillRect(p1x, p1y, p1w, p1h);
+      line(g, p1x, p1y, p1x + p1w, p1y + p1h, C.bad, 2);
+      line(g, p1x + p1w, p1y, p1x, p1y + p1h, C.bad, 2);
+      text(g, "AoA / AoD", p1x + p1w / 2, p1y + 26, C.bad, 14, "center");
+      // tiny antenna-array glyph (crossed out)
+      for (let i = 0; i < 4; i++) circle(g, p1x + p1w / 2 - 45 + i * 30, p1y + 90, 7, "#1c2536", C.bad, 2);
+      text(g, "✕ needs a switched array + CTE IQ", p1x + p1w / 2, p1y + 140, C.bad, 11, "center");
+      text(g, "not present on commodity phones", p1x + p1w / 2, p1y + 160, C.bad, 11, "center");
+      text(g, "BLE 5.1 spec reality · acknowledged §39.1", p1x + p1w / 2, p1y + 200, C.dim, 10, "center");
+
+      // ---- panel 2: swept-RSSI / rotate-to-find ----
+      const p2x = p1x + panW + 10, p2y = p1y, p2w = panW, p2h = p1h;
+      const cx = p2x + p2w / 2, cy = p2y + p2h / 2, R = Math.min(p2w, p2h) / 2 - 34;
+      ctx.fillStyle = "#101722"; ctx.fillRect(p2x, p2y, p2w, p2h);
+      circle(g, cx, cy, R, "rgba(20,30,45,0.5)", C.line, 1.5);
+      for (let a = 0; a < 360; a += 30) {
+        const rad = (a - 90) * Math.PI / 180;
+        line(g, cx + Math.cos(rad) * (R - 8), cy + Math.sin(rad) * (R - 8), cx + Math.cos(rad) * R, cy + Math.sin(rad) * R, C.dim, 1);
+      }
+      // samples
+      this.samples.forEach((s2) => {
+        const r = R * (0.3 + 0.7 * ((-s2.rssi - 74) / 40));
+        const rad = (s2.az - 90) * Math.PI / 180;
+        circle(g, cx + Math.cos(rad) * r, cy + Math.sin(rad) * r, 2, "rgba(126,231,135,0.6)");
+      });
+      // rotating scan line
+      const radH = (this.angle - 90) * Math.PI / 180;
+      line(g, cx, cy, cx + Math.cos(radH) * (R - 16), cy + Math.sin(radH) * (R - 16), C.warn, 2.5);
+      // true peer bearing
+      const radB = (this.peerDeg - 90) * Math.PI / 180;
+      line(g, cx, cy, cx + Math.cos(radB) * (R - 10), cy + Math.sin(radB) * (R - 10), C.ok, 2, [5, 3]);
+      circle(g, cx + Math.cos(radB) * (R - 10), cy + Math.sin(radB) * (R - 10), 6, C.ok);
+      text(g, "swept-RSSI rotate-to-find", p2x + p2w / 2, p2y + 20, C.accent, 13, "center");
+      text(g, "green = peer · amber = scan line · dots = RSSI", p2x + p2w / 2, p2y + p2h - 12, C.dim, 10, "center");
+
+      // ---- panel 3: torso-shadowing cardioid ----
+      const p3x = p2x + panW + 10, p3y = p2y, p3w = panW, p3h = p1h;
+      const cx3 = p3x + p3w / 2, cy3 = p3y + p3h / 2;
+      const peerA = 60 * Math.PI / 180;
+      ctx.fillStyle = "#101722"; ctx.fillRect(p3x, p3y, p3w, p3h);
+      circle(g, cx3, cy3, 16, "#121a28", C.warn, 2);
+      circle(g, cx3, cy3, 12, "#121a28", C.ink, 1);
+      text(g, "body", cx3, cy3 + 34, C.dim, 10, "center");
+      // cardioid: r = 1 - cos(theta - peerA) … strong facing peer, null behind
+      for (let a = 0; a < 360; a += 4) {
+        const rad = a * Math.PI / 180;
+        const k = (1 - Math.cos(rad - peerA)) / 2; // 0..1, 1 toward peer
+        const rr = 14 + k * (R - 20);
+        circle(g, cx3 + Math.cos(rad) * rr, cy3 + Math.sin(rad) * rr, 2.4, "rgba(126,231,135," + (0.25 + 0.6 * k).toFixed(2) + ")");
+      }
+      text(g, "torso-shadowing cardioid", p3x + p3w / 2, p3y + 20, C.accent, 13, "center");
+      text(g, "the body occludes ~50 dB behind you", p3x + p3w / 2, p3y + p3h - 34, C.dim, 10, "center");
+      text(g, "a rotation reads as a cardioid → bearing", p3x + p3w / 2, p3y + p3h - 18, C.dim, 10, "center");
+      text(g, "terminal-handoff exploit · run exp_012", p3x + p3w / 2, p3y + 40, C.ok, 10, "center");
+
+      text(g, this.read || "", W / 2, H - 10, C.warn, 12, "center");
+    },
+  };
+
+  function bestBearing(ss) {
+    return ss.reduce((m, s2) => (s2.rssi > m.rssi ? s2 : m), ss[0]).az;
+  }
+
   // expose draw helpers for debugging in console
   window.CanvasKit = { circle, line, text, phone, P };
 })();

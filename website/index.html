@@ -27,8 +27,10 @@
 <nav class="tabs wrap" id="tabs">
   <a href="#overview" data-tab="overview">Overview</a>
   <a href="#paper" data-tab="paper">The paper</a>
+  <a href="#concepts" data-tab="concepts">Concepts</a>
   <a href="#mesh" data-tab="mesh">Mesh 101</a>
   <a href="#navigate" data-tab="navigate">Navigate</a>
+  <a href="#radio" data-tab="radio">Radio &amp; BLE</a>
   <a href="#sim" data-tab="sim">Simulations</a>
   <a href="#videos" data-tab="videos">Walkthroughs</a>
   <a href="#facts" data-tab="facts">Glossary &amp; numbers</a>
@@ -79,7 +81,7 @@
       </ul>
     </div>
 
-    <p class="navhint">Start with <a href="#mesh">Mesh 101</a> and watch a third device enter the mesh, then <a href="#navigate">Navigate</a> to operate each navigation system, and <a href="#videos">Walkthroughs</a> for narrated timelines.</p>
+    <p class="navhint">Start with <a href="#concepts">Concepts</a> for the whole arc from mesh to the BLE radio, then <a href="#mesh">Mesh 101</a> to watch a third device enter the mesh, <a href="#radio">Radio &amp; BLE</a> for the physical floor, <a href="#navigate">Navigate</a> to operate each navigation system, and <a href="#videos">Walkthroughs</a> for narrated timelines.</p>
   </section>
 
   <!-- ===================== THE PAPER ===================== -->
@@ -101,9 +103,10 @@
         </div>
       </details>
       <details>
-        <summary>3 · Architecture — the seven layers</summary>
+        <summary>3 · Architecture — eleven layers</summary>
         <div class="acc-body">
-          <p><strong>1</strong> Identity: install key + incident id → per-incident pseudonym. <strong>2</strong> Transport: BLE5 dual-role advertising/scanning, connection-free. <strong>3</strong> Packet: a 56-bit PDU with FEC and a rolling 16-bit envelope MAC. <strong>4</strong> Topology: edges are radios heard; stale nodes/edges expire. <strong>5</strong> Gradient: SOS relay with TTL, dedup window, freshness, and codified broadcast (Trickle + jitter). <strong>6</strong> Navigation tiers: from hop-gradient-only up to (future) UWB/Channel-Sounding. <strong>7</strong> Guidance honesty: a device only ever reports routes it can show, and only points along a direction it can physically justify.</p>
+          <p>The paper decomposes the whole system into <strong>eleven layers</strong>, bottom-up (§12.1): <strong>1</strong> Radio plausibility — byte-floor facts (BLE ceilings, 3 advert channels, body-shadowing). <strong>2</strong> Link/discovery — advertising cadence, dual-role, half-duplex trades. <strong>3</strong> Packet/coding — 56-bit PDU + Hamming(7,4) ECC, v2/v3 compat. <strong>4</strong> Hop/relay — the four-rule gate (relay / forward / suppress / cache). <strong>5</strong> Routing graph — lazily-built label/route graph with distance/direction/uncertainty edges. <strong>6</strong> Gradient — SOS distance-to-source labels; ghost-safe. <strong>7</strong> Spatial graph (VRLG) — virtual relative landmark graph, the &ldquo;where&rdquo; answer-buffer. <strong>8</strong> Consistency engine — cross-checks, cheat-edge rejection, the anti-rumor authority. <strong>9</strong> Navigation rendering — arrow, edge-icons, path, orbital modes. <strong>10</strong> Terminal UI — glanceability, SOS arm via press/motion/voice, accessibility. <strong>11</strong> Platform compliance — Android/iOS admission control, permissions, background survival.</p>
+          <p>The whole-paper claim is <em>integration across all eleven</em> — no single layer is state-of-the-art alone, the coupling is the contribution.</p>
         </div>
       </details>
       <details>
@@ -245,6 +248,97 @@
     </div>
   </section>
 
+  <!-- ===================== CONCEPTS ===================== -->
+  <section class="page" id="tab-concepts" data-page="concepts" hidden>
+    <h2>Every concept, from mesh to the BLE radio</h2>
+    <p>Eleven chapters walking the whole research in order: why it exists, how the mesh is built, how the mesh navigates, and finally what happens at the BLE radio and direction-finding floor. Each entry answers one concept and is tagged with its evidence band (<code>CAN</code> / <code>IMP</code> / <code>RES</code> / <code>PRO</code> / <code>FAIL</code> / <code>NOT-RUN</code>) — nothing is presented as measured if it isn't. Expand any chapter or jump straight to <a href="#radio">Radio &amp; BLE</a> for the physical floor.</p>
+    <div id="concepts-root"></div>
+  </section>
+
+  <!-- ===================== RADIO & BLE ===================== -->
+  <section class="page" id="tab-radio" data-page="radio" hidden>
+    <h2>Radio &amp; BLE — the physical floor of the whole stack</h2>
+    <p>Everything above rides on BLE <strong>advertising</strong>, not connections. This page is the radio truth: the 3 channels, the byte ceilings, the half-duplex reality, and — because it is the most-asked question — <strong>how direction is and is not obtained</strong> on commodity phones.</p>
+
+    <div class="card sim-card">
+      <div class="sim-head">
+        <h3>Advertising channels, half-duplex trades &amp; the byte budget</h3>
+        <div class="sim-controls">
+          <button data-sim-btn="reset">Reset</button>
+          <button data-sim-btn="play">Run ▶</button>
+          <button data-sim-btn="pause">❚❚</button>
+        </div>
+      </div>
+      <canvas class="sim-canvas" data-sim="radio" width="840" height="430"></canvas>
+      <p id="radio-readout" class="readout-line"></p>
+      <p class="caption"><span class="chip chip-measured">CAN</span> BLE facts (Bluetooth Core Spec 5.1): 40 channels, 3 advertising, legacy 31 B / Type-0xFF 27 B / iOS dual-AD ≤ 23 B ceilings. Teaching canvas of the <em>cadence &amp; trade</em>, not a radio trace.</p>
+    </div>
+
+    <div class="card sim-card">
+      <div class="sim-head">
+        <h3>Direction finding — what commodity phones can and cannot do</h3>
+        <div class="sim-controls">
+          <button data-sim-btn="reset">Reset</button>
+          <button data-sim-btn="play">Sweep ▶</button>
+          <button data-sim-btn="pause">❚❚</button>
+        </div>
+      </div>
+      <canvas class="sim-canvas" data-sim="dirfind" width="840" height="430"></canvas>
+      <p id="dirfind-readout" class="readout-line"></p>
+      <p class="caption"><span class="chip chip-measured">CAN</span> AoA/AoD need a switched array + CTE IQ sampling — absent on phones. <span class="chip chip-open">FIELD OPEN</span> swept-RSSI bearings are RSSI-class, provisional on E17 (<code>NOT-RUN</code>). This canvas is the honest spectrum of choices, not a claim of measured precision.</p>
+    </div>
+
+    <div class="accordion">
+      <details open>
+        <summary>The BLE radio reality (advertising vs connections)</summary>
+        <div class="acc-body">
+          <p>BLE has <strong>40 RF channels</strong> (0–39); <strong>3 (37–39) are dedicated to advertising</strong>, the rest are data channels. Advertising packets ride the 3; data rides the 37. Discovery is a coordination problem: schedule, channel, and concurrency must be traded (<code>§13.1</code>).</p>
+          <p>Find Us deliberately builds its topology on advertising/discovery — <strong>not GATT connections</strong>. Nodes exchange state as half-duplex trades (my advert meets your scan); they never open a connection per neighbour. This is structurally decisive: Android/iOS cap concurrent connections (~8 system-wide), but that cache throttles <em>connected</em> topologies, not broadcast activity. A node's effective degree is bounded by radio duty-cycle and energy budget, not by the OS connection cache (<code>§13.3a</code>, critique 39.2).</p>
+        </div>
+      </details>
+      <details>
+        <summary>The byte ceilings that force the packet design</summary>
+        <div class="acc-body">
+          <ul>
+            <li>Legacy advertising PDU payload: <strong>31 B</strong> total.</li>
+            <li>Type 0xFF (manufacturer) block inside it: <strong>27 B</strong> usable.</li>
+            <li>Custom AD record: up to <strong>29 B</strong>.</li>
+            <li>iOS background advertising serializes/coalesces to <strong>≤ 23 B (dual-AD)</strong>; extra records go to an overflow area — delivered, but delayed and not on a guaranteed cadence.</li>
+            <li>Android 12+ requires the nearby/fine-location advisory for BLE scanning/advertising; iOS requires background modes; both throttle in background.</li>
+          </ul>
+          <p>These ceilings are why the core payload is <strong>56 bits + Hamming(7,4) ECC = 13 bytes</strong>: it fits Type-0xFF (27 B) and the iOS dual-AD (23 B) with headroom, and the <code>BLEFraming</code> dual-AD scheme pads it exactly into the iOS-safe shape (<code>§14.6</code>).</p>
+        </div>
+      </details>
+      <details>
+        <summary>Half-duplex, energy asymmetry, and the meeting problem</summary>
+        <div class="acc-body">
+          <p>Two devices meet as a <strong>trade</strong>: A's advertisement and B's scan window must overlap in time (and channel). The system uses a <em>willing-to-advertise</em> discipline — advertise frequently when metadata forks, less when quiescent; scan with a duty cycle that protects energy; treat discovery as stochastic, not scheduled (<code>§13.2</code>).</p>
+          <p>Radio economics reshape the protocol: transmitting an advert slot is cheap (~1.32 µAh/s in the constant model) while <em>listening</em> is ~10× (≈14.23 µAh/s at 10 Hz scan). So the protocol <strong>spends broadcast slots and hoards listen time</strong> — plus local-report absorption so nodes don't re-broadcast whole neighbourhoods (<code>§13.4</code>).</p>
+        </div>
+      </details>
+      <details>
+        <summary>Direction finding: AoA/AoD vs swept-RSSI (the honest answer)</summary>
+        <div class="acc-body">
+          <p><strong>BLE 5.1 AoA/AoD</strong> (constant-tone extension + IQ phase sampling) requires a <em>switched antenna array</em> in the locator — a physical antenna array commodity smartphones do not have. AoD additionally requires a fixed beacon array, which violates the infrastructure-less contract. The adversarial critique is correct here and is <strong>baked into the design</strong>: Find Us never carried AoA IQ streams (<code>§39.1</code>).</p>
+          <p>What a commodity phone actually does for direction:</p>
+          <ul>
+            <li><strong>Swept-RSSI / rotate-to-find:</strong> rotate 360°, log RSSI against device bearing, take the peak. RSSI-class observation, not a phase array. Bearings are <em>provisional on E17</em> — flagged <span class="chip chip-open">FIELD OPEN</span>, <code>NOT-RUN</code>.</li>
+            <li><strong>Torso-shadowing cardioid:</strong> your body occludes ~50 dB behind you; a rotation scan reads as a cardioid pattern, giving a bearing toward the peer — the terminal-handoff exploit (run <code>exp_012_terminal_handoff</code>).</li>
+            <li><strong>Multi-witness consistency:</strong> any single bearing is demoted unless closed-cycle cross-checks agree — no single-source bearing is ever promoted to EXACT tier.</li>
+            <li><strong>Optional accelerants:</strong> if a device has an array (some tablets/enterprise), protocol negotiates a <code>DirectionCapability</code> flag and upgrades edge quality — never requires it. Future UWB / channel-sounding plays the same optional role.</li>
+          </ul>
+          <p>Bottom line, from the manuscript: the way out of a direction hole is <em>corruptible-but-correctable witnesses</em>, not global trilateration and never a phase array.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Why the packet is connection-free and OS-safe</summary>
+        <div class="acc-body">
+          <p>The core frame (13 B) fits all ceilings; extensions chunk via <code>seq</code>-trie reassembly. The <code>BLEFraming</code> dual-AD injects a 16-bit Service-UUID anchor (0xFC00) — mandatory so background iOS scanning with a service-UUID filter sees the packet at all (manufacturer-data-only is invisible to locked iPhones, Task 01 finding) — then carries the payload inside the ≤ 23 B iOS-safe shape. This is deployed in both the Kotlin and Swift <code>BLEFraming</code>.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
   <!-- ===================== SIMULATIONS ===================== -->
   <section class="page" id="tab-sim" data-page="sim" hidden>
     <h2>Simulations — the engine, operated</h2>
@@ -363,6 +457,16 @@
           <dt>Freshness / expiry</dt><dd>Nodes die at 120 s, edges at 60 s in the reference; a route claim is &ldquo;live&rdquo; for 120 s.</dd>
           <dt>Nav tier</dt><dd>The lowest mutually measurable navigation signal two phones agree on.</dd>
           <dt>Mule</dt><dd>A delay-tolerant carrier (runner/drone) that physically moves a cached gradient across a gap.</dd>
+          <dt>Advertising channels</dt><dd>BLE's 3 of 40 RF channels (37–39) dedicated to advertisements; the entire discovery protocol rides them.</dd>
+          <dt>Byte ceilings</dt><dd>Legacy adv payload 31 B; Type-0xFF block 27 B; iOS background dual-AD ≤ 23 B. The 13-byte frame fits all three.</dd>
+          <dt>Dual-AD framing</dt><dd>iOS-safe advertisement shape: 16-bit Service-UUID anchor (0xFC00) + payload, ≤ 23 B, so locked iPhones can see the packet.</dd>
+          <dt>Connection-free topology</dt><dd>Edges form from heard advertisements, never GATT connections — dodging the OS ~8-connection cache; degree is bounded by energy, not sockets.</dd>
+          <dt>PHY</dt><dd>BLE radio physical layer (LE 1M/2M/Coded). Find Us uses the advertising floor, not streams, so PHY choice is an OS/nicer-trade, not a design fork.</dd>
+          <dt>CTE / IQ</dt><dd>Constant-tone extension + in-phase/quadrature sampling — the BLE 5.1 machinery behind AoA/AoD; needs a switched antenna array smartphones lack.</dd>
+          <dt>AoA / AoD</dt><dd>Angle of arrival/departure. Not used by the design (§39.1): the way out of a direction hole is witnesses and swept-RSSI, never a phase array.</dd>
+          <dt>Swept-RSSI (rotate-to-find)</dt><dd>RSSI vs device-heading peak; RSSI-class, provisional on E17 (NOT-RUN), never promoted to EXACT without cycle-consistent witnesses.</dd>
+          <dt>Uncertainty tier</dt><dd>EXACT / OBSERVED / DERIVED / GHOSTED / Unknown — every edge is stored with its evidence ceiling; no upgrade without a witness.</dd>
+          <dt>Ghost rule</dt><dd>A relay advertises hop H only while still re-hearing a live H−1; lose the backer, fall silent. Structural anti-rumor.</dd>
         </dl>
       </div>
       <div class="card">
@@ -398,6 +502,7 @@
   </div>
 </footer>
 
+<script src="concepts.js"></script>
 <script src="app.js"></script>
 <script src="sims.js"></script>
 </body>

@@ -121,6 +121,8 @@
       g.ctx.setTransform(g.DPR, 0, 0, g.DPR, 0, 0);
       this.def.draw.call(this, g);
       g.ctx.restore();
+      const ro = dom.$("#" + this.name + "-readout");
+      if (ro && this.read) ro.textContent = this.read;
     }
     loop(dt) {
       if (!this.run) return;
@@ -217,6 +219,30 @@
     return "<b>IMPLEMENTED</b> in the engine (Kotlin + Swift) — tier negotiation is live in both apps";
   }
 
+  /* ---------------- concepts curriculum ---------------- */
+  function renderConcepts() {
+    const root = dom.$("#concepts-root");
+    if (!root || !window.CONCEPTS) return;
+    const CHIP_CLS = { measured: "chip-measured", model: "chip-model", open: "chip-open", notrun: "chip-notrun" };
+    let h = '<nav class="concepts-jump">';
+    window.CONCEPTS.forEach((ch, i) => { h += '<a href="#chap' + i + '">' + ch.chapter.split("·")[0].trim() + "</a>"; });
+    h += "</nav>";
+    window.CONCEPTS.forEach((ch, i) => {
+      h += '<section class="conch" id="chap' + i + '">';
+      h += "<h3>" + ch.chapter + "</h3>";
+      if (ch.lead) h += '<p class="conlead">' + ch.lead + "</p>";
+      ch.items.forEach((it) => {
+        h += '<div class="con">';
+        h += '<div class="con-h"><b class="ct">' + it.term + "</b>" +
+          '<span class="chip ' + (CHIP_CLS[it.cls] || "chip-open") + '">' + it.tag + "</span></div>";
+        h += '<p class="ca">' + it.ans + "</p>";
+        h += "</div>";
+      });
+      h += "</section>";
+    });
+    root.innerHTML = h;
+  }
+
   /* ---------------- init ---------------- */
   window.addEventListener("resize", () => {
     hosts.forEach((h) => { h.c = mkContext(h.canvas); h.draw(); });
@@ -225,6 +251,7 @@
   // Boot order: build switch + scan (defines SIMS module in sims.js loaded after
   // app.js, so scanning must happen when both scripts exist).
   document.addEventListener("DOMContentLoaded", () => {
+    renderConcepts();
     buildTierSwitch();
     scanHosts();
     requestAnimationFrame(raf);

@@ -137,6 +137,24 @@ main { padding: 26px 0 60px; }
 .glo dt { font-weight: 700; margin-top: 8px; color: var(--ink); }
 .glo dd { margin: 0 0 2px; color: var(--ink-dim); }
 
+/* concepts curriculum */
+.concepts-jump { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.concepts-jump a {
+  color: var(--ink-dim); text-decoration: none; font-weight: 600; font-size: 12px;
+  background: var(--panel2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px;
+}
+.concepts-jump a:hover { color: var(--ink); border-color: var(--accent); }
+.conch { margin: 22px 0; scroll-margin-top: 64px; }
+.conch h3 { font-size: 18px; color: var(--accent); margin-bottom: 2px; }
+.conlead { color: var(--ink-dim); font-size: 14px; margin: 2px 0 10px; max-width: 90ch; }
+.con {
+  background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--line);
+  border-radius: 8px; padding: 8px 14px 2px; margin: 8px 0;
+}
+.con-h { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ct { font-weight: 700; color: var(--ink); }
+.ca { color: var(--ink-dim); margin: 4px 0 10px; font-size: 14.5px; max-width: 90ch; }
+
 /* walkthrough player */
 .caption-list { font-family: var(--mono); font-size: 14px; color: var(--ink-dim); padding: 12px 14px; background: #0a0e14; border: 1px solid var(--line); border-radius: 10px; margin: 10px 0 0; }
 .caption-list li { margin: 4px 0; }
