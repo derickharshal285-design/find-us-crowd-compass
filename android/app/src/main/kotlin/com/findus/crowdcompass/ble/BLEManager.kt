@@ -155,7 +155,7 @@ class BLEManager(
 
             // Parse service data (AD type 0x16) — the FEC carrier for the
             // service-UUID anchor. iOS background scanning filters on this UUID.
-            val carrier = scanRecord?.let { getServiceData(serviceUuid) } ?: return
+            val carrier = scanRecord?.getServiceData(serviceUuid) ?: return
             parseGradient(carrier, rssi, device)?.let(onGradientDiscovered!!)
             }
 
