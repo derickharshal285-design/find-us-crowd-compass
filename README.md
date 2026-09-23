@@ -1,62 +1,29 @@
-# Find Us — Crowd Compass · Repo Manifest (canonical)
+# find-us crowd compass
 
-> **Orientation: RESEARCH-FIRST.** This repo's spine is *not* the iOS build — it is the
-> single detailed paper and the research corpus that justify it. The native build is a
-> downstream artifact of the research, not the headline. Papers first; build next.
+> **LIVE** → https://find-us-crowd-compass-etw8ixzc7.vercel.app
 
----
+A phone-top-of-page proof that a crowd can find US: **single-sideband (SSB) Grad-Mesh over BLE** on ordinary phones, no cellular, no internet, no base station. A high-frequency packet beacon frequency, a mesh of listening watches, and a mousehole-search physics through the dense hollow that is a crowd.
 
-## 1. The single detailed paper (the deliverable)
+- **Run the site**: open the LIVE URL above (deployed via Vercel CLI — https://find-us-crowd-compass-ntzdblnex.vercel.app).
+- **Read the paper first**: IS THIS FAST? NO — then research is the spine. See `research/01_PAPER/01_manuscript.md` (paper) then journey via `docs/00_START_HERE.md`.
+- **Honesty constitution**: every claim is byte-proven — `[VERIFIED]` where true, `[EXP:NOT-RUN]` where it still must be measured. Nothing is fabricated; the honesty frames (52 in the manuscript) are the ledger, not decoration.
+- **Mesh status**: `[EXP:NOT-RUN]` until two real phones exchange bytes (BLE radio bridge is byte-blocked on this sandbox: bleak imports, 5/5 bridge verbs + bluez verbs absent, scan honest-empty). The site is deployed and real; the mesh is not yet measured and says so.
 
-**ONE canonical manuscript, both homes (repo + Android mirror), byte-matched:**
+## Open one thing: the interactive drag-drop site (deployed)
 
-| Artifact | Home (repo) | Bytes |
-|---|---|---|
-| Manuscript (Markdown) | `research/01_PAPER/01_manuscript.md` | 116,607 |
-| Manuscript (PDF render) | `research/01_PAPER/01_manuscript.pdf` | 122,948 |
+Grab a phone, drop a phone, watch the crowd-find-a-thing physics do a shortest-gradient descent, on the LIVE URL above.
 
-The paper is §1–§10, first-principles, and carries the honesty frame in its own
-text: the phantom performance triple (61.8× boost / 0.015 ms route / 85.3→1.39
-mAh/day) appears **only inside `[EXP:NOT-RUN]` honesty frames** — it is a
-*designed hypothetical*, never a reported result stub. The one real gap survives
-honestly: the 2-phone end-to-end demo (E10) has **not yet been run**, and the
-paper says so.
+## Repo structure (one digit = one home)
 
-## 2. The research corpus (the body)
+- `research/01_PAPER` — the single detailed paper (the spine every doc redirects to)
+- `research/02_SOURCES` — verified source ledger (`[VERIFIED]` credits)
+- `research/03_GAPS` — research gaps
+- `research/07_TOOLS` — BLE transport atoms, robustness spine, bridge learning
+- `website/` — the deployed static SPA (`vercel.json` static host)
+- `watchdog/` — mesh watchdog + honesty gateway (mutual: every home checks every home)
 
-- **30 numbered vignettes** at `research/` root (`00_START_HERE` … `29_IMPLEMENTATION`)
-  — the concept-by-concept research body, each honest-tagged.
-- **labeled homes** `research/01_PAPER … 07_TOOLS` — the paper, SOURCES ledger,
-  GAPS ledger, research dump, findings, tools, all filed, zero loose at root.
-- **`INDEX.md`** at top — the directory map.
+## The idea in one sentence
 
-## 3. The interactive teaching site
+Every phone advertises a small beacon of how-close-it-thinks-we-are along a mousehole-priority gradient; phones listen far more than they shout ($13.4), each hop toward the SOS gradient is one more mousehole-lined layer peeled, and the crowd's own phone-graph becomes the recovery antenna — peer to peer, unlicensed, on phones people already hold.
 
-- Source: `website/` (self-contained `index.html`, runs the current corpus)
-- GitHub Pages: served from the `main` branch's `website/` via `gh-pages`/Pages
-  config in `DOCUMENTATION.md`.
-
-## 4. The honest documentation set
-
-- `DOCUMENTATION.md` — the complete, current, research-first documentation.
-- `docs/` — per-area docs, all updated to research-first orientation.
-- `research/` — the corpus (paper + ledger + numbered vignettes).
-
-## 5. Honesty constitution (non-negotiable)
-
-1. Every claim carries an integrity tag: `[RES]` verified · `[PROPOSED]` design ·
-   `[SPEC]` specified · `[EXP:NOT-RUN]` not yet executed · `[UNVERIFIED]`.
-2. The phantom triple lives **only** inside `[EXP:NOT-RUN]` frames. Never as a result.
-3. Zero fabricated citations · zero fabricated DOIs · zero fabricated results.
-4. The integration gap **G-INT** survives as honestly `[PROPOSED] · [EXP:NOT-RUN]`.
-5. E10 (the two-phone demo) is the un-run honesty gate — no "works" claim until a
-   real-device run happens.
-6. Illegitimate or exposed credentials are never used, never persisted, never echoed.
-
-## 6. Status (bytes, verified)
-
-- Latest commit: `a0d6759` — pushed to `main`; verified identical to `origin/main`.
-- Paper PDF text re-rendered fresh from the manuscript.
-- Site rebuilt + mirrored to `/storage/emulated/0/CrowdCompass/06_SITE/`.
-- Secrets audit: 0 token-shaped strings in the tree (shapes `gsk_`, `ghp_`,
-  `github_pat_`, `sk-` swept, counts only).
+_Honest tag: the theory + deploy are byte-true and live; the two-phone mesh physics remain `[EXP:NOT-RUN]` until the bridge lands on real radios._
