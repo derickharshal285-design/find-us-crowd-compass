@@ -1,3 +1,6 @@
+
+> **RESEARCH-FIRST.** The single detailed paper (research/01_PAPER/01_manuscript.md) is the spine; the native build is its downstream artifact. Read the paper first.
+
 # CORE PROBLEM
 
 Derived from `docs/MASTER_SPEC.md` §4–16. The original problem was not "how do

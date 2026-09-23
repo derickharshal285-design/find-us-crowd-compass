@@ -1,3 +1,6 @@
+
+> **RESEARCH-FIRST.** The single detailed paper (research/01_PAPER/01_manuscript.md) is the spine; the native build is its downstream artifact. Read the paper first.
+
 # CROWD COMPASS — MASTER PROJECT SPECIFICATION & RESEARCH/BLOCK PLAN
 
 ## 0. Purpose of this document

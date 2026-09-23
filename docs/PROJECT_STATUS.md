@@ -1,3 +1,6 @@
+
+> **RESEARCH-FIRST.** The single detailed paper (research/01_PAPER/01_manuscript.md) is the spine; the native build is its downstream artifact. Read the paper first.
+
 # PROJECT STATUS
 
 Source of truth: `docs/MASTER_SPEC.md`. This file mirrors spec §60 and adds the

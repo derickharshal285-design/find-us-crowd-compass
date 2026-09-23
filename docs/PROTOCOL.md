@@ -1,3 +1,6 @@
+
+> **RESEARCH-FIRST.** The single detailed paper (research/01_PAPER/01_manuscript.md) is the spine; the native build is its downstream artifact. Read the paper first.
+
 # PROTOCOL
 
 Packet/data model. Source: `docs/MASTER_SPEC.md` §22–24, §53–54, §65. The

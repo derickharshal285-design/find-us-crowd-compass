@@ -1,34 +1,13 @@
 # Find Us / Crowd Compass — Complete Documentation
 
-## ⚠ READ FIRST (2026-09 pivot)
+## ⚠ READ FIRST — orientation
 
-The previous "Research Cascade" section documents the *older* design lineage.
-Both have been folded into a single source of truth: **`docs/MASTER_SPEC.md`**
-(92 sections). The sections below `## Research Cascade` remain as archive;
-wherever they conflict with the master spec, the spec wins. Current
-implementation status lives in `docs/PROJECT_STATUS.md`; each design decision
-is an ADR under `docs/DECISIONS/` (ADR-010 security and ADR-011 identity are
-still OPEN).
+**This repository is RESEARCH-FIRST.** The single detailed paper is the deliverable;
+the native iOS/Android build is a downstream artifact of that research. Read order:
+(1) the paper, (2) the honesty ledger, (3) the research corpus, (4) the build.
 
-New pure-Python engine (spec §63 Blocks 1–6, 8; run with `PYTHONPATH=core`):
-
-| Module | Implements | Self-test |
-|--------|------------|----------|
-| `core/domain.py` | block 1 types/enums, lifecycles, statuses | – |
-| `core/graph.py` | dynamic graph, hop BFS, events, aging (§84 A–D, G) | 22 checks |
-| `core/relationships.py` | spatial measurement store + compose (§84 C) | 17 checks |
-| `core/sos.py` | SOS gradient engine, flood, expiry (§40–41, §84 E–L) | 34 checks |
-| `core/protocol.py` | versioned binary codec (§23, §84 B) | 23 checks |
-| `core/simulation.py` | §57 scenarios, §58 fake radio, §59 metrics | 32 checks |
-| `app/devices.py` | one phone = local graph + SOS gradient, wire-only exchange (§48 L2–L3, §56, §64) | app selftests |
-| `app/guidance.py` | honest responder instructions (NO_SOS_KNOWN / NAVIGATING / NO_VALID_ROUTE / AT_TARGET) | app selftests |
-| `app/world.py` + `app/main.py` | transport-agnostic world + `demo`/`shell` CLI | app selftests |
-
-Key structural differences from the archive below: explicit `UNKNOWN` never
-encoded as `0`, no permanent anchor, topology is separate from geometry,
-`null` distance ceiling is explicitly unchecked (spec §65) rather than a
-validated RSSI↔distance table, and the 13-byte Hamming transport is optional
-rather than mandatory (vector chaining is dropped).
+**Read this documentation top-to-bottom.** Then read the paper — it is the spine.
+Everything below the paper exists to carry it.
 
 ## Executive Summary
 

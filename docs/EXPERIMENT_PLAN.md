@@ -1,3 +1,6 @@
+
+> **RESEARCH-FIRST.** The single detailed paper (research/01_PAPER/01_manuscript.md) is the spine; the native build is its downstream artifact. Read the paper first.
+
 # EXPERIMENT PLAN
 
 Source: `docs/MASTER_SPEC.md` §56–59, §74, §77, §79. Two tracks: simulation
