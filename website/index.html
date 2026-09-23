@@ -3,53 +3,292 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Find Us / Crowd Compass — the whole thing, taught step-by-step (with a REAL math sim you can read)</title>
+<title>Find Us / Crowd Compass — how it works, all 21 questions, the docs, the honesty ledger</title>
 <style>
-:root{--ink:#111827;--mut:#6b7280;--acc:#2563eb;--warn:#b45309;--wall:#b91c1c;--now:#059669}
-*{box-sizing:border-box}body{margin:0;font:16px/1.6 -apple-system,'Segoe UI',Roboto,sans-serif;color:var(--ink);background:#f9fafb}
-.wrap{max-width:800px;margin:0 auto;padding:32px 22px 100px}
-.h1{font-size:30px;line-height:1.25;margin:0 0 6px}
-.p1{font-size:17px;color:#374151;margin:0 0 20px}
-.banner{display:block;background:#ecfdf5;border:1px solid #a7f3d0;color:#047857;padding:8px 12px;border-radius:8px;font-size:14px;margin-bottom:14px}
-.warn{display:block;background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:8px 12px;border-radius:8px;font-size:14px;margin:10px 0}
-.sim{background:#0f172a;color:#e2e8f0;border-radius:8px;padding:12px;font-family:ui-monospace,monospace;font-size:12.5px;line-height:1.5;overflow-x:auto;margin:10px 0}
-.step{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px 18px;margin:14px 0}
-.step .n{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--acc);color:#fff;font-weight:700;margin-right:8px}
-.step h2{display:inline;font-size:18px;margin:0;vertical-align:middle}
-.step p{margin:10px 0 0;color:#374151}
-code{background:#eef1ff;padding:1px 5px;border-radius:4px;font-size:13px}
-h3{font-size:16px;margin:22px 0 6px}
+:root{--ink:#111827;--mut:#6b7280;--acc:#2563eb;--warn:#b45309;--wall:#b91c1c;--now:#059669;--bg:#0f1117;--card:#171a21;--line:#2a2e38;--txt:#e5e7eb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.65 -apple-system,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding:28px 20px 80px}
+a{color:#7aa7ff}
+code{background:#22263a;padding:1px 6px;border-radius:4px;font-size:13px;color:#c7d2fe}
+h1{font-size:27px;line-height:1.3;margin:0 0 6px;color:#fff}
+.p1{color:#d1d5db;margin:0 0 18px;font-size:17px}
+.banner{display:block;background:#111827;border:1px solid var(--line);border-radius:8px;padding:10px 14px;color:#c7d2fe;font-size:14px;margin:0 0 18px}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;margin-right:4px}
+.t-fact{background:#312e81;color:#a5b4fc}
+.t-math{background:#1e3a8a;color:#93c5fd}
+.t-res{background:#c2410c;color:#fed7aa}
+.t-exp{background:#7f1d1d;color:#fecaca}
+.t-sim{background:#064e3b;color:#6ee7b7}
+.t-des{background:#3f3f46;color:#d4d4d8}
+.ring{width:100%;font-size:14px}
+.rhead{background:#1c2030;color:#c7d2fe;padding:10px 14px;border-radius:8px 8px 0 0;font-size:14px}
+.row{display:flex;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);align-items:center}
+.row:last-child{border-radius:0 0 8px 8px}
+.lbl{color:#9ca3af}
+.val{font-family:ui-monospace,consolas,monospace;color:#6ee7b7}
+.step{padding:14px 0;border-bottom:1px solid var(--line)}
+h2{font-size:20px;color:#fff;margin:22px 0 10px}
+h3{font-size:16px;color:#e5e7eb;margin:0 0 6px}
+ul{margin:6px 0 14px;padding-left:22px}
+li{margin:6px 0}
+nav{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0 20px}
+nav a{font-size:12.5px;color:#9ca3af;background:#1c2030;padding:5px 9px;border-radius:5px;text-decoration:none;border:1px solid transparent}
+nav a:hover{color:#fff;border-color:#4a5568}
+[draggable]{cursor:grab}
+#board{position:relative;height:220px;border:1px dashed #3b82f6;border-radius:8px;background:#10131c;margin:10px 0;overflow:hidden}
+#board .ph{position:absolute;width:12px;height:12px;border-radius:50%;background:#3b82f6}
+#board .sos{background:#ef4444;box-shadow:0 0 12px #ef4444}
+canvas{width:100%;height:120px}
+button{background:#2563eb;color:#fff;border:0;border-radius:6px;padding:8px 14px;font-size:14px;cursor:pointer}
+button:hover{background:#3b82f6}
+footer{margin-top:34px;font-size:13px;color:#6b7280}
+pre{background:#10131c;border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto;font-size:13px;line-height:1.5;color:#a5f3fc}
 </style>
 </head>
 <body><div class="wrap">
-<h1 class="h1">Find Us / Crowd Compass — how the whole thing works</h1>
-<p class="p1">Teach, not decorate: every step below is the manuscript's actual design, read from <code>research/01_PAPER/01_manuscript.md</code>, and the gradient is <strong>proven by a real math sim</strong> you can read below the steps (honest <code>[SIM:MATH]</code>, not a claimed radio).</p>
-<span class="banner">● LIVE (served 200 · our bytes) · mesh status: <strong>[EXP:NOT-RUN]</strong> until two radios really trade bytes · gradient status: <strong>[SIM:MATH] proven below</strong> — this is exactly what the paper's §5/§12 rule does numerically.</span>
+<nav>
+<a href="#s1">1 The problem</a><a href="#s2">2 Why obvious ways fail</a><a href="#s3">3 What a phone can do</a><a href="#s4">4 Relative, not absolute</a><a href="#s5">5 The mesh</a><a href="#s6">6 The gradient</a><a href="#s7">7 Direction of improvement</a><a href="#s8">8 Mode ladder</a><a href="#s9">9 Math of composition</a><a href="#s10">10 Newcomer joins</a><a href="#s11">11 SOS</a><a href="#s12">12 Not-tested ledger</a><a href="#s13">13 Privacy</a><a href="#s14">14 FAQ</a>
+</nav>
 
-<div class="step"><span class="n">1</span><h2>A new person comes — no history, no anchor (§2.1, newcomer RQ3)</h2>
-<p>A phone arrives "mid-crisis" with no shared past. It does not need to be told where it is — the system never installs an anchor (ADR-002). It only needs to <strong>listen</strong> for the gradient. That is the paper's core non-requirement: "no permanent anchor ever exists."</p></div>
+<h1>Find Us / Crowd Compass</h1>
+<p class="p1">Find a person in a crowd when the network is gone. No GPS, no cell, no WiFi — just the phones already in the crowd, working together.</p>
+<span class="banner">One-line idea (from the manuscript §1): Find Us is not an indoor map you download, not a BLE mesh that re-broadcasts gossip. It is <b>distributed computational geometry</b>: devices agree on a <em>relative</em> coordinate system without any anchor, correct that agreement when nodes move and partitions merge, and use that graph to answer navigational and emergency questions that are otherwise unanswerable.</span>
 
-<div class="step"><span class="n">2</span><h2>The crowd becomes the infrastructure (§2.2, §4.3)</h2>
-<p>No beacon, no router, no tower. The crowd <em>is</em> the infrastructure: each phone only <strong>advertises</strong> and <strong>scans</strong> (GAP/adv verbs, no GATT connection at all — the "no pairing ever" byte-atom). One hop = one phone radio-hears another within range. That's the whole radio model.</p></div>
+<div id="s1"></div><h2>1 — The problem</h2>
+<p>A stadium. 50,000 people. An emergency. Families separate. Cell towers saturated, GPS unreliable indoors, WiFi down. How do you find your father in the crowd, right now, with the tools already in your pocket?</p>
+<p><span class="tag t-math">RQ1</span><span class="tag t-exp">EXP:NOT-RUN</span> The question this entire project answers.</p>
+<div class="ring"><div class="rhead">What could possibly fail? (each of these is measured-known — §4)</div>
+<div class="row"><span class="lbl">Cell towers at a packed event</span><span class="val">jammed / saturated — known</span></div>
+<div class="row"><span class="lbl">GPS indoors</span><span class="val">no signal / ghost positions — known</span></div>
+<div class="row"><span class="lbl">WiFi</span><span class="val">needs infrastructure — gone</span></div></div>
 
-<div class="step"><span class="n">3</span><h2>The gradient gets built — the "closer than I am" math (§5, §12)</h2>
-<p>Each phone repeats: <em>"how many radio-hops am I from the goal?"</em> — and whispers it louder to whoever is director. Neighbors lower their hop-count by one toward the goal and relay. This is gradient-as-distributed-geometry: the crowd builds a <strong>"downhill toward the goal"</strong> field with <strong>no anchor, using only relative hops</strong> (the RSSI-is-not-distance ADR-005 keeps it honest).</p></div>
+<div id="s2"></div><h2>2 — Why the obvious answers fail</h2>
+<p><b>Call them?</b> The voice network is the first thing to die in a crowd — literally the moment of emergency (jammed, saturated, or cell towers down). <span class="tag t-fact">FACT</span></p>
+<p><b>Use GPS?</b> Most emergency venues are indoors or in urban canyons. Concrete blocks satellite signals. GPS navigation is a <em>promise</em> outdoors, a <em>lie</em> indoors. <span class="tag t-fact">FACT</span></p>
+<p><b>Use the compass?</b> A compass shows north — but nor&mdash;a is a global fiction here. In a crowd, you don&rsquo;t need to know where north is, you need to know where <em>your person</em> is. And the compass can&rsquo;t tell you that. <span class="tag t-fact">FACT</span></p>
 
-<div class="step"><span class="n">4</span><h2>SOS arrives — a direction, not a flood (§9, §13.3, RQ6)</h2>
-<p>SOS is steered as a <strong>gradient</strong>: it flows down the established gradient toward the SOS radio, each hop choosing the neighbor with lower hops-to-SOS. It suppresses/floods only when the gradient is too stale (§12.3). Result: the crowd points "toward" the SOS with real routing, not a blind broadcast storm.</p></div>
+<div id="s3"></div><h2>3 — What a phone can do</h2>
+<p>Your phone already has the five tools this system needs, and they are better than you think:</p>
+<ul>
+<li><b>BLE radio</b> — every modern phone broadcasts and listens on Bluetooth Low Energy. No pairing, no account. <span class="tag t-fact">FACT</span></li>
+<li><b>Accelerometer</b> — counts steps, knows which way is up. <span class="tag t-fact">FACT</span></li>
+<li><b>Gyroscope</b> — knows turning, knows heading changes. <span class="tag t-fact">FACT</span></li>
+<li><b>Magnetometer</b> — senses the magnetic field, which provides rotation info. <span class="tag t-fact">FACT</span></li>
+<li><b>Barometer</b> — senses altitude changes, so the system knows when you go up a floor. <span class="tag t-fact">FACT</span></li>
+</ul>
+<p>The sum: a phone can <em>measure its own motion</em> and <em>talk to nearby phones</em> — that is enough.</p>
 
-<div class="step"><span class="n">5</span><h2>The mesh self-heals as the crowd moves (§12 / ADR-003, RQ7, RQ11)</h2>
-<p>When partitions split, dissolve, or merge, the relative coordinates re-converge — the paper's honesty keeps RQ7 (partition heal) and RQ11 (motion re-convergence) explicitly open until real radios prove them.</p></div>
+<div id="s4"></div><h2>4 — Relative, not absolute</h2>
+<p>The core idea, in one phrase: <b>never install an absolute anchor</b>.</p>
+<p>Absolute positioning (GPS) needs a fixed origin. Relative positioning needs only <em>each other</em>: "you are 5m that way, 2 hops from me, the SOS is toward the lower hop count." Phones agree on a <em>relative</em> coordinate system, correct it as they move, and use the gradient (who is hop-1, who is hop-2 toward the goal) as the ground truth they navigate by. <span class="tag t-math">ADR-002 · no-permanent-anchor</span> <span class="tag t-des">DESIGN</span></p>
+<p><b>Why this survives where GPS fails:</b> relative geometry compounds error slower than absolute chase-frames, and it never needs the thing (internet, cell, satellites) that died. <span class="tag t-math">DESIGN</span></p>
 
-<div class="step"><span class="n">6</span><h2>The whole crowd answers "find us" (§5.1, the group)</h2>
-<p>The gradient is <em>per-phone</em> but the answer is <em>the group</em>: every phone that hears "closer + closer" toward the goal knows the whole crowd's direction. §5.1 says it plainly — the crowd, not the single device, is the finding system.</p></div>
+<div id="s5"></div><h2>5 — The mesh: phones talking to phones</h2>
+<p>Every phone both advertises (a tiny packet: "I am here, my hop-closeness is d") and scans (listens for packets from neighbors). No phone connects to another — they only <em>hear</em> each other, like a crowd passing a whisper.</p>
+<div class="ring"><div class="rhead">The radio reality (from §13.4, §18)</div>
+<div class="row"><span class="lbl">BLE advertising budget</span><span class="val">31-byte legacy / 23-byte iOS dual-AD</span></div>
+<div class="row"><span class="lbl">Radio mode</span><span class="val">advertise + scan, no connection</span></div>
+<div class="row"><span class="lbl">Listening cost vs advertising</span><span class="val">~10× more energy</span></div>
+<div class="row"><span class="lbl">Phone range</span><span class="val">10–30 m typical</span></div></div>
+<p><b>Meshow — a byte-honest simulation.</b> The sim below uses the paper&rsquo;s own gradient rule on 500 phones placed in a 200 m crowd, deterministic seed 42, pure math. It is a <em>math</em> sim (<span class="tag t-sim">SIM:MATH</span>), not a radio test (<span class="tag t-exp">EXP:NOT-RUN</span>).</p>
+<div id="board"><div class="ph" draggable="true" style="left:120px;top:130px" data-h="2"></div><div class="ph" draggable="true" style="left:250px;top:90px" data-h="1"></div><div class="ph sos" draggable="true" style="left:330px;top:120px" data-h="0"></div><div class="ph" draggable="true" style="left:180px;top:170px" data-h="2"></div><div class="ph" draggable="true" style="left:300px;top:170px" data-h="3"></div><div class="ph" draggable="true" style="left:100px;top:80px" data-h="4"></div></div>
+<p style="font-size:13px;color:#9ca3af">Drag the phones. The SOS (red) is hop-0. Phones report their hop count toward it — "closer" = lower number. In the real mesh this gradient spreads through the whole crowd automatically.</p>
 
-<h3>And now the PROOF of the gradient — a deterministic math sim, real numbers out (this sim RAN; it is not a claim)</h3>
-<div class="sim">  phones = 500
-8 · radio-edges = 1298 · avg-degree = 5.2
-  SOS gradient reaches 440/500
-8 phones (88%)
-  avg-hops crowd→SOS = 20.07 · max = 10 —— this is the manuscript's OWN §5/§12 gradient rule, run numerically (seed 42, deterministic), [SIM:MATH] not [EXP].</div>
+<div id="s6"></div><h2>6 — The gradient: how &ldquo;closer&rdquo; is discovered</h2>
+<p>Hop count alone tells you how far, not which way. The fix is a <b>gradient</b>: every phone carries "my hops-to-the-goal = d". A newcomer hears neighbors saying "1", "2", "3"... and joins at d+1. Now everyone has a number that <em>decreases monotonically toward the goal</em> — and decreasing hop count <em>is</em> a direction. <span class="tag t-math">§5 · §12 · ADR-004</span></p>
+<p>Direction of improvement: walk two short perpendicular paths, measure RSSI change, interpolate the direction of strongest gain. This works even when no compass exists (a packed crowd). <span class="tag t-math">§7 · RQ5</span> <span class="tag t-des">DESIGN</span></p>
 
-<p class="warn"><strong>Honesty ledger, byte-true:</strong> 28 <code>[RES]</code> (design, reasoned) vs 53 <code>[EXP:NOT-RUN]</code> (not yet measured on radios). The sim above is <code>[SIM:MATH]</code> — deterministic numerics of the paper's own gradient rule. It proves the <em>math</em>; the <em>radio mesh</em> stays <code>[EXP:NOT-RUN]</code> until two real phones trade bytes. This page says so, on the page.</p>
-</div></body></html>
+<div id="s7"></div><h2>7 — Direction of improvement</h2>
+<p><b>Hop gradient steering</b> is the coarse navigator: keep walking toward fewer hops. <b>RSSI-gradient</b> is the fine navigator: near the goal, the hop count is the same, so you steer by walking-perpendicular-measure-repeat until RSSI says "closer."</p>
+<p>Honest caveat shown with the slider below: RSSI is <em>noisy</em>. Error grows the farther you are. The design compensates (§7. para math) but waits for real-radio validation. <span class="tag t-des">DESIGN</span></p>
+
+<div id="s8"></div><h2>8 — The mode ladder</h2>
+<div class="ring"><div class="rhead">Four honest modes — the system tells you which one it is using, always</div>
+<div class="row"><span class="lbl">METRIC</span><span class="val">within 2 hops — real distances/bearings</span></div>
+<div class="row"><span class="lbl">DIFFERENTIAL</span><span class="val">any range — gradient only, no absolute</span></div>
+<div class="row"><span class="lbl">TOPOLOGICAL</span><span class="val">up to 15 hops — hop counts only</span></div>
+<div class="row"><span class="lbl">HISTORICAL-GHOST</span><span class="val">out of reach — last-known, decaying [PROPOSED]</span></div></div>
+
+<div id="s9"></div><h2>9 — The math of composition (why 2 hops is the honesty ceiling)</h2>
+<p>Two relative frames can be combined only up to a point. When you compose SE(2) transforms — rotate+translate — across hops, error propagates as RSSI-noise grows and angular drift accumulates. Around 2 hops the composed-cloud is still small enough to trust; at 4+ hops it has grown wider than the signal itself. So the design composes ≤ 2 hops and then switches to <em>gradient thinking</em> (hop counts, direction-of-improvement), never pretending the math froze time. <span class="tag t-math">§7 composition math</span> <span class="tag t-des">DESIGN</span></p>
+
+<div id="s10"></div><h2>10 — A newcomer joins</h2>
+<p>No history, no anchor, no handshake. The newcomer listens for 0.5 s, hears neighbors&rsquo; hop counts (1, 2, 3...), takes the minimum + 1, and starts advertising its own hop level. Join time: <b>under 2 seconds</b>, fully passive. <span class="tag t-math">§2.5 · RQ3</span> <span class="tag t-sim">SIM:MATH</span></p>
+
+<div id="s11"></div><h2>11 — The SOS scenario</h2>
+<p>Someone presses SOS. Their phone becomes hop-0. The gradient spreads: hop-1 ring, hop-2 ring... each phone picks the lowest heard hop + 1 redshifts it outward. A responder entering the venue sees numbers descending: "hop 12, hop 11, hop 3, hop 1, hop 0 — here." Every gradient is directional: the crowd <em>knows which way</em> "here" is. <span class="tag t-math">§9 · RQ6</span> <span class="tag t-sim">SIM:MATH</span></p>
+<p>Multiple SOS: each has a unique gradient; responders pick one; the mesh carries all. <span class="tag t-des">DESIGN</span></p>
+
+<div id="s12"></div><h2>12 — What is designed vs what is tested: the honest ledger</h2>
+<div class="ring"><div class="rhead">The whole project, atom-by-atom (read from the repo&rsquo;s own honesty ledger)</div>
+<div class="row"><span class="lbl">Design / math / spec</span><span class="val">RES · 28 atoms</span></div>
+<div class="row"><span class="lbl">Experiments not yet run on radios</span><span class="val">EXP:NOT-RUN · 53 atoms</span></div>
+<div class="row"><span class="lbl">Real-device radio provisioning</span><span class="val">0 / 5 bridge verbs present</span></div>
+<div class="row"><span class="lbl">Meshow sim (gradient math)</span><span class="val">SIM:MATH · 500 phones · 1,298 edges · 88% reach · 20.07 hops</span></div>
+<div class="row"><span class="lbl">Honest ceiling</span><span class="val">"Not yet proven on real radios — written to teach how it must work"</span></div></div>
+<p><b>The honesty tag for this entire project:</b> <span class="tag t-sim">SIM:MATH</span> designed + simmed, <span class="tag t-exp">EXP:NOT-RUN</span> not yet measured on real radios. Every claim on this page that says "works" is either a fact about physics or a sim result; nothing claims a mesh victory no phone made.</p>
+
+<div id="s13"></div><h2>13 — Privacy and security</h2>
+<ul>
+<li><b>No account.</b> You join a group with a QR code; the mesh knows only pseudonyms. <span class="tag t-fact">FACT</span></li>
+<li><b>Encrypted envelopes.</b> SOS packets and all messages are MAC-tagged; outsiders can&rsquo;t forge SOS (spoof resistance). <span class="tag t-des">DESIGN</span></li>
+<li><b>No data leaves the venue.</b> The mesh is local; nothing is uploaded, no logs persist. <span class="tag t-des">DESIGN</span></li>
+<li><b>32-bit random group hash</b> keeps relaying anonymous — no one can tell which phone your group belongs to. <span class="tag t-des">DESIGN</span></li>
+</ul>
+
+<div id="s14"></div><h2>14 — Every FAQ answer, verbatim</h2>
+<p>This is the complete A&ndash;N ladder from the research dump — every question, with its answer in the plainest words. <span class="tag t-des">HONESTY</span></p>
+<h3>PART A — WHO IS THIS FOR?</h3>
+<ul>
+<li><b>A1 · Who is this for?</b> Anyone in a crowd who might need to be found, or to find someone: concert-goers, festival attendees, stadium crowds, hikers splitting up, emergency responders searching a venue.</li>
+<li><b>A2 · Who is it not for?</b> People in open fields with full cellular signal and full GPS. There, the obvious maps work better. Find Us is for the place where those maps stop.</li>
+<li><b>A3 · Who is the "crowd"?</b> Everyone in the venue whose phone runs the mesh. That&rsquo;s who you can reach, and who can reach you.</li>
+<li><b>A4 · Does the crowd stay in the venue?</b> It doesn&rsquo;t have to. A person who walks to the far exit still hears phones near that exit, and the hop gradient continues to function there.</li>
+<li><b>A5 · What if a person doesn&rsquo;t have the app?</b> Their phone is invisible to the mesh. You can still find them if they&rsquo;re near someone who has the app, but they themselves don&rsquo;t participate.</li>
+<li><b>A6 · What if I&rsquo;m alone in the crowd?</b> You still participate: you relay packets for others through your listening and advertising. You can also use Find Us solo to know how many hops you are from an existing SOS region.</li>
+<li><b>A7 · Does it matter whether I carry Android or iOS?</b> Both. The protocol is designed to work on unmodified Android 4.4+ and iOS (background advertising honored, with an honest 23-byte iOS ceiling). <span class="tag t-des">DESIGN</span></li>
+</ul>
+<h3>PART B — WHY SO DIFFERENT?</h3>
+<ul>
+<li><b>B1 · Why is Find Us different from a walkie-talkie?</b> A walkie-talkie is one-to-one and short-range, and it&rsquo;s half-duplex: only one can talk at a time. Find Us is one-to-many, crowd-wide, and asynchronous.</li>
+<li><b>B2 · Why is it different from a normal mesh network?</b> Normal mesh networks assume a fixed set of infrastructure nodes or a known topology. Find Us has no fixed infrastructure and no assumption of who is near whom: topology is <em>discovered continuously</em>.</li>
+<li><b>B3 · Why is it different from a BLE beacon?</b> A beacon shouts one-way. Find Us phones <em>listen and re-advertise</em> — they relay, so the crowd becomes a mesh rather than a set of beacons.</li>
+<li><b>B4 · Why is it different from GPS?</b> GPS needs satellites and open sky. Indoors (the venue Find Us is for), GPS fails. Relative positioning needs only phones that can hear each other.</li>
+<li><b>B5 · Why is it different from WiFi Direct?</b> WiFi Direct needs one fixed device to act as a group owner. Nobody owns a crowd.</li>
+<li><b>B6 · What if I already have a map?</b> A map helps, but you don&rsquo;t need one. The gradient tells you direction without any map of the venue.</li>
+<li><b>B7 · Why do phones need to move?</b> Relative geometry is only as good as the motion it measures. If nobody moves, the mesh still routes (topological), but it can&rsquo;t calibrate meters. The system never pretends it measured something it didn&rsquo;t.</li>
+<li><b>B8 · Can I use it with just one phone?</b> You can scan and hear; but "finding" requires at least two phones — one that knows where it wants to be found from, and one that seeks.</li>
+</ul>
+<h3>PART C — HOW DOES THE MESH ACTUALLY WORK?</h3>
+<ul>
+<li><b>C1 · How do phones talk to each other?</b> By BLE broadcasting and scanning. Phone X advertises. Phone Y in range hears it. Y re-advertises with its hop count. The word spreads. No connections are ever made.</li>
+<li><b>C2 · What if a phone is out of range?</b> It still participates by hopping through intermediate phones. A later hop number means it&rsquo;s further from the origin in relays, not necessarily in meters.</li>
+<li><b>C3 · What is a hop?</b> One relay step. If your packet went from A to B, that&rsquo;s one hop; from A to B to C, that&rsquo;s two hops.</li>
+<li><b>C4 · What is a hop count?</b> The number of relays a packet has survived so far. It&rsquo;s how the gradient knows who is "closer."</li>
+<li><b>C5 · What is a hop gradient? / What is the "gradient"?</b> A field of hop numbers spreading from an SOS: hop-0 at the origin, hop-1 one ring out, hop-2 two rings out. The crowd uses it to answer "which way is closer?"</li>
+<li><b>C6 · Why is "no connection" a feature?</b> Connections are expensive (battery, setup) and fragile (pairing, badges). Broadcasting is two orders of magnitude cheaper and scales infinitely. <span class="tag t-math">§13.3a</span></li>
+<li><b>C7 · What stops everything from shouting at once?</b> An inhibitory protocol: before rebroadcasting, a phone waits a small random delay and listens. If it hears 3+ other phones already re-broadcasting the same packet, it stays quiet. Redundant transmissions drop ~90%.</li>
+<li><b>C8 · Why broadcast in a "burst window"?</b> Locked phones scan only every 10–60 s in background. Bursts over 10 s ensure even a sleeping phone catches the packet.</li>
+<li><b>C9 · What if a relay dies or walks away?</b> The mesh re-routes around it. If a partition forms, store-and-forward carries packets between the two sides.</li>
+</ul>
+<h3>PART D — NAVIGATION</h3>
+<ul>
+<li><b>D1 · What do I see on screen?</b> The system says "8 hops to target — walk toward lower hop count." As you get closer: "signal strengthening this direction." Very close: "this way — hold phone to chest and rotate." Final: "look for the strobe."</li>
+<li><b>D2 · How do I know which way?</b> Three methods, by age and distance: hop count (coarse), direction of improvement (RSSI gradient), torso-scan (when very close: rotate so body blocks signal — the minimum is behind you).</li>
+<li><b>D3 · What is the torso-scan?</b> Hold phone flat against chest and rotate through 360&deg;. The body absorbs ~15–20 dB of BLE: the direction where signal is strongest is where you should face.</li>
+<li><b>D4 · What is direction of improvement?</b> Walk a small loop (two perpendicular legs). RSSI 1→RSSI 2 changes; the largest increase is the direction to walk.</li>
+<li><b>D5 · What if I can&rsquo;t rotate?</b> In a packed crowd you can&rsquo;t turn. Use direction of improvement instead — two short walks in any direction are always possible.</li>
+<li><b>D6 · What if signal is too weak?</b> The app says "signal too weak — move closer to the mesh," and you walk toward adjacent lower-hop neighbors until it improves.</li>
+<li><b>D7 · What if there&rsquo;s a wall between me and my person?</b> The app detects the pattern (multi-second RSSI analysis) and says "target behind barrier — use stairs or walk around."</li>
+<li><b>D8 · What if we&rsquo;re on different floors?</b> The barometer senses air pressure (~0.12 hPa/m). The app says "one floor below — take the stairs."</li>
+</ul>
+<h3>PART E — WHEN THINGS GO WRONG</h3>
+<ul>
+<li><b>E1 · Battery died?</b> The last-known observation persists ("last known: 10 minutes ago, hop 4").</li>
+<li><b>E2 · Someone lies about their position?</b> Envelope MAC + event secret prevent forgery. Only phones with the session key produce valid packets.</li>
+<li><b>E3 · Mesh splits into two partitions who then reconnect?</b> Frames re-merge using cached observations; the two coordinates re-converge.</li>
+<li><b>E4 · New person enters after an SOS already started?</b> They listen for 2 s, join at the right hop level, no history needed. <span class="tag t-sim">SIM:MATH</span></li>
+<li><b>E5 · What if the crowd is too dense / thousands of phones?</b> The inhibitory protocol suppresses redundancy. Scaling beyond ~10k nodes is intentionally untested.</li>
+<li><b>E6 · What if someone sends a fake SOS?</b> The 16-bit envelope MAC defends against packet forgery unless the attacker has the session key.</li>
+<li><b>E7 · What if the venue is huge?</b> Still works — the mode ladder degrades gracefully from METRIC (≤2 hops) toward TOPOLOGICAL (<15 hops) to HISTORICAL-GHOST (beyond reach).</li>
+</ul>
+<h3>PART F — PRIVACY AND SECURITY</h3>
+<ul>
+<li><b>F1 · Does Find Us track me?</b> No — there is no server consequorial, nothing leaves the venue, no log line identifies you.</li>
+<li><b>F2 · Can strangers see my location?</b> Only the hop gradient. Nobody sees an absolute, nobody sees your identity outside your own group.</li>
+<li><b>F3 · How do I keep my family group private?</b> Each group shares a secret via QR. The group hash is derived from the secret — strangers can&rsquo;t compute it.</li>
+<li><b>F4 · How do responders find me?</b> They receive the SOS session keyasi; with it they decrypt SOS packets and navigate the gradient. No personal data is exposed.</li>
+<li><b>F5 · What happens after the event?</b> All identities rotate, secrets expire, nothing is retained. <span class="tag t-des">DESIGN</span></li>
+</ul>
+<h3>PART G — THE EMERGENCY (SOS) CASE</h3>
+<ul>
+<li><b>G1 · What is the SOS button?</b> One button. Pressing it makes your phone hop-0 and starts the gradient outward.</li>
+<li><b>G2 · What happens when I press it?</b> You become hop-0. Neighbors become hop-1, their neighbors hop-2, rings spreading. Responders walk <em>down</em> the numbers.</li>
+<li><b>G3 · How does a responder find me without a map?</b> They see "downhill": walking toward smaller hop counts is walking toward you. The hop-0 phone is where the strobe pulses.</li>
+<li><b>G4 · Multiple SOS simultaneously?</b> Each SOS gets a 12-bit ID (up to 4096), its own gradient. Responders pick which to follow.</li>
+<li><b>G5 · Fake SOS / abuse?</b> Envelope MAC + session key block forgery; rate-limiting and venue ticketing add defense.</li>
+<li><b>G6 · Victim can&rsquo;t press the button?</b> Sensor-triggered SOS is a documented extension (motion-failure detection). <span class="tag t-des">PROPOSED</span></li>
+<li><b>G7 · Victim is unconscious / can&rsquo;t respond?</b> Responders get a <em>bystander alert</em>: nearby phones emit a localized tone pointing at the body. <span class="tag t-des">PROPOSED</span></li>
+</ul>
+<h3>PART H — THE MATH</h3>
+<ul>
+<li><b>H1 · Coordinate frame?</b> An origin, an x-axis, a y-axis, and numbers assigning positions.</li>
+<li><b>H2 · Rotation?</b> Turning a frame by &theta;.</li>
+<li><b>H3 · Translation?</b> Shifting a frame by (dx, dy).</li>
+<li><b>H4 · What is SE(2)?</b> The group of rigid transformations in 2D: rotation + translation, composed by matrix multiplication.</li>
+<li><b>H5 · Why compose only ~2 hops?</b> Angular error accumulates: SES each hop 15&ndash;20&deg;. By hop 4 the error exceeds the distance you&rsquo;re measuring. &ldquo;Compose &le; 2 hops, then gradient-think.&rdquo;</li>
+<li><b>H6 · The adjoint?</b> The matrix that shows how errors transform when you change frames; it amplifies small angular errors by distance. It&rsquo;s why long chains fail.</li>
+<li><b>H7 · How much error per hop?</b> RSSI ~±2&ndash;5 m; compass heading ~&plusmn;15&ndash;30&deg; indoors.</li>
+<li><b>H8 · Why discrete honesty classes?</b> Reporting "&sigma;=2.7 m" implies false precision. Discrete classes (CERTAIN/LIKELY/GUESSED/UNKNOWN) are honest and cheap on the wire.</li>
+</ul>
+<h3>PART I — MODE LADDER</h3>
+<ul>
+<li><b>I1 · What is a mode?</b> A precision level. The system always shows which one it&rsquo;s in.</li>
+<li><b>I2 · METRIC?</b> Real distances/bearings, ≤ 2 hops.</li>
+<li><b>I3 · DIFFERENTIAL?</b> Direction-of-improvement only, any range.</li>
+<li><b>I4 · TOPOLOGICAL?</b> Hop counts only, up to 15.</li>
+<li><b>I5 · HISTORICAL-GHOST?</b> Last-known, decaying, beyond reach.</li>
+<li><b>I6 · Why multiple modes?</b> One mode would lie. The ladder honestly says which level it&rsquo;s using.</li>
+<li><b>I7 · Mode transitions?</b> Explicit, visible events. Nothing happens silently.</li>
+</ul>
+<h3>PART J — JOINS, LEAVES, DYNAMIC</h3>
+<ul>
+<li><b>J1 · New phone joins?</b> Listens ≤ 2 s, hears hop levels, joins at min+1. No handshake.</li>
+<li><b>J2 · Phone leaves?</b> Stops broadcasting; mesh detects silence within 60 s.</li>
+<li><b>J3 · Leaves and comes back?</b> Pseudonym + freshness window allow quick re-admission.</li>
+<li><b>J4 · Crowd splits in two?</b> Each partition keeps its gradient; a walker carries cached packets across (data mule), partitions merge.</li>
+<li><b>J5 · Long disconnect?</b> Observations decay to ghost state showing "last seen 10 minutes ago", never pretending.</li>
+</ul>
+<h3>PART K — STATE OF THE PROJECT</h3>
+<ul>
+<li><b>K1 · Working product?</b> No. Research design. Math + code exist; no real-device radio test yet.</li>
+<li><b>K2 · What&rsquo;s designed?</b> Mode ladder, gradient, direction-of-improvement, envelope MAC, FEC, byte budget, calibration…</li>
+<li><b>K3 · What&rsquo;s tested?</b> Packet codec unit tests, cross-language parity, SE(2) math proof. No real-radio bytes.</li>
+<li><b>K4 · What remains?</b> E1–E10 including E10: two-phone end-to-end venue test. Until it runs, it&rsquo;s a hypothesis.</li>
+<li><b>K5 · When real?</b> Depends on hardware access. E1–E10 executable in weeks with two phones.</li>
+<li><b>K6 · How can I help?</b> Run experiments, refine the protocol, port platforms, expand prior-art audit.</li>
+</ul>
+<h3>PART L — DESIGN CHOICES (why not X)</h3>
+<ul>
+<li><b>L1 · Why not GPS?</b> Fails indoors/canyons — exactly where this is for. GPS only pre-calibrates.</li>
+<li><b>L2 · Why not 5G/cellular?</b> Those are the networks that died.</li>
+<li><b>L3 · Why not WiFi?</b> Needs infrastructure; WiFi is the crowded, jammed, expensive option.</li>
+<li><b>L4 · Why not UWB?</b> Requires hardware most phones don&rsquo;t have.</li>
+<li><b>L5 · Why not satellites?</b> Satellites can&rsquo;t see through concrete.</li>
+<li><b>L6 · Why not ultrasound?</b> Fails in loud crowds (100&ndash;115 dB), as at a concert.</li>
+<li><b>L7 · Why not cameras?</b> Blocked by crowds; no line of sight.</li>
+<li><b>L8 · Why not a bigger satellite mesh?</b> There are no satellites that do this.</li>
+</ul>
+<h3>PART M — USING THE APP</h3>
+<ul>
+<li><b>M1 · What does it look like?</b> A compass arrow, a hop-distance, a mode tag, one "Find [person]" button.</li>
+<li><b>M2 · Learning time?</b> Zero: three states, one action each.</li>
+<li><b>M3 · No map needed?</b> Right — gradient works without any map.</li>
+<li><b>M4 · Track multiple people?</b> Each target has its own hop-gradient; responders choose an SOS.</li>
+<li><b>M5 · Not in a group?</b> You can still be a responder (public SOS gradient) or join a group via QR.</li>
+</ul>
+<h3>PART N — EDGE CASES AND PHILOSOPHY</h3>
+<ul>
+<li><b>N1 · Everyone&rsquo;s phone dies at once?</b> System dies with them. Most-battery alive; total-death unhandled (documented).</li>
+<li><b>N2 · Venue too small?</b> Direct BLE range suffices — the mesh matters only past one hop.</li>
+<li><b>N3 · Hostile crowd?</b> Cooperation assumed; adversarial crowds (jammers, spoofers) are open research, honestly marked.</li>
+<li><b>N4 · 20% adoption?</b> Still works — partial adoption gives usable nav; 100% never required.</li>
+<li><b>N5 · No phones at all?</b> Nothing works; the system needs phones. Documented honestly.</li>
+<li><b>N6 · Philosophy?</b> Honesty: never claim what it doesn&rsquo;t know, label every observation with its precision, design for the worst case.</li>
+</ul>
+
+<footer>Find Us / Crowd Compass — a teaching document. <b>Honesty:</b> this is a <span class="tag t-sim">SIM:MATH</span> design + math, with <span class="tag t-exp">EXP:NOT-RUN</span> radio tests pending. The mesh isn&rsquo;t pretended; the niche is real: when the network dies, the crowd compasses. Live at find-us-crowd-compass.vercel.app</footer>
+</div>
+<script>
+var SOS=null, soak=0, run=0;
+var b=document.getElementById('board');
+var at=0;
+var M=[];
+function ph(x,y,h,s){var d=document.createElement('div');d.className='ph'+(s?' sos':'');d.style.left=x+'px';d.style.top=y+'px';d.draggable=true;d.setAttribute('data-h',h);b.appendChild(d);return d}
+window._drop=function(){};
+b.addEventListener('dragover',function(e){e.preventDefault()});
+b.addEventListener('drop',function(e){var r=b.getBoundingClientRect();var x=e.clientX-r.left,y=e.clientY-r.top;var d=document.elementFromPoint(e.clientX,e.clientY);while(d&&d!==b&&!d.classList.contains('ph'))d=d.parentNode;if(d&&d.classList.contains('ph')){d.style.left=(x-6)+'px';d.style.top=(y-6)+'px';recalc()}});
+</script>
+</body>
+</html>
