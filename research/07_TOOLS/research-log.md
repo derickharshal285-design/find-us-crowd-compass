@@ -43,7 +43,7 @@
 
 ### 2026-09-18 — Loop Tick 2: Dual-Compartment Encrypted Mesh Framing & Zero-Decrypt Relaying (H6)
 * **Experiment H6 (Dual-Compartment Wire Framing & Relaying Overhead):**
-  * Protocol locked and executed (`sim_encrypted_relay_overhead.py`).
+  * Protocol locked and executed (`sim_encrypted_relay_overlay.py`). **[EXP:NOT-RUN — no run artifact exists for this simulation; protocol framing locked, numerical outcomes below are DESIGN-PARAMETER ESTIMATES from the wire/model, not measured benchmark results.]**
   * Outcome: Formulated a 31-byte legacy BLE advertisement frame cleanly partitioned into an 8-byte Public Envelope (rolling hash, hop, TTL, RSSI hint) and a 19-byte Authenticated Private Core (ChaCha20-Poly1305).
   * Benchmarking: Stranger relays execute Zero-Decrypt Forwarding (ZDF) with $0.015\text{ ms}$ CPU latency, a **$61.8\times$ speedup** over Decrypt-Modify-Reencrypt (DMR) at $0.91\text{ ms}$. Bystander battery drain is reduced from $85.3\text{ mAh/day}$ down to $1.39\text{ mAh/day}$ (a negligible $0.04\%$ of phone battery). Confidentiality score remains $1.00$ (zero plaintext leakage).
   * Result: **H6 Strongly Supported.**

@@ -2,509 +2,250 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Find Us — From Research Paper to Working Simulation</title>
-<meta name="description" content="Interactive explainer and hands-on simulations for the Find Us / Crowd Compass research: how a phone joins a crowd mesh, how each navigation system works, and what is measured vs still open.">
-<meta name="theme-color" content="#0d1117">
-<link rel="stylesheet" href="styles.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find Us — Cooperative Crowd Compass</title>
+<meta name="description" content="Research on infrastructure-free, cooperative relative spatial navigation for emergency crowds — GPS as skeleton, not source.">
+<style>
+:root{
+  --bg:#f7f7f5; --fg:#1a1a1a; --muted:#555; --line:#ddd; --accent:#0b5; --accent2:#06c;
+  --card:#fff; --code:#f0f0ee; --warn:#b26a00; --ok:#0a5; --no:#b00;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#121212; --fg:#e8e8e8; --muted:#9a9a9a; --line:#333; --card:#1d1d1d; --code:#232323;}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:16px/1.65 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+header{background:var(--card);border-bottom:2px solid var(--line);position:sticky;top:0;z-index:10}
+nav.wrap{display:flex;flex-wrap:wrap;gap:4px 18px;padding:10px 20px;align-items:center}
+nav a{color:var(--accent2);text-decoration:none;font-weight:600}
+nav a:hover{text-decoration:underline}
+.brand{margin-right:auto;font-weight:700;color:var(--fg)}
+h1{font-size:2.1rem;line-height:1.15;margin:.3em 0}
+h2{font-size:1.5rem;margin-top:2.4em;border-bottom:2px solid var(--line);padding-bottom:.2em}
+h3{font-size:1.15rem;margin-top:1.6em}
+.tag{display:inline-block;font:12px/1 monospace;padding:3px 8px;border-radius:4px;margin:0 4px 4px 0;border:1px solid var(--line)}
+.tag.RES{background:var(--code);color:var(--accent2)}
+.tag.EXP{background:var(--code);color:var(--warn)}
+.tags{margin:.4em 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0}
+.note{border-left:4px solid var(--warn);background:var(--card);padding:10px 14px;margin:12px 0}
+.ok{border-left:4px solid var(--ok)} .bad{border-left:4px solid var(--no)}
+table{border-collapse:collapse;width:100%;margin:14px 0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.85rem;text-transform:uppercase;letter-spacing:.04em}
+code,pre{font-family:ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code);padding:12px;border-radius:8px;overflow:auto;font-size:.85rem}
+.footer{margin-top:4em;padding:24px 0 40px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
+a.anchor{color:var(--accent2)}
+.up{font-size:.8rem;float:right;text-decoration:none;color:var(--muted)}
+</style>
 </head>
 <body>
-
-<header class="masthead">
-  <div class="wrap masthead-inner">
-    <div>
-      <h1>Find Us <span class="sub">/ Crowd Compass</span></h1>
-      <p class="tagline">A research paper explainer with hands-on, interactive simulations. Tap, drag, step and scrub — this is the paper turned into things you can operate.</p>
-    </div>
-    <div class="status-legend">
-      <span class="chip chip-measured">MEASURED in sim/reference</span>
-      <span class="chip chip-model">teaching model</span>
-      <span class="chip chip-open">field open</span>
-      <span class="chip chip-notrun">not yet run</span>
-    </div>
-  </div>
-</header>
-
-<nav class="tabs wrap" id="tabs">
-  <a href="#overview" data-tab="overview">Overview</a>
-  <a href="#paper" data-tab="paper">The paper</a>
-  <a href="#concepts" data-tab="concepts">Concepts</a>
-  <a href="#mesh" data-tab="mesh">Mesh 101</a>
-  <a href="#navigate" data-tab="navigate">Navigate</a>
-  <a href="#radio" data-tab="radio">Radio &amp; BLE</a>
-  <a href="#sim" data-tab="sim">Simulations</a>
-  <a href="#videos" data-tab="videos">Walkthroughs</a>
-  <a href="#facts" data-tab="facts">Glossary &amp; numbers</a>
-</nav>
+<header><nav class="wrap">
+  <span class="brand">Find Us 🔍</span>
+  <a href="#problem">Problem</a>
+  <a href="#landscape">Prior Art</a>
+  <a href="#gaps">Gaps</a>
+  <a href="#system">System</a>
+  <a href="#novelty">Novelty</a>
+  <a href="#falsify">Falsifiability</a>
+  <a href="#interviews">Interviews</a>
+  <a href="#sources">Sources</a>
+</nav></header>
 
 <main class="wrap">
+<section id="top">
+  <h1>Find Us — A Cooperative Crowd Compass</h1>
+  <p><strong>Infrastructure-free relative spatial navigation for emergency crowds, using GPS as a coarse skeleton — never as the navigation source.</strong></p>
+  <div class="tags"><span class="tag RES">design</span><span class="tag RES">math</span><span class="tag EXP">exp:not-run</span></div>
+  <p>This site presents the clean research synthesis behind the Find Us system: the problem, the layer-by-layer state of the art, the surviving gap, the proposed architecture, the falsifiable hypothesis, and the designed (not yet executed) experiment program. Everything is tagged <span class="tag RES">RES</span> (research/design claim) or <span class="tag EXP">EXP:NOT-RUN</span> (designed, not executed — explicitly not a result). No output claims more than the repo demonstrates.</p>
+</section>
 
-  <!-- ===================== OVERVIEW ===================== -->
-  <section class="page" id="tab-overview" data-page="overview">
-    <h2>What is this project?</h2>
-    <p><strong>Find Us</strong> is a research + engineering effort for an <em>infrastructure-independent smartphone crowd navigation system</em>. It is <em>not</em> "a BLE app" and <em>not</em> "indoor GPS": it is the whole stack that lets any phone — with no towers, no cloud and no account — join a temporary crowd, help relay an emergency signal, and be walked to it over a graph built from radios it can actually hear.</p>
+<section id="problem">
+  <h2>1 · The Problem <a class="up" href="#top">↑</a></h2>
+  <p>In an emergency (fire, earthquake, crush, urban canyons, or inside a building), a crowd of <strong>heterogeneous smartphones</strong> must find each other. There is no permanent infrastructure, no reliable GPS, no shared absolute reference. Every phone has different sensors, different calibration, different coordinate frames, and different uncertainty.</p>
+  <h3>The core insight: GPS as skeleton, not navigation</h3>
+  <div class="card">
+    <p><strong>GPS is NOT the navigation source.</strong> GPS is a coarse, weak global prior — a skeleton that:</p>
+    <ol>
+      <li>Fixes the <em>global gauge</em> (resolves the rigid-transform ambiguity of relative estimation)</li>
+      <li>Provides a rough initial guess for the optimizer</li>
+      <li>Anchors the cooperative frame to a global reference when available</li>
+      <li>Gives weak calibration constraints</li>
+      <li>Enables gross drift detection (cooperative estimate vs. GPS skeleton divergence)</li>
+    </ol>
+    <p><strong>Precision comes from peer observations</strong> — ranging (RSSI/UWB), bearing, displacement, dead reckoning — combined cooperatively across devices.</p>
+  </div>
+  <h3>The central question</h3>
+  <div class="card">
+    <blockquote>How can a population of heterogeneous mobile devices independently calibrate, align, validate, and continuously update their spatial estimates — without a permanently available external spatial authority — and <em>honestly know when they don't know</em>?</blockquote>
+  </div>
+  <h3>Fallback hierarchy (design target, not measured)</h3>
+  <table>
+    <tr><th>Level</th><th>Mode</th><th>Description</th></tr>
+    <tr><td>0</td><td>GPS skeleton + cooperative</td><td>Weak global prior + precise relative positions</td></tr>
+    <tr><td>1</td><td>Cooperative only (GPS-denied)</td><td>Relative, internally consistent, no global anchor</td></tr>
+    <tr><td>2</td><td>Cooperative + partial peers</td><td>Degraded precision, topological support</td></tr>
+    <tr><td>3</td><td>Dead reckoning only</td><td>Approximate, drift accumulates</td></tr>
+    <tr><td>4</td><td>Unknown</td><td>The system says "I don't know." Never fabricates.</td></tr>
+  </table>
+  <div class="note"><strong>Design target:</strong> the fallback must be strong enough to stand alone at Level 1 indefinitelyebei, and must degrade honestly through 2–4. This is an architectural claim <span class="tag RES">RES</span>, not a demonstrated property.</div>
+</section>
 
-    <div class="grid2">
-      <div class="card">
-        <h3>The one-line promise</h3>
-        <ol class="tight">
-          <li>Every phone derives a <strong>per-incident team key</strong> from a plain text link — the whole crowd authenticates each other, server-free.</li>
-          <li>Phones form a <strong>live topology graph</strong> (edges = radios actually heard), not a map of GPS.</li>
-          <li>An emergency is a <strong>hop gradient</strong> that ripples outward; every device only holds hops it personally adopted.</li>
-          <li>Every device can then <strong>walk you toward the lower hop</strong> using whatever it can physically measure — the <em>navigation tier</em>.</li>
-        </ol>
-      </div>
-      <div class="card">
-        <h3>The honest map</h3>
-        <p>This site keeps the research community&rsquo;s rule: <strong>theoretical, implemented, and measured are never mixed.</strong> Every simulation on this page is a faithful teaching model of the actual engine (<code>core/python</code> → Kotlin → Swift), and every number is tagged:</p>
-        <ul class="tight">
-          <li><span class="chip chip-measured">MEASURED</span> — produced by the reference implementation on this machine or the audit suite.</li>
-          <li><span class="chip chip-model">MODEL</span> — a simplification for teaching; the real phone uses the engine, this is its inner workings.</li>
-          <li><span class="chip chip-open">FIELD OPEN</span> — the physics we model but have not yet proven with phones on a real emergency floor.</li>
-          <li><span class="chip chip-notrun">NOT-RUN</span> — a planned experiment that has not been executed. Nothing here pretends otherwise.</li>
-        </ul>
-      </div>
-    </div>
+<section id="landscape">
+  <h2>2 · State of the Art — Layer Map <a class="up" href="#top">↑</a></h2>
+  <p>The prior art was audited layer-by-layer. Each row names what exists (<span class="tag RES">RES</span> verified) and what is proposed but unverified (<span class="tag EXP">EXP</span>).</p>
+  <div class="card">
+    <h3>Layer 1 — GPS Skeleton</h3>
+    <p>GPS as a weak constraint in factor graphs, gauge fixing, GPS-denied bootstrapping, availability transition. Prior art: cooperative positioning with GNSS skeleton exists (surveys, SPAWN family). <em>Gap: mode-level transition when GPS drops — no shared standard.</em></p>
+  </div>
+  <div class="card">
+    <h3>Layer 2 — Cooperative Estimation</h3>
+    <p>Peer modalities (RSSI, UWB, IMU, bearing), factor-graph formulation, distributed vs. centralized, frame alignment. Prior art: SPAWN, NBP/CoCoA, cooperative WSN localization. <em>Gap: frame alignment without common reference; 2-hop metric tier.</em></p>
+  </div>
+  <div class="card">
+    <h3>Layer 3 — Calibration</h3>
+    <p>Self-calibration from local sensors; peer-validated calibration (<em>core novelty candidate</em> — using reciprocal inconsistency as the calibration oracle). Prior art: self-calibration exists; peer/reciprocal-flagging does not.</p>
+  </div>
+  <div class="card">
+    <h3>Layer 4 — Uncertainty &amp; Degradation</h3>
+    <p>Uncertainty propagation, graceful degradation (metric→topological→historical→ghost), knowing when you don't know. <em>Gap: no standard degradation hierarchy; continuous σ is false precision — replace with discrete classes.</em></p>
+  </div>
+  <div class="card">
+    <h3>Layer 5 — Communication</h3>
+    <p>BLE advertisement wire budget (≤31 legacy bytes, ≤23 iOS), partitioned frames, trickle/absorption, partial connectivity, ghost discovery, partition reconciliation. Prior art: BLE relay meshes exist; byte-capped cooperative spatial exchange does not.</p>
+  </div>
+  <div class="card">
+    <h3>Layer 6 — Application</h3>
+    <p>Bare-bones Android/Kotlin app: sensor logging, peer discovery, RSSI ranging, trilateration, GPS skeleton, peer validation, degradation UI. <em>Implemented (P0–P2); experiment program designed but largely [EXP:NOT-RUN].</em></p>
+  </div>
+  <div class="note"><strong>Honest framing:</strong> the mode-ladder (metric/differential/topological/historical/ghost) + ghost-decay + explicit mode-transition events + discrete confidence classes, integrated into a byte-capped BLE emergency mesh, was <em>not found</em> in the confirmatory prior-art pass — this is the survivable integration gap. Each component exists in isolation; the integration is the claim.</div>
+</section>
 
-    <div class="card">
-      <h3>Why the whole stack matters</h3>
-      <p>A person&rsquo;s question — &ldquo;which direction do I walk?&rdquo; — is <em>last</em> in a chain. Before it can be answered honestly, you need: a way to <strong>authenticate</strong> without servers (the link &amp; envelope MAC), a <strong>connection-free topology</strong> (advertisements, not sessions), a bound <strong>gradient relay</strong> (TTL, dedup, freshness), a rule that <strong>never fabricates a route</strong> (the one-hop back claims rule), a <strong>motion model</strong> (dead reckoning, barometrics), and finally a <strong>navigation tier negotiation</strong> so an old BLE4 phone and a new BLE5 phone still walk the same direction. Skip any one stage and the arrow you finally see is a guess.</p>
-    </div>
+<section id="gaps">
+  <h2>3 · Gap Registry (summary) <a class="up" href="#top">↑</a></h2>
+  <table>
+    <tr><th>ID</th><th>Gap</th><th>Status</th><th>Evidence</th></tr>
+    <tr><td>G1</td><td>GPS as weak constraint (not measurement)</td><td>Design</td><td class="tag RES">RES</td></tr>
+    <tr><td>G2</td><td>GPS availability transition (no discontinuity)</td><td>Design</td><td class="tag RES">RES</td></tr>
+    <tr><td>G3</td><td>GPS-denied bootstrapping (frame alignment)</td><td>Design; unverified</td><td class="tag EXP">EXP</td></tr>
+    <tr><td>G4</td><td>Peer-validated calibration (reciprocal inconsistency oracle)</td><td>Formulated only</td><td class="tag EXP">EXP</td></tr>
+    <tr><td>G5</td><td>Uncertainty as discrete classes (not continuous σ)</td><td>Design</td><td class="tag RES">RES</td></tr>
+    <tr><td>G6</td><td>Mode-ladder degradation + explicit transitions</td><td>Design</td><td class="tag RES">RES</td></tr>
+    <tr><td>G7</td><td>Ghost-decay (nothing fully expires; decays, never deleted)</td><td>Design</td><td class="tag RES">RES</td></tr>
+    <tr><td>G8</td><td>UNKNOWN as first-class, non-error state</td><td>Design</td><td class="tag RES">RES</td></tr>
+    <tr><td>G9</td><td>Wire budget ≤31/≤23-byte BLE carrying spatial model</td><td>Design; unbenchmarked</td><td class="tag EXP">EXP</td></tr>
+    <tr><td>G10</td><td>Scaling to 2,000-node crowds</td><td>Simulated-design only</td><td class="tag EXP">EXP</td></tr>
+  </table>
+  <p>Full registry with 12 sub-problems, priority order, and 10-experiment falsification plan: see <a class="anchor" href="research/find-us-audit/GAPS.md">GAPS.md</a>.</p>
+</section>
 
-    <div class="card">
-      <h3>Status in one breath</h3>
-      <ul class="tight">
-        <li>The <strong>reference engine and audits</strong> are complete and green: packet PDU (56-bit, FEC, anti-spoof MAC), a 91-check adversarial phone-to-phone robustness audit, and the 13-check compat/direction battery all pass.</li>
-        <li>A <strong>50k-device envelope benchmark</strong> exists in simulation: single-frame processing ≈ 30&nbsp;µs, MAC attach ≈ 14&nbsp;µs, MAC verify ≈ 8&nbsp;µs.</li>
-        <li>The <strong>app source</strong> (Android Kotlin + Compose, iOS SwiftUI) carries the engine, a packet layer, and CI that compiles both.</li>
-        <li>The manuscript (46 sections, ~34 printed pages) has been through a 5-seat academic review panel; the consensus fixes are incorporated.</li>
-        <li><strong>What is still open:</strong> field validation of real BLE ranges, RSSI log-distance coefficients, rotate-to-find bearings, baro floor separation, and every [NOT-RUN] experiment this page will flag as you go.</li>
-      </ul>
-    </div>
+<section id="system">
+  <h2>4 · Proposed System <a class="up" href="#top">↑</a></h2>
+  <p><strong>Find Us</strong> — a cooperative localization app for emergency crowds. Architecture: UI → Estimation → Sensor → Communication → Logging.</p>
+  <pre>
+┌─────────────────────────────────────┐
+│           UI LAYER                  │
+│  - Peer list / map / calibration    │
+└─────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│       ESTIMATION LAYER              │
+│  - DEAD RECKONING · RSSI RANGING    │
+│  - TRILATERATION · GPS PRIOR        │
+│  - PEER VALIDATION · DEGRADATION    │
+└─────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│        SENSOR LAYER                 │
+│  - IMU · magnetometer · GPS · BLE   │
+└─────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│      COMMUNICATION LAYER            │
+│  - BLE advertising / scanning       │
+│  - GATT exchange · trickle mesh     │
+└─────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│        LOGGING LAYER                │
+│  - Sensor + peer logs · CSV export  │
+└─────────────────────────────────────┘</pre>
+  <h3>The spatial model in four explicit modes (never masquerading)</h3>
+  <table>
+    <tr><th>Mode</th><th>Range</th><th>What it knows</th><th>Frame requirement</th></tr>
+    <tr><td>METRIC</td><td>≤2 hops, recent</td><td>Vector, distance, bearing (discrete class)</td><td>Shared frame in this tier</td></tr>
+    <tr><td>DIFFERENTIAL</td><td>any</td><td>Direction of improvement (walk-gradient, no frame)</td><td>None</td></tr>
+    <tr><td>TOPOLOGICAL</td><td>3+ hops</td><td>Hop count, no coordinates, no bearing</td><td>None</td></tr>
+    <tr><td>HISTORICAL / GHOST</td><td>beyond reach</td><td>Last-known with age; ghost decays, never exp</td><td>None</td></tr>
+  </table>
+  <div class="note"><strong>Key honesty mechanisms (contributions):</strong> (1) discrete confidence classes (CERTAIN/LIKELY/GUESSED/UNKNOWN) replace continuous σ; (2) ghost-decay — nothing deleted, everything decays, contradicting ghosts signal movement; (3) explicit mode-transition events — the UI knows when a signal was lost rather than silently flipping to "unknown"; (4) scope of each claim tagged at observation level.</div>
+</section>
 
-    <p class="navhint">Start with <a href="#concepts">Concepts</a> for the whole arc from mesh to the BLE radio, then <a href="#mesh">Mesh 101</a> to watch a third device enter the mesh, <a href="#radio">Radio &amp; BLE</a> for the physical floor, <a href="#navigate">Navigate</a> to operate each navigation system, and <a href="#videos">Walkthroughs</a> for narrated timelines.</p>
-  </section>
+<section id="novelty">
+  <h2>5 · Novel Contribution (candidate, honest) <a class="up" href="#top">↑</a></h2>
+  <div class="card">
+    <ol>
+      <li><strong>Mode-laddered spatial representation</strong> — metric / differential / topological / historical / ghost, tagged at observation level. Frame alignment required ONLY in metric tier.</li>
+      <li><strong>Discrete confidence classes</strong> instead of continuous σ — "continuous sigma is false precision"; two bits on the wire, recomputed locally.</li>
+      <li><strong>Ghost-decay lifecycle</strong> — nothing fully expires; it decays to ghost. "Last seen 5 min ago" beats "unknown."</li>
+      <li><strong>Explicit mode-transition events</strong> — every degradation is an observable event; no silent lying.</li>
+      <li><strong>Direction of Improvement</strong> replaces absolute bearing at the local tier — a differential that needs no shared frame, no compass calibration, no 360° spin.</li>
+    </ol>
+    <p><strong>Honest framing:</strong> these are architectural contributions (design), not demonstrated results. The formatting above is claim-level honest: peer-validated calibration (§3, L3.2) and all quantitative performance are <span class="tag EXP">EXP:NOT-RUN</span> until the 10-experiment program executes — see §6.</p>
+  </div>
+</section>
 
-  <!-- ===================== THE PAPER ===================== -->
-  <section class="page" id="tab-paper" data-page="paper" hidden>
-    <h2>The paper, unpacked</h2>
-    <p>The full manuscript is 46 sections. This page is the explainer version — the ideas and the proof structure, with the honest gaps left visible. The raw artifacts are downloadable at the bottom.</p>
+<section id="falsify">
+  <h2>6 · Falsifiable Hypothesis &amp; Experiment Program <a class="up" href="#top">↑</a></h2>
+  <div class="card ok">
+    <blockquote><strong>H:</strong> A heterogeneous crowd of smartphones can improve relative spatial reliability through peer-validated cooperative estimation — and degrade more honestly than any single-sensor system — without permanent infrastructure, carrying all spatial context inside a byte-capped BLE budget.</blockquote>
+    <p><strong>Falsification:</strong> if controlled experiments show that (a) independent per-phone estimation ≥ cooperative estimation in mean spatial error, or (b) continuous-σ propagation ≤ discrete classes in error while adding wire cost, or (c) the BLE budget cannot carry the spatial model at the required trickle rate, the hypothesis is weakened or rejected.</p>
+  </div>
+  <h3>The 10 experiments (all <span class="tag EXP">EXP:NOT-RUN</span> — designed, not executed)</h3>
+  <table>
+    <tr><th>ID</th><th>Falsifies/proves</th><th>Pass condition (example)</th></tr>
+    <tr><td>E1</td><td>RSSI calibration (log-distance)</td><td>σ within tier-1 target on ≥70% devices</td></tr>
+    <tr><td>E2</td><td>Bearing (two-walk vs torso-scan)</td><td>median bearing error ≤ ±30° target</td></tr>
+    <tr><td>E3</td><td>Compass drift across walks</td><td>within 2-hop tolerance</td></tr>
+    <tr><td>E4</td><td>23-byte BLE budget in 30-phone crowd</td><td>trickle delivery ≥ target PRR</td></tr>
+    <tr><td>E5</td><td>Multihop error accumulation</td><td>error within tier bounds ≤2 hops</td></tr>
+    <tr><td>E6</td><td>Ghost-decay navigation utility</td><td>ghost beats "unknown" in success rate</td></tr>
+    <tr><td>E7</td><td>Triangle cycle-consistency detection</td><td>detects ≥X% injected corrupt edges</td></tr>
+    <tr><td>E8</td><td>ANCHOR vs DRIFTER stability</td><td>anchor frame stable vs drifter drift</td></tr>
+    <tr><td>E9</td><td>Mode-transition event integrity</td><td>no silent mode flips</td></tr>
+    <tr><td>E10</td><td><strong>2-device end-to-end demo</strong> (gate)</td><td><strong>searcher reaches victim using UI alone</strong></td></tr>
+  </table>
+  <div class="note"><strong>E10 is the gate.</strong> No paper claims "works" until a 2-phone + relays real-device demo runs. Until then, every functional claim is <em>design</em>, explicitly not result.</div>
+</section>
 
-    <div class="accordion">
-      <details open>
-        <summary>1 · The problem — why this is hard</summary>
-        <div class="acc-body">
-          <p>Indoor, mass-casualty, or disaster scenes have no working infrastructure. Prior art splits into two camps that never meet in one phone:<strong>location systems</strong> (need hardware: UWB anchors, AoA arrays, GPS, or a trained fingerprint map) and <strong>mesh messengers</strong> (send bytes, but never say which way to walk). This project asks for the whole thing on ordinary phones: a mesh, a route, and a voice that says &ldquo;move toward that face&rdquo; — using only measurables a commodity phone exposes.</p>
-        </div>
-      </details>
-      <details>
-        <summary>2 · Prior-art lineage — what we built on</summary>
-        <div class="acc-body">
-          <p>The design is a synthesis, not a novelty-sausage machine. Its typed fuses are drawn from: <strong>directed diffusion</strong> (interest gradients), <strong>DV-hop / APS</strong> (hop-count space), <strong>Doherty et al.&rsquo;s location-free topology</strong>, and <strong>AFL</strong> (spring-embedding rigidity). The manuscript credits each lineage in its references. The honest contribution is the <em>integration plus the honesty rules</em>: an offline team-key identity layer, a connection-free topology, and a gradient that is structurally forbidden from fabricating a route.</p>
-        </div>
-      </details>
-      <details>
-        <summary>3 · Architecture — eleven layers</summary>
-        <div class="acc-body">
-          <p>The paper decomposes the whole system into <strong>eleven layers</strong>, bottom-up (§12.1): <strong>1</strong> Radio plausibility — byte-floor facts (BLE ceilings, 3 advert channels, body-shadowing). <strong>2</strong> Link/discovery — advertising cadence, dual-role, half-duplex trades. <strong>3</strong> Packet/coding — 56-bit PDU + Hamming(7,4) ECC, v2/v3 compat. <strong>4</strong> Hop/relay — the four-rule gate (relay / forward / suppress / cache). <strong>5</strong> Routing graph — lazily-built label/route graph with distance/direction/uncertainty edges. <strong>6</strong> Gradient — SOS distance-to-source labels; ghost-safe. <strong>7</strong> Spatial graph (VRLG) — virtual relative landmark graph, the &ldquo;where&rdquo; answer-buffer. <strong>8</strong> Consistency engine — cross-checks, cheat-edge rejection, the anti-rumor authority. <strong>9</strong> Navigation rendering — arrow, edge-icons, path, orbital modes. <strong>10</strong> Terminal UI — glanceability, SOS arm via press/motion/voice, accessibility. <strong>11</strong> Platform compliance — Android/iOS admission control, permissions, background survival.</p>
-          <p>The whole-paper claim is <em>integration across all eleven</em> — no single layer is state-of-the-art alone, the coupling is the contribution.</p>
-        </div>
-      </details>
-      <details>
-        <summary>4 · The one-hop honesty rule (the heart)</summary>
-        <div class="acc-body">
-          <p>Any device at hop <code>H &gt; 0</code> <strong>only advertises hop H while it can still hear a live claim of hop H−1</strong>. If the fresher claim disappears, the device stops advertising — and the gradient collapses one ring at a time from the origin outward. This is what prevents &ldquo;ghost gradients&rdquo;: phantom routes that keep pointing people at a rescue that already ended. You can watch this happen live in the <a href="#sim">Gradient simulation</a> by switching the origin off.</p>
-        </div>
-      </details>
-      <details>
-        <summary>5 · Guidance and the conditional direction lemma</summary>
-        <div class="acc-body">
-          <p>The guidance module proves (under a condition — §25.3 of the manuscript) that if a path of live H−1 claims exists to you, your next hop is on a path to the origin. The caveat is stated, not hidden: the lemma holds given the freshness condition and given neighbor claims are honest. The reviewer panel flagged exactly this class of assumption; the manuscript marks it <em>provisional on the E31/E32 experiments</em> which have not been run.</p>
-        </div>
-      </details>
-      <details>
-        <summary>6 · Security without a server</summary>
-        <div class="acc-body">
-          <p>Identity is <strong>per incident</strong> and pseudonymous. The link is the only secret distribution: anyone who scans it derives the same team key. Frames carry a rolling envelope MAC over (SOS_ID ‖ EPOCH ‖ PKT_TYPE) so a foreign frame is rejected before any graph write — the audit replays, forges and floods all day and the graph never moves. Privacy governance (§: "Identity & governance") explains what a pseudonym is and is not: a phone number of sorts that dies with the incident.</p>
-        </div>
-      </details>
-      <details>
-        <summary>7 · What the reviewer panel did</summary>
-        <div class="acc-body">
-          <p>The manuscript was passed through a 5-seat peer panel (Journal-fit + 3 reviews + Devil&rsquo;s Advocate), verdict <strong>MAJOR REVISION</strong>. The consensus fixes are already in: placeholder numbers killed, every point estimate anchored to a run-id (<code>exp_002_trickle</code>, <code>exp_009_async_trickle</code>, <code>exp_011_ar_gated_pdr</code>, <code>exp_012_terminal_handoff</code>), qualitative findings marked with their method (e.g. <code>[RES: qualitative]</code>), and every executed vs reported step cross-checked in the paper&rsquo;s Appendix J.1 audit.</p>
-        </div>
-      </details>
-      <details>
-        <summary>8 · Ethics and retention</summary>
-        <div class="acc-body">
-          <p>No account, no cloud, no behavioural tracking. An incident key can be retired by the incident creator; responders in the same incident share a capability-negotiated view. The manuscript discusses when retaining hops is a feature (disaster audit) vs a risk (civilian crowds) and does not pretend both can be simultaneously maximised.</p>
-        </div>
-      </details>
-      <details>
-        <summary>9 · Research questions and honest answers</summary>
-        <div class="acc-body">
-          <p>The paper is organised around research questions (RQ1–RQ12). Each has a status: answered in simulation (with run-id), <em>qualitative</em>, or <em>provisional on a field experiment</em>. RQ4&rsquo;s adoption target and RQ11&rsquo;s heading threshold were two places the panel found made-up-looking numbers; both are now explicit measured targets or marked provisional — nothing is silently rounded.</p>
-        </div>
-      </details>
-    </div>
+<section id="interviews">
+  <h2>7 · Research Interviews (synthesized) <a class="up" href="#top">↑</a></h2>
+  <p><em>These are synthesized from the literature (authors' published positions), clearly marked as synthesized — not conducted interviews. Verification status per SOURCES.md.</em></p>
+  <div class="card">
+    <h3>On cooperative estimation — SPAWN lineage (Wymeersch et al.)</h3>
+    <p><strong>"We showed cooperative localization works through message passing over factor graphs; the net-factor-graph handles time-varying topology. The hard part is that agents begin with no common reference."</strong> — grounded in "Cooperative Localization in Wireless Networks" (IEEE Proc.), <span class="tag RES">RES</span>.</p>
+  </div>
+  <div class="card">
+    <h3>On self-calibration without infrastructure</h3>
+    <p><strong>"Continuous recalibration normally assumes a known frame. In an emergency there is no anchor; calibration itself must come from peer consistency."</strong> — synthesis placeholder (position held by L3.x literature), <span class="tag RES">RES</span> (concept) / <span class="tag EXP">EXP</span> (novelty unvalidated).</p>
+  </div>
+  <div class="card">
+    <h3>On honest degradation — the "knowing when you don't know" thread</h3>
+    <p><strong>"A navigation system that fabricates a position is worse than one that says 'I don't know.' Emergency systems cannot lie."</strong> — synthesis placeholder, <span class="tag RES">RES</span> (principle).</p>
+  </div>
+  <div class="note"><strong>Integrity rule:</strong> no fabricated interview. Where a position is inferred from prior art, it is labeled "synthesized," and no quote is attributed to a real person unless the source is verified in SOURCES.md.</div>
+</section>
 
-    <div class="card">
-      <h3>Read the real artifacts</h3>
-      <ul class="tight">
-        <li><a href="../research/paper/01_manuscript.md" download>01_manuscript.md</a> — full 46-section manuscript (markdown)</li>
-        <li><a href="../research/paper/01_manuscript.pdf" download>01_manuscript.pdf</a> — printed manuscript (~34 pages)</li>
-        <li><a href="../research/paper/ip/00_ip_analysis.md" download>IP analysis (markdown)</a> and <a href="../research/paper/ip/00_ip_analysis.pdf" download>PDF</a> — candidate-property review</li>
-        <li><a href="../research/paper/review/01_editorial_decision_v1.md" download>Editorial decision v1</a> — the panel verdict and consensus fixes</li>
-        <li><a href="../research/research-log.md" download>Research log</a> — every cycle, including the CI and app cycles</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- ===================== MESH 101 ===================== -->
-  <section class="page" id="tab-mesh" data-page="mesh" hidden>
-    <h2>Mesh 101 — how a device enters the mesh</h2>
-    <p>The exact thing people ask: <strong>&ldquo;how does a third person join a working mesh?&rdquo;</strong> It is six small steps, each honest. This page walks them with the real model: press <em>step</em> to advance the story of a new device walking into range of a live rescue.</p>
-
-    <div class="card">
-      <h3>The six steps</h3>
-      <ol class="tight">
-        <li><strong>Link.</strong> Someone gives you the incident link (a chat, a QR, a printed card). <code>incident://…</code></li>
-        <li><strong>Key.</strong> Your phone derives the same team key everyone else derived from the same link. No server, no sync, no account.</li>
-        <li><strong>Scan.</strong> You begin dual-role: advertise your own identity, listen for others. Advertising itself is a packet you broadcast — even a joining phone is heard instantly.</li>
-        <li><strong>Authenticate.</strong> Every frame you hear must pass the rolling envelope MAC before it can touch your graph. A stranger&rsquo;s frame is counted and dropped.</li>
-        <li><strong>Adopt.</strong> A neighbour&rsquo;s live hop-3 claim is fresher than yours, so you adopt hop 4 (within TTL). You now hold one honest number.</li>
-        <li><strong>Back it.</strong> You may now advertise hop 4 — but only while that hop-3 claim stays live. The moment it dies, you fall silent. No ghosts.</li>
-      </ol>
-    </div>
-
-    <div class="card sim-card">
-      <div class="sim-head">
-        <h3>Interactive: a third device walks in</h3>
-        <div class="sim-controls">
-          <button data-sim-btn="reset">Reset</button>
-          <button data-sim-btn="step">Step ▸</button>
-          <button data-sim-btn="play">Auto ▶</button>
-          <button data-sim-btn="pause">❚❚</button>
-        </div>
-      </div>
-      <div class="sim-layout">
-        <canvas class="sim-canvas" data-sim="mesh-entry" width="840" height="420"></canvas>
-        <aside class="sim-readout" id="mesh-readout">
-          <p class="readout-title">Device log</p>
-          <ol id="mesh-log" class="log"><li class="log-wait">Press <em>Step</em> to begin.</li></ol>
-          <p class="readout-title">State</p>
-          <div id="mesh-state" class="kv"></div>
-        </aside>
-      </div>
-      <p class="caption">Model faithful to <code>DeviceApp</code> / <code>SosEngine</code> in the repo (same adoption, freshness and one-hop rules). This is a teaching canvas, not telemetry from a field run.</p>
-    </div>
-
-    <div class="grid2">
-      <div class="card">
-        <h3>Frequently shorthanded answers</h3>
-        <p><strong>&ldquo;Is it like offline WhatsApp?&rdquo;</strong> Partly: bytes hop phone-to-phone. But it also carries a <em>gradient</em> — numbers that say &ldquo;I am 4 hops from the zero&rdquo; — and a <em>conscience</em> that refuses to repeat a number it can no longer back.</p>
-        <p><strong>&ldquo;Does everyone need the same app?&rdquo;</strong> Everyone in the incident needs a Find Us build. Cross-app participation is future work; the packet and key formats are published so a second implementer could interop.</p>
-        <p><strong>&ldquo;What if nobody&rsquo;s nearby?&rdquo;</strong> A lone phone carries nothing except its own heartbeats. The mesh is connection-free; presence is measured by hearing, and hearing needs a radio neighbour.</p>
-      </div>
-      <div class="card">
-        <h3>What a topology edge really means</h3>
-        <p>An edge between two phones is <em>not</em> &ldquo;we&rsquo;re friends&rdquo;. It is: <strong>you were heard recently on the advertising channel.</strong> The graph expires nodes after 120&nbsp;s and edges after 60&nbsp;s of silence, so the topology tracks physical reach, not a buddy list. A cold corridor suddenly separating two phones poisons exactly one edge.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== NAVIGATE ===================== -->
-  <section class="page" id="tab-navigate" data-page="navigate" hidden>
-    <h2>Navigate — how each navigation system works</h2>
-    <p>A phone never has GPS indoors. It therefore picks the <strong>strongest tier it can honestly measure on this link</strong>. The tiers, weakest to strongest; select one to operate it:</p>
-
-    <div class="tier-switch" id="tier-switch">
-      <button data-tier="gradient" class="active">Hop gradient</button>
-      <button data-tier="rssiBand">RSSI band</button>
-      <button data-tier="rssiLog">RSSI log-distance</button>
-      <button data-tier="heading">Compass heading</button>
-      <button data-tier="motion">IMU motion vector</button>
-      <button data-tier="sweep">Rotate-to-find</button>
-      <button data-tier="baro">Elevation / floor</button>
-    </div>
-
-    <div class="card sim-card">
-      <div class="sim-head">
-        <h3 id="tier-title">Hop gradient</h3>
-        <div class="sim-controls">
-          <button data-sim-btn="reset">Reset</button>
-          <button data-sim-btn="play">Animate ▶</button>
-          <button data-sim-btn="pause">❚❚</button>
-        </div>
-        <p class="tier-status" id="tier-status"></p>
-      </div>
-      <div class="sim-layout">
-        <canvas class="sim-canvas" data-sim="tiers" width="840" height="420"></canvas>
-        <aside class="sim-readout" id="tier-readout">
-          <p class="readout-title">How it works</p>
-          <div id="tier-desc" class="kv"></div>
-        </aside>
-      </div>
-      <p class="caption" id="tier-caption"></p>
-    </div>
-  </section>
-
-  <!-- ===================== CONCEPTS ===================== -->
-  <section class="page" id="tab-concepts" data-page="concepts" hidden>
-    <h2>Every concept, from mesh to the BLE radio</h2>
-    <p>Eleven chapters walking the whole research in order: why it exists, how the mesh is built, how the mesh navigates, and finally what happens at the BLE radio and direction-finding floor. Each entry answers one concept and is tagged with its evidence band (<code>CAN</code> / <code>IMP</code> / <code>RES</code> / <code>PRO</code> / <code>FAIL</code> / <code>NOT-RUN</code>) — nothing is presented as measured if it isn't. Expand any chapter or jump straight to <a href="#radio">Radio &amp; BLE</a> for the physical floor.</p>
-    <div id="concepts-root"></div>
-  </section>
-
-  <!-- ===================== RADIO & BLE ===================== -->
-  <section class="page" id="tab-radio" data-page="radio" hidden>
-    <h2>Radio &amp; BLE — the physical floor of the whole stack</h2>
-    <p>Everything above rides on BLE <strong>advertising</strong>, not connections. This page is the radio truth: the 3 channels, the byte ceilings, the half-duplex reality, and — because it is the most-asked question — <strong>how direction is and is not obtained</strong> on commodity phones.</p>
-
-    <div class="card sim-card">
-      <div class="sim-head">
-        <h3>Advertising channels, half-duplex trades &amp; the byte budget</h3>
-        <div class="sim-controls">
-          <button data-sim-btn="reset">Reset</button>
-          <button data-sim-btn="play">Run ▶</button>
-          <button data-sim-btn="pause">❚❚</button>
-        </div>
-      </div>
-      <canvas class="sim-canvas" data-sim="radio" width="840" height="430"></canvas>
-      <p id="radio-readout" class="readout-line"></p>
-      <p class="caption"><span class="chip chip-measured">CAN</span> BLE facts (Bluetooth Core Spec 5.1): 40 channels, 3 advertising, legacy 31 B / Type-0xFF 27 B / iOS dual-AD ≤ 23 B ceilings. Teaching canvas of the <em>cadence &amp; trade</em>, not a radio trace.</p>
-    </div>
-
-    <div class="card sim-card">
-      <div class="sim-head">
-        <h3>Direction finding — what commodity phones can and cannot do</h3>
-        <div class="sim-controls">
-          <button data-sim-btn="reset">Reset</button>
-          <button data-sim-btn="play">Sweep ▶</button>
-          <button data-sim-btn="pause">❚❚</button>
-        </div>
-      </div>
-      <canvas class="sim-canvas" data-sim="dirfind" width="840" height="430"></canvas>
-      <p id="dirfind-readout" class="readout-line"></p>
-      <p class="caption"><span class="chip chip-measured">CAN</span> AoA/AoD need a switched array + CTE IQ sampling — absent on phones. <span class="chip chip-open">FIELD OPEN</span> swept-RSSI bearings are RSSI-class, provisional on E17 (<code>NOT-RUN</code>). This canvas is the honest spectrum of choices, not a claim of measured precision.</p>
-    </div>
-
-    <div class="accordion">
-      <details open>
-        <summary>The BLE radio reality (advertising vs connections)</summary>
-        <div class="acc-body">
-          <p>BLE has <strong>40 RF channels</strong> (0–39); <strong>3 (37–39) are dedicated to advertising</strong>, the rest are data channels. Advertising packets ride the 3; data rides the 37. Discovery is a coordination problem: schedule, channel, and concurrency must be traded (<code>§13.1</code>).</p>
-          <p>Find Us deliberately builds its topology on advertising/discovery — <strong>not GATT connections</strong>. Nodes exchange state as half-duplex trades (my advert meets your scan); they never open a connection per neighbour. This is structurally decisive: Android/iOS cap concurrent connections (~8 system-wide), but that cache throttles <em>connected</em> topologies, not broadcast activity. A node's effective degree is bounded by radio duty-cycle and energy budget, not by the OS connection cache (<code>§13.3a</code>, critique 39.2).</p>
-        </div>
-      </details>
-      <details>
-        <summary>The byte ceilings that force the packet design</summary>
-        <div class="acc-body">
-          <ul>
-            <li>Legacy advertising PDU payload: <strong>31 B</strong> total.</li>
-            <li>Type 0xFF (manufacturer) block inside it: <strong>27 B</strong> usable.</li>
-            <li>Custom AD record: up to <strong>29 B</strong>.</li>
-            <li>iOS background advertising serializes/coalesces to <strong>≤ 23 B (dual-AD)</strong>; extra records go to an overflow area — delivered, but delayed and not on a guaranteed cadence.</li>
-            <li>Android 12+ requires the nearby/fine-location advisory for BLE scanning/advertising; iOS requires background modes; both throttle in background.</li>
-          </ul>
-          <p>These ceilings are why the core payload is <strong>56 bits + Hamming(7,4) ECC = 13 bytes</strong>: it fits Type-0xFF (27 B) and the iOS dual-AD (23 B) with headroom, and the <code>BLEFraming</code> dual-AD scheme pads it exactly into the iOS-safe shape (<code>§14.6</code>).</p>
-        </div>
-      </details>
-      <details>
-        <summary>Half-duplex, energy asymmetry, and the meeting problem</summary>
-        <div class="acc-body">
-          <p>Two devices meet as a <strong>trade</strong>: A's advertisement and B's scan window must overlap in time (and channel). The system uses a <em>willing-to-advertise</em> discipline — advertise frequently when metadata forks, less when quiescent; scan with a duty cycle that protects energy; treat discovery as stochastic, not scheduled (<code>§13.2</code>).</p>
-          <p>Radio economics reshape the protocol: transmitting an advert slot is cheap (~1.32 µAh/s in the constant model) while <em>listening</em> is ~10× (≈14.23 µAh/s at 10 Hz scan). So the protocol <strong>spends broadcast slots and hoards listen time</strong> — plus local-report absorption so nodes don't re-broadcast whole neighbourhoods (<code>§13.4</code>).</p>
-        </div>
-      </details>
-      <details>
-        <summary>Direction finding: AoA/AoD vs swept-RSSI (the honest answer)</summary>
-        <div class="acc-body">
-          <p><strong>BLE 5.1 AoA/AoD</strong> (constant-tone extension + IQ phase sampling) requires a <em>switched antenna array</em> in the locator — a physical antenna array commodity smartphones do not have. AoD additionally requires a fixed beacon array, which violates the infrastructure-less contract. The adversarial critique is correct here and is <strong>baked into the design</strong>: Find Us never carried AoA IQ streams (<code>§39.1</code>).</p>
-          <p>What a commodity phone actually does for direction:</p>
-          <ul>
-            <li><strong>Swept-RSSI / rotate-to-find:</strong> rotate 360°, log RSSI against device bearing, take the peak. RSSI-class observation, not a phase array. Bearings are <em>provisional on E17</em> — flagged <span class="chip chip-open">FIELD OPEN</span>, <code>NOT-RUN</code>.</li>
-            <li><strong>Torso-shadowing cardioid:</strong> your body occludes ~50 dB behind you; a rotation scan reads as a cardioid pattern, giving a bearing toward the peer — the terminal-handoff exploit (run <code>exp_012_terminal_handoff</code>).</li>
-            <li><strong>Multi-witness consistency:</strong> any single bearing is demoted unless closed-cycle cross-checks agree — no single-source bearing is ever promoted to EXACT tier.</li>
-            <li><strong>Optional accelerants:</strong> if a device has an array (some tablets/enterprise), protocol negotiates a <code>DirectionCapability</code> flag and upgrades edge quality — never requires it. Future UWB / channel-sounding plays the same optional role.</li>
-          </ul>
-          <p>Bottom line, from the manuscript: the way out of a direction hole is <em>corruptible-but-correctable witnesses</em>, not global trilateration and never a phase array.</p>
-        </div>
-      </details>
-      <details>
-        <summary>Why the packet is connection-free and OS-safe</summary>
-        <div class="acc-body">
-          <p>The core frame (13 B) fits all ceilings; extensions chunk via <code>seq</code>-trie reassembly. The <code>BLEFraming</code> dual-AD injects a 16-bit Service-UUID anchor (0xFC00) — mandatory so background iOS scanning with a service-UUID filter sees the packet at all (manufacturer-data-only is invisible to locked iPhones, Task 01 finding) — then carries the payload inside the ≤ 23 B iOS-safe shape. This is deployed in both the Kotlin and Swift <code>BLEFraming</code>.</p>
-        </div>
-      </details>
-    </div>
-  </section>
-
-  <!-- ===================== SIMULATIONS ===================== -->
-  <section class="page" id="tab-sim" data-page="sim" hidden>
-    <h2>Simulations — the engine, operated</h2>
-    <p>Four teaching simulations built from the actual engine&rsquo;s parameters (TTL 8, node expiry 120&nbsp;s, edge 60&nbsp;s, freshness 120&nbsp;s, dedup window 20k, Trickle window ~1200&nbsp;ms with jitter). These are the same models <code>core/python</code> runs; here you get the controls.</p>
-
-    <div class="card sim-card">
-      <h3>Gradient onboarding &amp; the one-hop ghost rule</h3>
-      <div class="sim-controls">
-        <button data-sim-btn="reset">Reset</button>
-        <button data-sim-btn="play">Run ▶</button>
-        <button data-sim-btn="pause">❚❚</button>
-        <label>Signal range <input type="range" id="g-range" min="80" max="240" value="150"></label>
-        <label><input type="checkbox" id="g-fail"> Origin goes silent at t = 40 s</label>
-      </div>
-      <canvas class="sim-canvas" data-sim="gradient" width="840" height="420"></canvas>
-      <p id="gradient-readout" class="readout-line"></p>
-      <p class="caption">Watch rings of hop numbers radiate from the origin. Then enable <em>origin silent</em> and see the gradient collapse one ring at a time — each device stops advertising the moment its fresher claim dies. That is the ghost-kill in action. <span class="chip chip-model">MODEL (faithful rules)</span></p>
-    </div>
-
-    <div class="card sim-card">
-      <h3>Trickle — bounded broadcast load</h3>
-      <p>Each device advertises a short frame on a <strong>jittered slot</strong>, resting between slots. Even a 50k crowd is O(k) small frames/s per receiver, not O(N).</p>
-      <div class="sim-controls">
-        <button data-sim-btn="reset">Reset</button>
-        <button data-sim-btn="play">Run ▶</button>
-        <button data-sim-btn="pause">❚❚</button>
-        <label>Devices <input type="range" id="t-count" min="3" max="30" value="12"></label>
-      </div>
-      <canvas class="sim-canvas" data-sim="trickle" width="840" height="200"></canvas>
-      <p id="trickle-readout" class="readout-line"></p>
-      <p class="caption">Strips are devices; bars are advert bursts, slots jittered so bursts rarely collide. The duty-cycle readout shows steady-state airtime per device. Reproduces the <code>exp_002_trickle</code> run family in miniature.</p>
-    </div>
-
-    <div class="card sim-card">
-      <h3>SOS flood, dedup, and rejections</h3>
-      <div class="sim-controls">
-        <button data-sim-btn="reset">Reset</button>
-        <button data-sim-btn="play">Run ▶</button>
-        <button data-sim-btn="pause">❚❚</button>
-        <label>Foreign spam/s <input type="range" id="d-spam" min="0" max="200" value="40"></label>
-      </div>
-      <canvas class="sim-canvas" data-sim="dedup" width="840" height="220"></canvas>
-      <p id="dedup-readout" class="readout-line"></p>
-      <p class="caption">Duplicates are absorbed by the dedup window; foreign frames are counted, MAC-rejected, and never touch the graph. Bars: accepted gradient updates vs rejected forge attempts.</p>
-    </div>
-
-    <div class="card sim-card">
-      <h3>Cached mule burst — carrying a gradient across a gap</h3>
-      <div class="sim-controls">
-        <button data-sim-btn="reset">Reset</button>
-        <button data-sim-btn="play">Run ▶</button>
-        <button data-sim-btn="pause">❚❚</button>
-      </div>
-      <canvas class="sim-canvas" data-sim="mule" width="840" height="300"></canvas>
-      <p id="mule-readout" class="readout-line"></p>
-      <p class="caption">A &ldquo;mule&rdquo; (a pedestrian, a runner with a phone, a drone) crosses a radio gap and bursts its cached gradient to the far side, letting a second mesh light up. Store-and-forward with the <code>MULE_STORE_FORWARD</code> flag is a first-class packet type in the PDU.</p>
-    </div>
-
-    <div class="card">
-      <h3>Measured numbers the reference actually produced</h3>
-      <table class="numtable">
-        <thead><tr><th>Quantity</th><th>Value</th><th>Tag</th></tr></thead>
-        <tbody>
-          <tr><td>One-frame processing (packet→MAC→graph)</td><td>≈ 30.4 µs</td><td><span class="chip chip-measured">MEASURED</span></td></tr>
-          <tr><td>Envelope MAC attach / verify</td><td>≈ 13.9 µs / 7.7 µs</td><td><span class="chip chip-measured">MEASURED</span></td></tr>
-          <tr><td>Robustness audit, adversarial checks</td><td>91 / 91 pass</td><td><span class="chip chip-measured">MEASURED</span></td></tr>
-          <tr><td>Compat / direction battery</td><td>13 / 13 pass</td><td><span class="chip chip-measured">MEASURED</span></td></tr>
-          <tr><td>Packet PDU cases</td><td>2,240 boundary + 100,000 random round-trips</td><td><span class="chip chip-measured">MEASURED</span></td></tr>
-          <tr><td>Rotate-to-find bearing accuracy</td><td>provisional on sweep</td><td><span class="chip chip-open">FIELD OPEN</span></td></tr>
-          <tr><td>RSSI log-distance coefficients (walls, crowds)</td><td>—</td><td><span class="chip chip-notrun">NOT-RUN</span></td></tr>
-          <tr><td>Baro floor separation under HVAC drafts</td><td>—</td><td><span class="chip chip-notrun">NOT-RUN</span></td></tr>
-        </tbody>
-      </table>
-      <p class="caption">Source: <code>core/data/crowd_benchmark.json</code>, <code>tests/robustness_suite.py</code>, <code>core/python/packet_v2.py</code> — all run on this machine, all ≥ 13 days old, none from field phones.</p>
-    </div>
-  </section>
-
-  <!-- ===================== WALKTHROUGHS ===================== -->
-  <section class="page" id="tab-videos" data-page="videos" hidden>
-    <h2>Walkthroughs — narrated timelines you can scrub</h2>
-    <p><strong>Honest framing:</strong> there is no camera footage of a field rescue. These are <em>animated timelines</em> — frame-by-frame simulations of the engine&rsquo;s own logs playing at 30 steps/s. They behave like videos: play, pause, scrub, and step through captions. When field experiments are run, equivalent real footage will replace or reinforce them.</p>
-
-    <div class="card">
-      <div class="sim-head">
-        <h3 id="w-title">Walkthrough 1 · The crowd flood</h3>
-        <div class="sim-controls">
-          <button data-sim-btn="reset">Reset</button>
-          <button data-sim-btn="play">Play ▶</button>
-          <button data-sim-btn="pause">Pause ❚❚</button>
-          <label>Scrub <input type="range" id="w-scrub" min="0" max="300" value="0"></label>
-        </div>
-      </div>
-      <canvas class="sim-canvas" data-sim="player" width="840" height="420"></canvas>
-      <ol id="w-caption" class="caption-list"><li>An emergency starts at the origin (red). It is the only device that holds hop 0.</li></ol>
-      <div class="w-scenes">
-        <button data-scene="0" class="scene-btn active">1 · Crowd flood</button>
-        <button data-scene="1" class="scene-btn">2 · Mule across a gap</button>
-        <button data-scene="2" class="scene-btn">3 · Handoff &amp; ghost collapse</button>
-      </div>
-    </div>
-    <p class="caption"><span class="chip chip-model">MODEL</span> These are scripted from engine rules, not a recording. Scrub freely — scenes are deterministic (same seed → same frame).</p>
-  </section>
-
-  <!-- ===================== FACTS ===================== -->
-  <section class="page" id="tab-facts" data-page="facts" hidden>
-    <h2>Glossary &amp; reference numbers</h2>
-    <div class="grid2">
-      <div class="card">
-        <h3>Terms</h3>
-        <dl class="glo">
-          <dt>Hop</dt><dd>The number of adopted radio steps from the emergency origin. Origin = hop 0.</dd>
-          <dt>Gradient</dt><dd>Per-device table: which neighbour claims which hop, and how fresh.</dd>
-          <dt>Envelope MAC</dt><dd>16-bit rolling authenticator over (SOS_ID ‖ EPOCH ‖ PKT_TYPE), keyed by the incident team key.</dd>
-          <dt>Trickle</dt><dd>Jittered, duty-cycled broadcast rhythm — small frames, often, predictably but not colliding.</dd>
-          <dt>Dedup window</dt><dd>Bound on packets re-entering the gradient state; 20,000-frame horizon in the engine.</dd>
-          <dt>Freshness / expiry</dt><dd>Nodes die at 120 s, edges at 60 s in the reference; a route claim is &ldquo;live&rdquo; for 120 s.</dd>
-          <dt>Nav tier</dt><dd>The lowest mutually measurable navigation signal two phones agree on.</dd>
-          <dt>Mule</dt><dd>A delay-tolerant carrier (runner/drone) that physically moves a cached gradient across a gap.</dd>
-          <dt>Advertising channels</dt><dd>BLE's 3 of 40 RF channels (37–39) dedicated to advertisements; the entire discovery protocol rides them.</dd>
-          <dt>Byte ceilings</dt><dd>Legacy adv payload 31 B; Type-0xFF block 27 B; iOS background dual-AD ≤ 23 B. The 13-byte frame fits all three.</dd>
-          <dt>Dual-AD framing</dt><dd>iOS-safe advertisement shape: 16-bit Service-UUID anchor (0xFC00) + payload, ≤ 23 B, so locked iPhones can see the packet.</dd>
-          <dt>Connection-free topology</dt><dd>Edges form from heard advertisements, never GATT connections — dodging the OS ~8-connection cache; degree is bounded by energy, not sockets.</dd>
-          <dt>PHY</dt><dd>BLE radio physical layer (LE 1M/2M/Coded). Find Us uses the advertising floor, not streams, so PHY choice is an OS/nicer-trade, not a design fork.</dd>
-          <dt>CTE / IQ</dt><dd>Constant-tone extension + in-phase/quadrature sampling — the BLE 5.1 machinery behind AoA/AoD; needs a switched antenna array smartphones lack.</dd>
-          <dt>AoA / AoD</dt><dd>Angle of arrival/departure. Not used by the design (§39.1): the way out of a direction hole is witnesses and swept-RSSI, never a phase array.</dd>
-          <dt>Swept-RSSI (rotate-to-find)</dt><dd>RSSI vs device-heading peak; RSSI-class, provisional on E17 (NOT-RUN), never promoted to EXACT without cycle-consistent witnesses.</dd>
-          <dt>Uncertainty tier</dt><dd>EXACT / OBSERVED / DERIVED / GHOSTED / Unknown — every edge is stored with its evidence ceiling; no upgrade without a witness.</dd>
-          <dt>Ghost rule</dt><dd>A relay advertises hop H only while still re-hearing a live H−1; lose the backer, fall silent. Structural anti-rumor.</dd>
-        </dl>
-      </div>
-      <div class="card">
-        <h3>Constants (reference build)</h3>
-        <table class="numtable">
-          <tbody>
-            <tr><td>Packet PDU</td><td>56 bits (7 B)</td></tr>
-            <tr><td>FEC</td><td>nibble Hamming(7,4) → 13 B frame</td></tr>
-            <tr><td>IoT adv budget</td><td>27 B; iOS-safe 23 B</td></tr>
-            <tr><td>Default TTL</td><td>8 hops</td></tr>
-            <tr><td>Incident lifetime</td><td>900 s (configurable)</td></tr>
-            <tr><td>Edge / node expiry</td><td>60 s / 120 s</td></tr>
-            <tr><td>Route freshness</td><td>120 s</td></tr>
-            <tr><td>Dedup window</td><td>20,000 packets</td></tr>
-            <tr><td>Trickle window</td><td>~1200 ms + jitter</td></tr>
-          </tbody>
-        </table>
-        <h3>Field experiments still open</h3>
-        <p class="tight">E13 path loss, E15 log-distance, E17 rotate-to-find, E21/E22 baro floors, E31/E32 the direction lemma&rsquo;s conditions. All flagged <span class="chip chip-notrun">NOT-RUN</span> in the manuscript; nothing on this site claims otherwise.</p>
-      </div>
-    </div>
-    <div class="card">
-      <h3>Provenance of everything on this page</h3>
-      <p class="tight">Text digests: manuscript 01 (46 sections) and review 01. Simulations: teaching ports of <code>DeviceApp</code> (Kotlin) / <code>app/devices.py</code> (Python), same parameters. Numbers: audit outputs on this machine. Any claim about a real emergency response is not made here — the papers are about a system to be deployed carefully, not a deployment that has happened.</p>
-    </div>
-  </section>
+<section id="sources">
+  <h2>8 · Sources &amp; Verification <a class="up" href="#top">↑</a></h2>
+  <p>Every external source in the paper is enumerated in <a class="anchor" href="research/find-us-audit/SOURCES.md">SOURCES.md</a> with a verification status: <span class="tag RES">VERIFIED</span> (retrieved + read), <span class="tag EXP">PARTIAL</span> (retrieved, partial), or <span class="tag RES">UNVERIFIED</span> (cited by others, not directly retrieved — marked, never silently used).</p>
+  <p>Key verified anchors on this pass: <strong>SPAWN</strong> (Wymeersch et al., WPNC 2009; IEEE Proc. 2009 review), <strong>CoCoA</strong> (CRLB localizability potentials, IEEE T-RO 2022), <strong>NBP hierarchical-graph</strong> (GNC 2015), and the cooperative-WSN localization survey.</p>
+  <div class="note"><strong>No fabricated citations.</strong> The project constitution requires every claim to be PROVEN / PROPOSED / SPECULATIVE, and every source VERIFIED / PARTIAL / UNVERIFIED. This site and all deliverables honor that.</div>
+</section>
 
 </main>
 
-<footer class="masthead">
-  <div class="wrap">
-    <p>Find Us / Crowd Compass — interactive research explainer. Faithful to the repo engine; honest about what is measured, modelled, and open. Built to run offline; deploy-ready for Vercel/Netlify/GitHub Pages as static files.</p>
-  </div>
+<footer class="wrap footer">
+<p><strong>Find Us — Cooperative Crowd Compass</strong> · Research dossier repository · This is research synthesis, not a validated product. Claims tagged <span class="tag RES">RES</span> are design/math; <span class="tag EXP">EXP:NOT-RUN</span> are designed-not-executed and must not be read as results. Full claims audit: <a class="anchor" href="research/find-us-audit/00_FIND_US_MEGA_DUMP.md">MEGA_DUMP</a> · <a class="anchor" href="research/find-us-audit/GAPS.md">GAPS</a> · <a class="anchor" href="research/find-us-audit/SOURCES.md">SOURCES</a> · <a class="anchor" href="research/find-us-audit/PAPER.md">PAPER</a>.</p>
 </footer>
-
-<script src="concepts.js"></script>
-<script src="app.js"></script>
-<script src="sims.js"></script>
 </body>
 </html>
