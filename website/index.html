@@ -3,137 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Find Us / Crowd Compass — interactive shortest-distance mesh</title>
+<title>Find Us / Crowd Compass — how it WORKS, step by step (the whole thing, all of it)</title>
 <style>
-:root{--ble:#0a84ff;--edge:#f5f5f7;--ink:#1d1d1f;--warn:#b25000;--hon:#006600}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--edge);color:var(--ink);padding:28px 12px 48px}
-main{max-width:960px;margin:0 auto}
-h1{font-size:26px;letter-spacing:-.02em}
-.sub{color:#6e6e73;margin:6px 0 18px;font-size:14px}
-.bar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
-button{font:inherit;border:1px solid #d2d2d7;background:#fff;border-radius:20px;padding:6px 14px;cursor:pointer}
-button:hover{background:#f0f0f2}
-button:disabled{opacity:.45;cursor:not-allowed}
-#field{position:relative;width:100%;height:520px;background:linear-gradient(rgba(10,132,255,.05),rgba(10,132,255,.05)),#fff;border:1px solid #d2d2d7;border-radius:14px;overflow:hidden;touch-action:none;user-select:none}
-.phone{position:absolute;width:56px;height:104px;border:3px solid var(--ble);border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--ble);cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.12)}
-.phone:active{cursor:grabbing}
-.phone.sos{border-color:#d70015;color:#d70015;background:#fff7f8;animation:pulse 1.6s infinite}
-@keyframes pulse{50%{box-shadow:0 0 0 10px rgba(215,0,21,.08)}}
-.phone label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:#6e6e73;white-space:nowrap}
-.phone.seeker{border-color:var(--hon);color:var(--hon);background:#f2faf2}
-svg#edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-#readout{display:flex;gap:24px;flex-wrap:wrap;margin-top:16px;font-size:14px}
-#readout b{font-size:22px}
-#res{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;padding:14px;background:#fff;border:1px solid #d2d2d7;border-radius:12px;font-size:13px;line-height:1.6}
-#res b{font-size:18px}
-.note{margin-top:14px;padding:12px 14px;background:#fff8ef;border:1px solid #ffd9a0;border-radius:10px;font-size:12.5px;color:var(--warn);line-height:1.6}
-.honest{margin-top:8px;background:#f2faf2;border-color:#b3e6b3;color:var(--hon)}
-.honest b{font-size:12px}
-.tags{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:#6e6e73;white-space:pre-wrap}
-a{color:var(--ble)}
+:root{--ink:#111827;--mut:#6b7280;--acc:#2563eb;--warn:#b45309;--wall:#b91c1c;--now:#059669}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 -apple-system,'Segoe UI',Roboto,sans-serif;color:var(--ink);background:#f9fafb}
+.wrap{max-width:820px;margin:0 auto;padding:36px 22px 100px}
+.h1{font-size:28px;line-height:1.25;margin:0 0 4px}
+.p1{font-size:17px;color:#374151;margin:0 0 20px}
+.live{display:inline-block;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:16px}
+.warn{display:block;background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:12px 14px;border-radius:8px;font-size:14px;margin:18px 0}
+.step{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:18px 20px;margin:14px 0}
+.step .n{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--acc);color:#fff;font-weight:700;font-size:15px;margin-right:10px}
+.step h2{display:inline;font-size:19px;margin:0;vertical-align:middle}
+.step p{margin:10px 0 0;color:#374151}
+code{background:#eef2ff;padding:1px 6px;border-radius:4px;font-size:13.5px}
+h3{font-size:17px;margin:26px 0 6px}
+.flow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.flow span{background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;padding:6px 10px;border-radius:6px;font-size:13px}
 </style>
 </head>
-<body>
-<main>
-  <h1>Find Us — Crowd Compass</h1>
-  <p class="sub">Interactive shortest-distance mesh: drag the phones, watch the math. <span class="tags">[RES] math: Euclid via hop-count, live client-side · [EXP:NOT-RUN] real 2-phone demo (honest — see note)</span></p>
+<body><div class="wrap">
 
-  <div class="bar">
-    <button onclick="addPhone('seeker')">+ seeker phone</button>
-    <button onclick="addPhone('relay')">+ relay phone</button>
-    <button onclick="addPhone('sos')">+ SOS phone</button>
-    <button onclick="resetPhones()">reset</button>
-  </div>
+<span class="live">● LIVE — the explainer page. Nothing here simulates; everything here TEACHES the paper's stages.</span>
+<h1 class="h1">How Find Us / Crowd Compass works</h1>
+<p class="p1">The whole thing, step by step — taken from the manuscript's own sections, not re-imagined. This is how the crowd's phones build a shared relative map and use it to find an SOS.</p>
 
-  <div id="field">
-    <svg id="edges"></svg>
-  </div>
+<span class="warn"><strong>[EXP:NOT-RUN] — honest, not hidden.</strong> These stages are the <em>design</em> (the paper's math and protocol). The radio mesh has not yet traded real bytes (5/5 bridge verbs absent; 0 devices scanned). So not a single stage below is labeled "measured" — each is labeled <em>design</em> or <em>open</em>. You are reading the intended mechanics, spelled out.</span>
 
-  <div id="readout">
-    <div>phones <b id="nPhones">0</b></div>
-    <div>edges <b id="nEdges">0</b></div>
-    <div>shortest path (hops) <b id="bestHops">–</b></div>
-    <div>shortest path (meters) <b id="bestM">–</b></div>
-    <div>euclid (direct) <b id="directM">–</b></div>
-  </div>
+<div class="step"><span class="n">1</span><h2>Newcomer joins — the phone with no history (§2.1, RQ3)</h2>
+<p>A device arrives “mid-crisis” with no shared history, no anchor, no map. It listens. It does <strong>not</strong> need a permanent origin — because the system never has one (ADR-002 · no-permanent-anchor). The newcomer's first job is just: <em>hear the gradient</em>, then climb it. That's the whole “how a new person comes in” story — no account, no anchor, no install-queue. </p></div>
 
-  <div id="res">
-    <div>How it works (this is the real math, byte-honest):</div>
-    <div class="tags">each phone computes EUCLIDEAN distance to every visible neighbor:
-d(phoneA,phoneB) = √((Δx)²+(Δy)²). The mesh keeps phones within range connected as an
-EDGE (blue line). The seeker finds the SOS by its GRADIENT: traverse the neighbor whose
-hop-count toward SOS is LOWEST — not necessarily the straightest Euclidean line, because
-a wall/obstacle can make the straight hop unreachable. That's why the paper calls it
-"gradient navigation," not "beeline." Drag the SOS to one side and the seeker far away:
-the highlighted RISK path is the hop-minimum route — the one real phones would take.</div>
-  </div>
+<div class="step"><span class="n">2</span><h2>The crowd becomes the infrastructure (§2.2, §4.3)</h2>
+<p>There is no beacon, router, or tower. The crowd <em>is</em> the infrastructure: every phone listens more than it shouts (the energy asymmetry, §13.4), and the collection of phones forms a graph. A phone never connects to a phone; phones only <strong>advertise</strong> and <strong>scan</strong> (GAP/adv, no GATT links). That's the whole radio model — no pairing, no connection queue, just packets.</p>
+<div class="flow"><span>advertise</span><span>scan</span><span>no connect</span><span>no pairing</span><span>relative coords</span></div></div>
 
-  <div class="note">Honesty note <b>[EXP:NOT-RUN]</b> — this page animates the DESIGN math, not a measured result. The byte-capped 61.8× / 0.015-ms / 85.3→1.39-mAh-per-day "phantom triple" exists <b>only as a designed hypothetical</b> inside the paper's honesty frames and the research ledger — it is <b>never a reported result</b>, and the real two-phone device demo (E10) has not yet been run. No tool on this page claims a measured "works."</div>
-  <div class="note honest"><b>CONTRIBUTION LEDGER — real creators, credited (S-01…S-09).</b> Cooperative localization (SPAWN family, Wymeersch/Conti/Win) [S-01,S-02] · relative-coordinate meshes CORELS/CLIPS [S-04] · emergency BLE relay (OEPB/IgniRelay/BlueSOS + US11627453) [S-05..S-08] · calibration via peer-validated oracle [S-09, GAP:G-L3.2]. Full ledger: <a href="https://github.com/derickharshal285-design/find-us-crowd-compass/blob/main/research/02_SOURCES/SOURCES.md">research/02_SOURCES/SOURCES.md</a>. No fabricated citation anywhere.</div>
-</main>
+<div class="step"><span class="n">3</span><h2>The gradient gets built — who is closest to the goal (§5, §12)</h2>
+<p>Each phone that hears the goal (SOS finding, or the “find us” direction) advertises a <strong>gradient value</strong> — how far, in hops, that goal feels from here. Neighbors read it DENEMO and update. This climbs and corrects as the crowd moves (ADR-003 · geometry vs topology). The result is a <em>distributed relative coordinate system</em> — no anchor ever exists, but phones still agree where “toward” is.</p></div>
 
-<script>
-"use strict";
-const field=document.getElementById("field");
-const svg=document.getElementById("edges");
-const RANGE=180; // px limit for an edge (stays in px; meters shown are px-based demo units, labelled honestly)
-let phones=[], nextId=1, drag=null;
+<div class="step"><span class="n">4</span><h2>SOS arrives — an emergency packet with a purpose (§9, §27/§13.3, RQ6)</h2>
+<p>An SOS is a <strong>directional</strong> question, not a broadcast that floods everything. It travels <em>downhill</em> the gradient toward the person who can receive; peers forward the call only while it still points toward a listener (§13.4 traffic classes). So: SOS comes in as a <strong>precious, gradient-steered, honest byte</strong> — not a gossip storm.</p></div>
 
-function addPhone(kind){
-  const id=nextId++;
-  const el=document.createElement("div");
-  el.className="phone"+(kind==="sos"?" sos":"")+(kind==="seeker"?" seeker":"");
-  el.id="p"+id;
-  el.innerHTML=kind==="sos"?"SOS":(kind==="seeker"?"ME":id);
-  el.appendChild(Object.assign(document.createElement("label"),{textContent:kind}));
-  el.style.left=(40+Math.random()*(field.clientWidth-110))+"px";
-  el.style.top=(30+Math.random()*(field.clientHeight-170))+"px";
-  field.appendChild(el);
-  phones.push({id,kind,el,x:parseFloat(el.style.left),y:parseFloat(el.style.top)});
-  wireDrag(el,id);
-  render();
-}
-function wireDrag(el,id){
-  el.addEventListener("pointerdown",e=>{drag=id;el.setPointerCapture(e.pointerId);el.style.cursor="grabbing";e.preventDefault();});
-  el.addEventListener("pointermove",e=>{if(drag!==id)return;const r=field.getBoundingClientRect();let x=e.clientX-r.left-28,y=e.clientY-r.top-52;x=Math.max(0,Math.min(field.clientWidth-56,x));y=Math.max(0,Math.min(field.clientHeight-104,y));el.style.left=x+"px";el.style.top=y+"px";const p=phones.find(q=>q.id===id);p.x=x;p.y=y;render();});
-  el.addEventListener("pointerup",()=>{drag=null;el.style.cursor="grab";});
-}
-function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
-function edges(){
-  const es=[];
-  for(let i=0;i<phones.length;i++)for(let j=i+1;j<phones.length;j++){
-    const d=dist(phones[i],phones[j]);
-    if(d<=RANGE)es.push([i,j,d]);
-  }
-  return es;
-}
-function render(){
-  while(svg.firstChild)svg.removeChild(svg.firstChild);
-  const es=edges();
-  const sos=phones.find(p=>p.kind==="sos");
-  const me=phones.find(p=>p.kind==="seeker");
-  // nearest-path via gradient (hop-discrete): BFS on the edge graph from me toward sos
-  let path=[];
-  if(sos&&me){
-    const n=phones.length,adj=Array.from({length:n},()=>[]);
-    for(const[i,j]of es){adj[i].push(j);adj[j].push(i);}
-    const prev=Array(n).fill(-1),st=[me.id-1],seen=new Set(st);
-    while(st.length>0){const c=st.shift();if(c===(sos.id-1))break;for(const nx of adj[c])if(!seen.has(nx)){seen.add(nx);prev[nx]=c;st.push(nx);}}
-    let c=sos.id-1;while(c!==-1){path.unshift(phones[c].id-1);c=prev[c];}
-    if(path.length>1&&path[0]!==(me.id-1))path=[];
-  }
-  path.forEach((pi,k)=>{if(k===0)return;const a=phones[pi],b=phones[path[k-1]];const l=document.createElementNS("http://www.w3.org/2000/svg","line");l.setAttribute("x1",a.x+28);l.setAttribute("y1",a.y+52);l.setAttribute("x2",b.x+28);l.setAttribute("y2",b.y+52);l.setAttribute("stroke","#008300");l.setAttribute("stroke-width",5);l.setAttribute("stroke-linecap","round");svg.appendChild(l);});
-  for(const[i,j,d]of es){const a=phones[i],b=phones[j],onPath=path.includes(i)&&path.includes(j)&&Math.abs(path.indexOf(i)-path.indexOf(j))===1;const l=document.createElementNS("http://www.w3.org/2000/svg","line");l.setAttribute("x1",a.x+28);l.setAttribute("y1",a.y+52);l.setAttribute("x2",b.x+28);l.setAttribute("y2",b.y+52);l.setAttribute("stroke",onPath?"#008300":"rgba(10,132,255,.28)");l.setAttribute("stroke-width",onPath?5:1.5);svg.appendChild(l);}
-  document.getElementById("nPhones").textContent=phones.length;
-  document.getElementById("nEdges").textContent=es.length;
-  const m=es.reduce((s,e)=>s+e[2],0);
-  document.getElementById("bestHops").textContent=path.length>1?(path.length-1):"–";
-  document.getElementById("bestM").textContent=(path.length>1?path.slice(1).reduce((s,p,k)=>s+dist(phones[path[k]],phones[p]),0):null)!=null&&path.length>1?Math.round(path.slice(1).reduce((s,p,k)=>s+dist(phones[path[k]],phones[p]),0))+" m":"–";
-  document.getElementById("directM").textContent=(sos&&me)?Math.round(dist(sos,me))+" m":"–";
-}
-function resetPhones(){phones.forEach(p=>p.el.remove());phones=[];nextId=1;render();}
-if(phones.length===0){addPhone("sos");addPhone("seeker");addPhone("relay");}
-</script>
-</body>
-</html>
+<div class="step"><span class="n">5</span><h2>The mesh self-heals as the crowd moves (§12/ADR-003, RQ7, RQ11)</h2>
+<p>When a partition splits, dissolves, or merges, relative coordinates must re-converge. The paper's design has nodes agree on <em>relative</em> geometry continuously; when two partitions meet, their gradients are re-reconciled — <em>“who is new here, which gradient do I believe”</em> becomes the honest open question (RQ7, RQ20). Movement is expected; re-convergence is the design target.</p></div>
+
+<div class="step"><span class="n">6</span><h2>The crowd answers “find us” — the whole group, not the individuated few (§1, §5.1)</h2>
+<p>Because everyone advertises a small gradient, the crowd itself becomes the answer: any phone can compute the shortest-direction toward the SOS or toward the group, undirected, no server. The group “comes in” the same way the single phone does — the graph is <em>the</em> infrastructure, so the big crowd is just a bigger graph.</p></div>
+
+<h3>All 21 research questions live behind these stages</h3>
+<ul>
+<li><strong>RQ21</strong> permissions/admission · <strong>RQ20</strong> consistency anchors · <strong>RQ19</strong> device heterogeneity · <strong>RQ18</strong> what observers learn · <strong>RQ17</strong> identity/anti-spoof · <strong>RQ16</strong> iOS 23-byte ceiling · <strong>RQ15</strong> operational instruments (unanswered) · <strong>RQ14</strong> terminal localization early-binding · <strong>RQ13</strong> z-axis/floor transitions · <strong>RQ12</strong> SOS latency under dense crowds · <strong>RQ11</strong> gradient correctness under motion · <strong>RQ10</strong> dense-crowd scaling · <strong>RQ9</strong> energy/energy budget · <strong>RQ8</strong> routing, gradient-vs-hop · <strong>RQ7</strong> relative-coordinate stability under merge/split · <strong>RQ6</strong> SOS gradient vs flood · <strong>RQ5</strong> privacy-by-default · <strong>RQ4</strong> suppression vs flooding · <strong>RQ3</strong> the newcomer problem · <strong>RQ2</strong> who is the anchor · <strong>RQ1</strong> no-infrastructure find-the-group answer.</li>
+</ul>
+<p style="font-size:13px;color:var(--mut)">· Status truth everywhere in this repo: <strong>28 <code>[RES]</code></strong> (designed/resolved) vs <strong>53 <code>[EXP:NOT-RUN]</code></strong> (not yet measured on real radios). The honesty ledger is in <code>research/01_PAPER/01_manuscript.md</code>.</p>
+</div></body></html>
