@@ -1,6 +1,6 @@
 # find-us crowd compass
 
-> **LIVE** → https://find-us-crowd-compass-etw8ixzc7.vercel.app
+> **LIVE** → https://find-us-crowd-compass.vercel.app
 
 A phone-top-of-page proof that a crowd can find US: **single-sideband (SSB) Grad-Mesh over BLE** on ordinary phones, no cellular, no internet, no base station. A high-frequency packet beacon frequency, a mesh of listening watches, and a mousehole-search physics through the dense hollow that is a crowd.
 
