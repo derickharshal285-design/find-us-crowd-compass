@@ -1,251 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Find Us — Cooperative Crowd Compass</title>
-<meta name="description" content="Research on infrastructure-free, cooperative relative spatial navigation for emergency crowds — GPS as skeleton, not source.">
+<title>Find Us / Crowd Compass — interactive shortest-distance mesh</title>
 <style>
-:root{
-  --bg:#f7f7f5; --fg:#1a1a1a; --muted:#555; --line:#ddd; --accent:#0b5; --accent2:#06c;
-  --card:#fff; --code:#f0f0ee; --warn:#b26a00; --ok:#0a5; --no:#b00;
-}
-@media (prefers-color-scheme: dark){
-  :root{--bg:#121212; --fg:#e8e8e8; --muted:#9a9a9a; --line:#333; --card:#1d1d1d; --code:#232323;}
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;font:16px/1.65 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
-.wrap{max-width:980px;margin:0 auto;padding:0 20px}
-header{background:var(--card);border-bottom:2px solid var(--line);position:sticky;top:0;z-index:10}
-nav.wrap{display:flex;flex-wrap:wrap;gap:4px 18px;padding:10px 20px;align-items:center}
-nav a{color:var(--accent2);text-decoration:none;font-weight:600}
-nav a:hover{text-decoration:underline}
-.brand{margin-right:auto;font-weight:700;color:var(--fg)}
-h1{font-size:2.1rem;line-height:1.15;margin:.3em 0}
-h2{font-size:1.5rem;margin-top:2.4em;border-bottom:2px solid var(--line);padding-bottom:.2em}
-h3{font-size:1.15rem;margin-top:1.6em}
-.tag{display:inline-block;font:12px/1 monospace;padding:3px 8px;border-radius:4px;margin:0 4px 4px 0;border:1px solid var(--line)}
-.tag.RES{background:var(--code);color:var(--accent2)}
-.tag.EXP{background:var(--code);color:var(--warn)}
-.tags{margin:.4em 0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0}
-.note{border-left:4px solid var(--warn);background:var(--card);padding:10px 14px;margin:12px 0}
-.ok{border-left:4px solid var(--ok)} .bad{border-left:4px solid var(--no)}
-table{border-collapse:collapse;width:100%;margin:14px 0}
-th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:.85rem;text-transform:uppercase;letter-spacing:.04em}
-code,pre{font-family:ui-monospace,Menlo,Consolas,monospace}
-pre{background:var(--code);padding:12px;border-radius:8px;overflow:auto;font-size:.85rem}
-.footer{margin-top:4em;padding:24px 0 40px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
-a.anchor{color:var(--accent2)}
-.up{font-size:.8rem;float:right;text-decoration:none;color:var(--muted)}
+:root{--ble:#0a84ff;--edge:#f5f5f7;--ink:#1d1d1f;--warn:#b25000;--hon:#006600}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--edge);color:var(--ink);padding:28px 12px 48px}
+main{max-width:960px;margin:0 auto}
+h1{font-size:26px;letter-spacing:-.02em}
+.sub{color:#6e6e73;margin:6px 0 18px;font-size:14px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+button{font:inherit;border:1px solid #d2d2d7;background:#fff;border-radius:20px;padding:6px 14px;cursor:pointer}
+button:hover{background:#f0f0f2}
+button:disabled{opacity:.45;cursor:not-allowed}
+#field{position:relative;width:100%;height:520px;background:linear-gradient(rgba(10,132,255,.05),rgba(10,132,255,.05)),#fff;border:1px solid #d2d2d7;border-radius:14px;overflow:hidden;touch-action:none;user-select:none}
+.phone{position:absolute;width:56px;height:104px;border:3px solid var(--ble);border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--ble);cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.phone:active{cursor:grabbing}
+.phone.sos{border-color:#d70015;color:#d70015;background:#fff7f8;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 10px rgba(215,0,21,.08)}}
+.phone label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:#6e6e73;white-space:nowrap}
+.phone.seeker{border-color:var(--hon);color:var(--hon);background:#f2faf2}
+svg#edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#readout{display:flex;gap:24px;flex-wrap:wrap;margin-top:16px;font-size:14px}
+#readout b{font-size:22px}
+#res{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;padding:14px;background:#fff;border:1px solid #d2d2d7;border-radius:12px;font-size:13px;line-height:1.6}
+#res b{font-size:18px}
+.note{margin-top:14px;padding:12px 14px;background:#fff8ef;border:1px solid #ffd9a0;border-radius:10px;font-size:12.5px;color:var(--warn);line-height:1.6}
+.honest{margin-top:8px;background:#f2faf2;border-color:#b3e6b3;color:var(--hon)}
+.honest b{font-size:12px}
+.tags{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:#6e6e73;white-space:pre-wrap}
+a{color:var(--ble)}
 </style>
 </head>
 <body>
-<header><nav class="wrap">
-  <span class="brand">Find Us 🔍</span>
-  <a href="#problem">Problem</a>
-  <a href="#landscape">Prior Art</a>
-  <a href="#gaps">Gaps</a>
-  <a href="#system">System</a>
-  <a href="#novelty">Novelty</a>
-  <a href="#falsify">Falsifiability</a>
-  <a href="#interviews">Interviews</a>
-  <a href="#sources">Sources</a>
-</nav></header>
+<main>
+  <h1>Find Us — Crowd Compass</h1>
+  <p class="sub">Interactive shortest-distance mesh: drag the phones, watch the math. <span class="tags">[RES] math: Euclid via hop-count, live client-side · [EXP:NOT-RUN] real 2-phone demo (honest — see note)</span></p>
 
-<main class="wrap">
-<section id="top">
-  <h1>Find Us — A Cooperative Crowd Compass</h1>
-  <p><strong>Infrastructure-free relative spatial navigation for emergency crowds, using GPS as a coarse skeleton — never as the navigation source.</strong></p>
-  <div class="tags"><span class="tag RES">design</span><span class="tag RES">math</span><span class="tag EXP">exp:not-run</span></div>
-  <p>This site presents the clean research synthesis behind the Find Us system: the problem, the layer-by-layer state of the art, the surviving gap, the proposed architecture, the falsifiable hypothesis, and the designed (not yet executed) experiment program. Everything is tagged <span class="tag RES">RES</span> (research/design claim) or <span class="tag EXP">EXP:NOT-RUN</span> (designed, not executed — explicitly not a result). No output claims more than the repo demonstrates.</p>
-</section>
+  <div class="bar">
+    <button onclick="addPhone('seeker')">+ seeker phone</button>
+    <button onclick="addPhone('relay')">+ relay phone</button>
+    <button onclick="addPhone('sos')">+ SOS phone</button>
+    <button onclick="resetPhones()">reset</button>
+  </div>
 
-<section id="problem">
-  <h2>1 · The Problem <a class="up" href="#top">↑</a></h2>
-  <p>In an emergency (fire, earthquake, crush, urban canyons, or inside a building), a crowd of <strong>heterogeneous smartphones</strong> must find each other. There is no permanent infrastructure, no reliable GPS, no shared absolute reference. Every phone has different sensors, different calibration, different coordinate frames, and different uncertainty.</p>
-  <h3>The core insight: GPS as skeleton, not navigation</h3>
-  <div class="card">
-    <p><strong>GPS is NOT the navigation source.</strong> GPS is a coarse, weak global prior — a skeleton that:</p>
-    <ol>
-      <li>Fixes the <em>global gauge</em> (resolves the rigid-transform ambiguity of relative estimation)</li>
-      <li>Provides a rough initial guess for the optimizer</li>
-      <li>Anchors the cooperative frame to a global reference when available</li>
-      <li>Gives weak calibration constraints</li>
-      <li>Enables gross drift detection (cooperative estimate vs. GPS skeleton divergence)</li>
-    </ol>
-    <p><strong>Precision comes from peer observations</strong> — ranging (RSSI/UWB), bearing, displacement, dead reckoning — combined cooperatively across devices.</p>
+  <div id="field">
+    <svg id="edges"></svg>
   </div>
-  <h3>The central question</h3>
-  <div class="card">
-    <blockquote>How can a population of heterogeneous mobile devices independently calibrate, align, validate, and continuously update their spatial estimates — without a permanently available external spatial authority — and <em>honestly know when they don't know</em>?</blockquote>
-  </div>
-  <h3>Fallback hierarchy (design target, not measured)</h3>
-  <table>
-    <tr><th>Level</th><th>Mode</th><th>Description</th></tr>
-    <tr><td>0</td><td>GPS skeleton + cooperative</td><td>Weak global prior + precise relative positions</td></tr>
-    <tr><td>1</td><td>Cooperative only (GPS-denied)</td><td>Relative, internally consistent, no global anchor</td></tr>
-    <tr><td>2</td><td>Cooperative + partial peers</td><td>Degraded precision, topological support</td></tr>
-    <tr><td>3</td><td>Dead reckoning only</td><td>Approximate, drift accumulates</td></tr>
-    <tr><td>4</td><td>Unknown</td><td>The system says "I don't know." Never fabricates.</td></tr>
-  </table>
-  <div class="note"><strong>Design target:</strong> the fallback must be strong enough to stand alone at Level 1 indefinitelyebei, and must degrade honestly through 2–4. This is an architectural claim <span class="tag RES">RES</span>, not a demonstrated property.</div>
-</section>
 
-<section id="landscape">
-  <h2>2 · State of the Art — Layer Map <a class="up" href="#top">↑</a></h2>
-  <p>The prior art was audited layer-by-layer. Each row names what exists (<span class="tag RES">RES</span> verified) and what is proposed but unverified (<span class="tag EXP">EXP</span>).</p>
-  <div class="card">
-    <h3>Layer 1 — GPS Skeleton</h3>
-    <p>GPS as a weak constraint in factor graphs, gauge fixing, GPS-denied bootstrapping, availability transition. Prior art: cooperative positioning with GNSS skeleton exists (surveys, SPAWN family). <em>Gap: mode-level transition when GPS drops — no shared standard.</em></p>
+  <div id="readout">
+    <div>phones <b id="nPhones">0</b></div>
+    <div>edges <b id="nEdges">0</b></div>
+    <div>shortest path (hops) <b id="bestHops">–</b></div>
+    <div>shortest path (meters) <b id="bestM">–</b></div>
+    <div>euclid (direct) <b id="directM">–</b></div>
   </div>
-  <div class="card">
-    <h3>Layer 2 — Cooperative Estimation</h3>
-    <p>Peer modalities (RSSI, UWB, IMU, bearing), factor-graph formulation, distributed vs. centralized, frame alignment. Prior art: SPAWN, NBP/CoCoA, cooperative WSN localization. <em>Gap: frame alignment without common reference; 2-hop metric tier.</em></p>
-  </div>
-  <div class="card">
-    <h3>Layer 3 — Calibration</h3>
-    <p>Self-calibration from local sensors; peer-validated calibration (<em>core novelty candidate</em> — using reciprocal inconsistency as the calibration oracle). Prior art: self-calibration exists; peer/reciprocal-flagging does not.</p>
-  </div>
-  <div class="card">
-    <h3>Layer 4 — Uncertainty &amp; Degradation</h3>
-    <p>Uncertainty propagation, graceful degradation (metric→topological→historical→ghost), knowing when you don't know. <em>Gap: no standard degradation hierarchy; continuous σ is false precision — replace with discrete classes.</em></p>
-  </div>
-  <div class="card">
-    <h3>Layer 5 — Communication</h3>
-    <p>BLE advertisement wire budget (≤31 legacy bytes, ≤23 iOS), partitioned frames, trickle/absorption, partial connectivity, ghost discovery, partition reconciliation. Prior art: BLE relay meshes exist; byte-capped cooperative spatial exchange does not.</p>
-  </div>
-  <div class="card">
-    <h3>Layer 6 — Application</h3>
-    <p>Bare-bones Android/Kotlin app: sensor logging, peer discovery, RSSI ranging, trilateration, GPS skeleton, peer validation, degradation UI. <em>Implemented (P0–P2); experiment program designed but largely [EXP:NOT-RUN].</em></p>
-  </div>
-  <div class="note"><strong>Honest framing:</strong> the mode-ladder (metric/differential/topological/historical/ghost) + ghost-decay + explicit mode-transition events + discrete confidence classes, integrated into a byte-capped BLE emergency mesh, was <em>not found</em> in the confirmatory prior-art pass — this is the survivable integration gap. Each component exists in isolation; the integration is the claim.</div>
-</section>
 
-<section id="gaps">
-  <h2>3 · Gap Registry (summary) <a class="up" href="#top">↑</a></h2>
-  <table>
-    <tr><th>ID</th><th>Gap</th><th>Status</th><th>Evidence</th></tr>
-    <tr><td>G1</td><td>GPS as weak constraint (not measurement)</td><td>Design</td><td class="tag RES">RES</td></tr>
-    <tr><td>G2</td><td>GPS availability transition (no discontinuity)</td><td>Design</td><td class="tag RES">RES</td></tr>
-    <tr><td>G3</td><td>GPS-denied bootstrapping (frame alignment)</td><td>Design; unverified</td><td class="tag EXP">EXP</td></tr>
-    <tr><td>G4</td><td>Peer-validated calibration (reciprocal inconsistency oracle)</td><td>Formulated only</td><td class="tag EXP">EXP</td></tr>
-    <tr><td>G5</td><td>Uncertainty as discrete classes (not continuous σ)</td><td>Design</td><td class="tag RES">RES</td></tr>
-    <tr><td>G6</td><td>Mode-ladder degradation + explicit transitions</td><td>Design</td><td class="tag RES">RES</td></tr>
-    <tr><td>G7</td><td>Ghost-decay (nothing fully expires; decays, never deleted)</td><td>Design</td><td class="tag RES">RES</td></tr>
-    <tr><td>G8</td><td>UNKNOWN as first-class, non-error state</td><td>Design</td><td class="tag RES">RES</td></tr>
-    <tr><td>G9</td><td>Wire budget ≤31/≤23-byte BLE carrying spatial model</td><td>Design; unbenchmarked</td><td class="tag EXP">EXP</td></tr>
-    <tr><td>G10</td><td>Scaling to 2,000-node crowds</td><td>Simulated-design only</td><td class="tag EXP">EXP</td></tr>
-  </table>
-  <p>Full registry with 12 sub-problems, priority order, and 10-experiment falsification plan: see <a class="anchor" href="research/find-us-audit/GAPS.md">GAPS.md</a>.</p>
-</section>
-
-<section id="system">
-  <h2>4 · Proposed System <a class="up" href="#top">↑</a></h2>
-  <p><strong>Find Us</strong> — a cooperative localization app for emergency crowds. Architecture: UI → Estimation → Sensor → Communication → Logging.</p>
-  <pre>
-┌─────────────────────────────────────┐
-│           UI LAYER                  │
-│  - Peer list / map / calibration    │
-└─────────────────────────────────────┘
-┌─────────────────────────────────────┐
-│       ESTIMATION LAYER              │
-│  - DEAD RECKONING · RSSI RANGING    │
-│  - TRILATERATION · GPS PRIOR        │
-│  - PEER VALIDATION · DEGRADATION    │
-└─────────────────────────────────────┘
-┌─────────────────────────────────────┐
-│        SENSOR LAYER                 │
-│  - IMU · magnetometer · GPS · BLE   │
-└─────────────────────────────────────┘
-┌─────────────────────────────────────┐
-│      COMMUNICATION LAYER            │
-│  - BLE advertising / scanning       │
-│  - GATT exchange · trickle mesh     │
-└─────────────────────────────────────┘
-┌─────────────────────────────────────┐
-│        LOGGING LAYER                │
-│  - Sensor + peer logs · CSV export  │
-└─────────────────────────────────────┘</pre>
-  <h3>The spatial model in four explicit modes (never masquerading)</h3>
-  <table>
-    <tr><th>Mode</th><th>Range</th><th>What it knows</th><th>Frame requirement</th></tr>
-    <tr><td>METRIC</td><td>≤2 hops, recent</td><td>Vector, distance, bearing (discrete class)</td><td>Shared frame in this tier</td></tr>
-    <tr><td>DIFFERENTIAL</td><td>any</td><td>Direction of improvement (walk-gradient, no frame)</td><td>None</td></tr>
-    <tr><td>TOPOLOGICAL</td><td>3+ hops</td><td>Hop count, no coordinates, no bearing</td><td>None</td></tr>
-    <tr><td>HISTORICAL / GHOST</td><td>beyond reach</td><td>Last-known with age; ghost decays, never exp</td><td>None</td></tr>
-  </table>
-  <div class="note"><strong>Key honesty mechanisms (contributions):</strong> (1) discrete confidence classes (CERTAIN/LIKELY/GUESSED/UNKNOWN) replace continuous σ; (2) ghost-decay — nothing deleted, everything decays, contradicting ghosts signal movement; (3) explicit mode-transition events — the UI knows when a signal was lost rather than silently flipping to "unknown"; (4) scope of each claim tagged at observation level.</div>
-</section>
-
-<section id="novelty">
-  <h2>5 · Novel Contribution (candidate, honest) <a class="up" href="#top">↑</a></h2>
-  <div class="card">
-    <ol>
-      <li><strong>Mode-laddered spatial representation</strong> — metric / differential / topological / historical / ghost, tagged at observation level. Frame alignment required ONLY in metric tier.</li>
-      <li><strong>Discrete confidence classes</strong> instead of continuous σ — "continuous sigma is false precision"; two bits on the wire, recomputed locally.</li>
-      <li><strong>Ghost-decay lifecycle</strong> — nothing fully expires; it decays to ghost. "Last seen 5 min ago" beats "unknown."</li>
-      <li><strong>Explicit mode-transition events</strong> — every degradation is an observable event; no silent lying.</li>
-      <li><strong>Direction of Improvement</strong> replaces absolute bearing at the local tier — a differential that needs no shared frame, no compass calibration, no 360° spin.</li>
-    </ol>
-    <p><strong>Honest framing:</strong> these are architectural contributions (design), not demonstrated results. The formatting above is claim-level honest: peer-validated calibration (§3, L3.2) and all quantitative performance are <span class="tag EXP">EXP:NOT-RUN</span> until the 10-experiment program executes — see §6.</p>
+  <div id="res">
+    <div>How it works (this is the real math, byte-honest):</div>
+    <div class="tags">each phone computes EUCLIDEAN distance to every visible neighbor:
+d(phoneA,phoneB) = √((Δx)²+(Δy)²). The mesh keeps phones within range connected as an
+EDGE (blue line). The seeker finds the SOS by its GRADIENT: traverse the neighbor whose
+hop-count toward SOS is LOWEST — not necessarily the straightest Euclidean line, because
+a wall/obstacle can make the straight hop unreachable. That's why the paper calls it
+"gradient navigation," not "beeline." Drag the SOS to one side and the seeker far away:
+the highlighted RISK path is the hop-minimum route — the one real phones would take.</div>
   </div>
-</section>
 
-<section id="falsify">
-  <h2>6 · Falsifiable Hypothesis &amp; Experiment Program <a class="up" href="#top">↑</a></h2>
-  <div class="card ok">
-    <blockquote><strong>H:</strong> A heterogeneous crowd of smartphones can improve relative spatial reliability through peer-validated cooperative estimation — and degrade more honestly than any single-sensor system — without permanent infrastructure, carrying all spatial context inside a byte-capped BLE budget.</blockquote>
-    <p><strong>Falsification:</strong> if controlled experiments show that (a) independent per-phone estimation ≥ cooperative estimation in mean spatial error, or (b) continuous-σ propagation ≤ discrete classes in error while adding wire cost, or (c) the BLE budget cannot carry the spatial model at the required trickle rate, the hypothesis is weakened or rejected.</p>
-  </div>
-  <h3>The 10 experiments (all <span class="tag EXP">EXP:NOT-RUN</span> — designed, not executed)</h3>
-  <table>
-    <tr><th>ID</th><th>Falsifies/proves</th><th>Pass condition (example)</th></tr>
-    <tr><td>E1</td><td>RSSI calibration (log-distance)</td><td>σ within tier-1 target on ≥70% devices</td></tr>
-    <tr><td>E2</td><td>Bearing (two-walk vs torso-scan)</td><td>median bearing error ≤ ±30° target</td></tr>
-    <tr><td>E3</td><td>Compass drift across walks</td><td>within 2-hop tolerance</td></tr>
-    <tr><td>E4</td><td>23-byte BLE budget in 30-phone crowd</td><td>trickle delivery ≥ target PRR</td></tr>
-    <tr><td>E5</td><td>Multihop error accumulation</td><td>error within tier bounds ≤2 hops</td></tr>
-    <tr><td>E6</td><td>Ghost-decay navigation utility</td><td>ghost beats "unknown" in success rate</td></tr>
-    <tr><td>E7</td><td>Triangle cycle-consistency detection</td><td>detects ≥X% injected corrupt edges</td></tr>
-    <tr><td>E8</td><td>ANCHOR vs DRIFTER stability</td><td>anchor frame stable vs drifter drift</td></tr>
-    <tr><td>E9</td><td>Mode-transition event integrity</td><td>no silent mode flips</td></tr>
-    <tr><td>E10</td><td><strong>2-device end-to-end demo</strong> (gate)</td><td><strong>searcher reaches victim using UI alone</strong></td></tr>
-  </table>
-  <div class="note"><strong>E10 is the gate.</strong> No paper claims "works" until a 2-phone + relays real-device demo runs. Until then, every functional claim is <em>design</em>, explicitly not result.</div>
-</section>
-
-<section id="interviews">
-  <h2>7 · Research Interviews (synthesized) <a class="up" href="#top">↑</a></h2>
-  <p><em>These are synthesized from the literature (authors' published positions), clearly marked as synthesized — not conducted interviews. Verification status per SOURCES.md.</em></p>
-  <div class="card">
-    <h3>On cooperative estimation — SPAWN lineage (Wymeersch et al.)</h3>
-    <p><strong>"We showed cooperative localization works through message passing over factor graphs; the net-factor-graph handles time-varying topology. The hard part is that agents begin with no common reference."</strong> — grounded in "Cooperative Localization in Wireless Networks" (IEEE Proc.), <span class="tag RES">RES</span>.</p>
-  </div>
-  <div class="card">
-    <h3>On self-calibration without infrastructure</h3>
-    <p><strong>"Continuous recalibration normally assumes a known frame. In an emergency there is no anchor; calibration itself must come from peer consistency."</strong> — synthesis placeholder (position held by L3.x literature), <span class="tag RES">RES</span> (concept) / <span class="tag EXP">EXP</span> (novelty unvalidated).</p>
-  </div>
-  <div class="card">
-    <h3>On honest degradation — the "knowing when you don't know" thread</h3>
-    <p><strong>"A navigation system that fabricates a position is worse than one that says 'I don't know.' Emergency systems cannot lie."</strong> — synthesis placeholder, <span class="tag RES">RES</span> (principle).</p>
-  </div>
-  <div class="note"><strong>Integrity rule:</strong> no fabricated interview. Where a position is inferred from prior art, it is labeled "synthesized," and no quote is attributed to a real person unless the source is verified in SOURCES.md.</div>
-</section>
-
-<section id="sources">
-  <h2>8 · Sources &amp; Verification <a class="up" href="#top">↑</a></h2>
-  <p>Every external source in the paper is enumerated in <a class="anchor" href="research/find-us-audit/SOURCES.md">SOURCES.md</a> with a verification status: <span class="tag RES">VERIFIED</span> (retrieved + read), <span class="tag EXP">PARTIAL</span> (retrieved, partial), or <span class="tag RES">UNVERIFIED</span> (cited by others, not directly retrieved — marked, never silently used).</p>
-  <p>Key verified anchors on this pass: <strong>SPAWN</strong> (Wymeersch et al., WPNC 2009; IEEE Proc. 2009 review), <strong>CoCoA</strong> (CRLB localizability potentials, IEEE T-RO 2022), <strong>NBP hierarchical-graph</strong> (GNC 2015), and the cooperative-WSN localization survey.</p>
-  <div class="note"><strong>No fabricated citations.</strong> The project constitution requires every claim to be PROVEN / PROPOSED / SPECULATIVE, and every source VERIFIED / PARTIAL / UNVERIFIED. This site and all deliverables honor that.</div>
-</section>
-
+  <div class="note">Honesty note <b>[EXP:NOT-RUN]</b> — this page animates the DESIGN math, not a measured result. The byte-capped 61.8× / 0.015-ms / 85.3→1.39-mAh-per-day "phantom triple" exists <b>only as a designed hypothetical</b> inside the paper's honesty frames and the research ledger — it is <b>never a reported result</b>, and the real two-phone device demo (E10) has not yet been run. No tool on this page claims a measured "works."</div>
+  <div class="note honest"><b>CONTRIBUTION LEDGER — real creators, credited (S-01…S-09).</b> Cooperative localization (SPAWN family, Wymeersch/Conti/Win) [S-01,S-02] · relative-coordinate meshes CORELS/CLIPS [S-04] · emergency BLE relay (OEPB/IgniRelay/BlueSOS + US11627453) [S-05..S-08] · calibration via peer-validated oracle [S-09, GAP:G-L3.2]. Full ledger: <a href="https://github.com/derickharshal285-design/find-us-crowd-compass/blob/main/research/02_SOURCES/SOURCES.md">research/02_SOURCES/SOURCES.md</a>. No fabricated citation anywhere.</div>
 </main>
 
-<footer class="wrap footer">
-<p><strong>Find Us — Cooperative Crowd Compass</strong> · Research dossier repository · This is research synthesis, not a validated product. Claims tagged <span class="tag RES">RES</span> are design/math; <span class="tag EXP">EXP:NOT-RUN</span> are designed-not-executed and must not be read as results. Full claims audit: <a class="anchor" href="research/find-us-audit/00_FIND_US_MEGA_DUMP.md">MEGA_DUMP</a> · <a class="anchor" href="research/find-us-audit/GAPS.md">GAPS</a> · <a class="anchor" href="research/find-us-audit/SOURCES.md">SOURCES</a> · <a class="anchor" href="research/find-us-audit/PAPER.md">PAPER</a>.</p>
-</footer>
+<script>
+"use strict";
+const field=document.getElementById("field");
+const svg=document.getElementById("edges");
+const RANGE=180; // px limit for an edge (stays in px; meters shown are px-based demo units, labelled honestly)
+let phones=[], nextId=1, drag=null;
+
+function addPhone(kind){
+  const id=nextId++;
+  const el=document.createElement("div");
+  el.className="phone"+(kind==="sos"?" sos":"")+(kind==="seeker"?" seeker":"");
+  el.id="p"+id;
+  el.innerHTML=kind==="sos"?"SOS":(kind==="seeker"?"ME":id);
+  el.appendChild(Object.assign(document.createElement("label"),{textContent:kind}));
+  el.style.left=(40+Math.random()*(field.clientWidth-110))+"px";
+  el.style.top=(30+Math.random()*(field.clientHeight-170))+"px";
+  field.appendChild(el);
+  phones.push({id,kind,el,x:parseFloat(el.style.left),y:parseFloat(el.style.top)});
+  wireDrag(el,id);
+  render();
+}
+function wireDrag(el,id){
+  el.addEventListener("pointerdown",e=>{drag=id;el.setPointerCapture(e.pointerId);el.style.cursor="grabbing";e.preventDefault();});
+  el.addEventListener("pointermove",e=>{if(drag!==id)return;const r=field.getBoundingClientRect();let x=e.clientX-r.left-28,y=e.clientY-r.top-52;x=Math.max(0,Math.min(field.clientWidth-56,x));y=Math.max(0,Math.min(field.clientHeight-104,y));el.style.left=x+"px";el.style.top=y+"px";const p=phones.find(q=>q.id===id);p.x=x;p.y=y;render();});
+  el.addEventListener("pointerup",()=>{drag=null;el.style.cursor="grab";});
+}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+function edges(){
+  const es=[];
+  for(let i=0;i<phones.length;i++)for(let j=i+1;j<phones.length;j++){
+    const d=dist(phones[i],phones[j]);
+    if(d<=RANGE)es.push([i,j,d]);
+  }
+  return es;
+}
+function render(){
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const es=edges();
+  const sos=phones.find(p=>p.kind==="sos");
+  const me=phones.find(p=>p.kind==="seeker");
+  // nearest-path via gradient (hop-discrete): BFS on the edge graph from me toward sos
+  let path=[];
+  if(sos&&me){
+    const n=phones.length,adj=Array.from({length:n},()=>[]);
+    for(const[i,j]of es){adj[i].push(j);adj[j].push(i);}
+    const prev=Array(n).fill(-1),st=[me.id-1],seen=new Set(st);
+    while(st.length>0){const c=st.shift();if(c===(sos.id-1))break;for(const nx of adj[c])if(!seen.has(nx)){seen.add(nx);prev[nx]=c;st.push(nx);}}
+    let c=sos.id-1;while(c!==-1){path.unshift(phones[c].id-1);c=prev[c];}
+    if(path.length>1&&path[0]!==(me.id-1))path=[];
+  }
+  path.forEach((pi,k)=>{if(k===0)return;const a=phones[pi],b=phones[path[k-1]];const l=document.createElementNS("http://www.w3.org/2000/svg","line");l.setAttribute("x1",a.x+28);l.setAttribute("y1",a.y+52);l.setAttribute("x2",b.x+28);l.setAttribute("y2",b.y+52);l.setAttribute("stroke","#008300");l.setAttribute("stroke-width",5);l.setAttribute("stroke-linecap","round");svg.appendChild(l);});
+  for(const[i,j,d]of es){const a=phones[i],b=phones[j],onPath=path.includes(i)&&path.includes(j)&&Math.abs(path.indexOf(i)-path.indexOf(j))===1;const l=document.createElementNS("http://www.w3.org/2000/svg","line");l.setAttribute("x1",a.x+28);l.setAttribute("y1",a.y+52);l.setAttribute("x2",b.x+28);l.setAttribute("y2",b.y+52);l.setAttribute("stroke",onPath?"#008300":"rgba(10,132,255,.28)");l.setAttribute("stroke-width",onPath?5:1.5);svg.appendChild(l);}
+  document.getElementById("nPhones").textContent=phones.length;
+  document.getElementById("nEdges").textContent=es.length;
+  const m=es.reduce((s,e)=>s+e[2],0);
+  document.getElementById("bestHops").textContent=path.length>1?(path.length-1):"–";
+  document.getElementById("bestM").textContent=(path.length>1?path.slice(1).reduce((s,p,k)=>s+dist(phones[path[k]],phones[p]),0):null)!=null&&path.length>1?Math.round(path.slice(1).reduce((s,p,k)=>s+dist(phones[path[k]],phones[p]),0))+" m":"–";
+  document.getElementById("directM").textContent=(sos&&me)?Math.round(dist(sos,me))+" m":"–";
+}
+function resetPhones(){phones.forEach(p=>p.el.remove());phones=[];nextId=1;render();}
+if(phones.length===0){addPhone("sos");addPhone("seeker");addPhone("relay");}
+</script>
 </body>
 </html>
